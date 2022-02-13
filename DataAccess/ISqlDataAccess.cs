@@ -3,7 +3,8 @@ namespace DataAccessLibrary
 {
     public interface ISqlDataAccess
     {
-        Task<List<T>> LoadData<T, U>(string sql, U parameters);
+        Task<List<T>> LoadDataList<T, U>(string sql, U parameters);
         Task SaveData<T>(string sql, T parameters);
+        Task<T> LoadData<T, U>(string sql, U parameters);
     }
 }

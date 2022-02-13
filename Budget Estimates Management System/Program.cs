@@ -1,7 +1,7 @@
-using Budget_Estimates_Management_System.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using DataAccessLibrary;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +10,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 //Data Services
 builder.Services.AddTransient<ISqlDataAccess, SqlDataAccess>();
+builder.Services.AddTransient<IDbData, DbData>();
 
 //build app
 var app = builder.Build();

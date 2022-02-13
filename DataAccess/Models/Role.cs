@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DataAccessLibrary.Models
 {
-    public class Roles
+    public class RoleModel
     {
 
-        public Roles (string name, string description)
+        public RoleModel (string name, string description)
         {
             this.Name = name;
             this.Description = description;
