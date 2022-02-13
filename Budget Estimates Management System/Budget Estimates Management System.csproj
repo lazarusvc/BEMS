@@ -11,11 +11,4 @@
     <ProjectReference Include="..\DataAccess\DataAccessLibrary.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\Admin\" />
-    <Folder Include="Pages\Capital\" />
-    <Folder Include="Pages\Recurrent\" />
-    <Folder Include="Pages\Reports\" />
-  </ItemGroup>
-
 </Project>
