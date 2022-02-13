@@ -5,7 +5,9 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Budget Estimates Management System", "Budget Estimates Management System\Budget Estimates Management System.csproj", "{3AA62030-163D-4182-9CAC-5F6BD0221EC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLibrary", "DataAccess\DataAccessLibrary.csproj", "{D6906DE4-9413-4C26-B750-F67D2717919B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLibrary", "DataAccess\DataAccessLibrary.csproj", "{D6906DE4-9413-4C26-B750-F67D2717919B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageCenterLibrary", "MessageCenter\MessageCenterLibrary.csproj", "{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D6906DE4-9413-4C26-B750-F67D2717919B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6906DE4-9413-4C26-B750-F67D2717919B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6906DE4-9413-4C26-B750-F67D2717919B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
