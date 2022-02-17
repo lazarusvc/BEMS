@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Budget Estimates Management System\BlazorWebUI.csproj" />
     <ProjectReference Include="..\DataAccess\DataAccessLibrary.csproj" />
+    <ProjectReference Include="..\MessageCenter\MessageCenterLibrary.csproj" />
   </ItemGroup>
 
 </Project>
