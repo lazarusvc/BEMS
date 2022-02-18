@@ -19,7 +19,7 @@ namespace DataAccessLibrary
             _config = config;
         }
 
-        public async Task<List<T>> LoadDataList<T, U>(string sql, U parameters)
+        public async Task<List<T>> LoadListData<T, U>(string sql, U parameters)
         {
             string connectionString = _config.GetConnectionString(ConnectionStringName);
             using (IDbConnection connection = new SqlConnection(connectionString))

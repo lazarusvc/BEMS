@@ -1,8 +1,8 @@
 ﻿namespace DataAccessLibrary.Models
 {
-    public class BugetEstimatesModel
+    public class BudgetEstimatesModel
     {
-        public BugetEstimatesModel(string id, string processing_year, string ministry, string program, string subprog, string account, string project, string sof, string sector, string lastcode, string quantity, string year1_amount, string year2_amount, string year3_amount, string is_by_law, string comment, string sort_position, string version_no, string is_current, string flagged, string flagged_comment, string entered_by, string date_entered, string modified_by, string last_modified, int status_id)
+        public BudgetEstimatesModel(string id, string processing_year, string ministry, string program, string subprog, string account, string project, string sof, string sector, string lastcode, string quantity, string year1_amount, string year2_amount, string year3_amount, string is_by_law, string comment, string sort_position, string version_no, string is_current, string flagged, string flagged_comment, string entered_by, string date_entered, string modified_by, string last_modified, int status_id)
         {
             this.id = id;
             this.processing_year = processing_year;
