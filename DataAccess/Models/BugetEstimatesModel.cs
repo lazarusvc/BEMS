@@ -2,7 +2,7 @@
 {
     public class BugetEstimatesModel
     {
-        public BugetEstimatesModel(string id, string processing_year, string ministry, string program, string subprog, string account, string project, string sof, string sector, string lastcode, string quantity, string year1_amount, string year2_amount, string year3_amount, string is_by_law, string comment, string sort_position, string version_no, string is_current, string flagged, string flagged_comment, string entered_by, string date_entered, string modified_by, string last_modified)
+        public BugetEstimatesModel(string id, string processing_year, string ministry, string program, string subprog, string account, string project, string sof, string sector, string lastcode, string quantity, string year1_amount, string year2_amount, string year3_amount, string is_by_law, string comment, string sort_position, string version_no, string is_current, string flagged, string flagged_comment, string entered_by, string date_entered, string modified_by, string last_modified, int status_id)
         {
             this.id = id;
             this.processing_year = processing_year;
@@ -29,6 +29,7 @@
             this.date_entered = date_entered;
             this.modified_by = modified_by;
             this.last_modified = last_modified;
+            this.status_id = status_id;
         }
 
       public string id { get; set; }
@@ -56,5 +57,6 @@
       public string date_entered { get; set; }
       public string modified_by { get; set; }
       public string last_modified { get; set; }
+      public int status_id { get; set; }
     }
 }

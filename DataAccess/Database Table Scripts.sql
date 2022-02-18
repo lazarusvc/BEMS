@@ -1,7 +1,11 @@
 ﻿/**
 Maintain DB Changes Here.
 **/
---Tables for Data Entry
+
+
+/****************
+TABLES
+*****************/
 
 --Starting Table needed for incase ministries merge or change.  This way history is preserved
 CREATE TABLE Starting_Estimates
@@ -17,11 +21,9 @@ sector char(3) NOT NULL,
 lastcode char(4) NOT NULL,
 quantity smallint,
 amount int NOT NULL,
-is_by_law bit NOT NULL,
 comment nvarchar(150),
-sort_position tinyint,
-entered_by nvarchar(50),
-date_entered datetime,
+entered_by nvarchar(50) NOT NULL,
+date_entered datetime NOT NULL,
 modified_by datetime,
 last_modified nvarchar(50)
 );
@@ -50,8 +52,34 @@ version_no tinyint NOT NULL,
 is_current bit NOT NULL,
 flagged bit NOT NULL,
 flagged_comment nvarchar(150),
-entered_by nvarchar(50),
-date_entered datetime,
+entered_by nvarchar(50) NOT NULL,
+date_entered datetime NOT NULL,
 modified_by datetime,
-last_modified nvarchar(50)
+last_modified nvarchar(50),
+entry_status_id tinyint NOT NULL
 );
+
+CREATE TABLE Entry_Status
+(
+id tinyint PRIMARY KEY,
+status_descp nvarchar(50)
+);
+
+--Default Values
+INSERT INTO Entry_Status
+VALUES (0,'Unsubmitted'),(1,'Submitted'),(2,'Approved');
+--Foreign Keys
+ALTER TABLE Budget_Estimates
+   ADD CONSTRAINT Budget_Estimates_Status FOREIGN KEY (entry_status_id)
+      REFERENCES Entry_Status (id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+;
+
+/****************
+VIEWS
+*****************/
+
+CREATE VIEW processing_years as
+select distinct processing_year
+from Starting_Estimates;

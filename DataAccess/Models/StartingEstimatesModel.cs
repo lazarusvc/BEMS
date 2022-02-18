@@ -16,16 +16,14 @@
             this.lastcode = lastcode;
             this.quantity = quantity;
             this.amount = amount;
-            this.is_by_law = is_by_law;
             this.comment = comment;
-            this.sort_position = sort_position;
             this.entered_by = entered_by;
             this.date_entered = date_entered;
             this.modified_by = modified_by;
             this.last_modified = last_modified;
         }
 
-        public string id { get; set; }
+      public string id { get; set; }
       public string processing_year { get; set; }
       public string ministry { get; set; }
       public string program { get; set; }
@@ -37,9 +35,7 @@
       public string lastcode { get; set; }
       public string quantity { get; set; }
       public string amount { get; set; }
-      public string is_by_law { get; set; }
       public string comment { get; set; }
-      public string sort_position { get; set; }
       public string entered_by { get; set; }
       public string date_entered { get; set; }
       public string modified_by { get; set; }
