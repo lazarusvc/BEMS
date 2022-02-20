@@ -7,27 +7,6 @@ Maintain DB Changes Here.
 TABLES
 *****************/
 
---Starting Table needed for incase ministries merge or change.  This way history is preserved
-CREATE TABLE Starting_Estimates
-(id int PRIMARY KEY IDENTITY(1,1),
-processing_year int NOT NULL,
-ministry char(2) NOT NULL,
-program char(4) NOT NULL,
-subprog char(3) NOT NULL,
-account char(7) NOT NULL,
-project char(5) NOT NULL,
-sof char(3) NOT NULL,
-sector char(3) NOT NULL,
-lastcode char(4) NOT NULL,
-quantity smallint,
-amount int NOT NULL,
-comment nvarchar(150),
-entered_by nvarchar(50) NOT NULL,
-date_entered datetime NOT NULL,
-modified_by datetime,
-last_modified nvarchar(50)
-);
-
 
 --Tables to store the budget figures
 CREATE TABLE Budget_Estimates
@@ -41,7 +20,9 @@ project char(5) NOT NULL,
 sof char(3) NOT NULL,
 sector char(3) NOT NULL,
 lastcode char(4) NOT NULL,
+label nvarchar(150),
 quantity smallint,
+year0_amount int NOT NULL,
 year1_amount int NOT NULL,
 year2_amount int NOT NULL,
 year3_amount int NOT NULL,
@@ -75,4 +56,12 @@ ALTER TABLE Budget_Estimates
       ON DELETE CASCADE
       ON UPDATE CASCADE
 ;
+
+
+--Table for processing year.  Some years might need preconfiguration. eg. name changes merges etc.  Need a way to hide from end users
+CREATE TABLE Processing_Year
+(id int PRIMARY KEY IDENTITY(1,1),
+year int not null,
+ready_for_data_entry bit not null)
+
 

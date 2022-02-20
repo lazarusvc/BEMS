@@ -2,7 +2,7 @@
 {
     public class BudgetEstimatesModel
     {
-        public BudgetEstimatesModel(string id, string processing_year, string ministry, string program, string subprog, string account, string project, string sof, string sector, string lastcode, string quantity, string year1_amount, string year2_amount, string year3_amount, string is_by_law, string comment, string sort_position, string version_no, string is_current, string flagged, string flagged_comment, string entered_by, string date_entered, string modified_by, string last_modified, int status_id)
+        public BudgetEstimatesModel(string id, string processing_year, string ministry, string program, string subprog, string account, string project, string sof, string sector, string lastcode, string label, int quantity, string year0_amount, string year1_amount, string year2_amount, string year3_amount, string is_by_law, string comment, string sort_position, string version_no, string is_current, string flagged, string flagged_comment, string entered_by, string date_entered, string modified_by, string last_modified, int status_id)
         {
             this.id = id;
             this.processing_year = processing_year;
@@ -14,7 +14,9 @@
             this.sof = sof;
             this.sector = sector;
             this.lastcode = lastcode;
+            this.label = label;
             this.quantity = quantity;
+            this.year0_amount = year0_amount;
             this.year1_amount = year1_amount;
             this.year2_amount = year2_amount;
             this.year3_amount = year3_amount;
@@ -42,7 +44,9 @@
       public string sof { get; set; }
       public string sector { get; set; }
       public string lastcode { get; set; }
-      public string quantity { get; set; }
+        public string label { get; set; }
+        public int quantity { get; set; }
+      public string year0_amount { get; set; }
       public string year1_amount { get; set; }
       public string year2_amount { get; set; }
       public string year3_amount { get; set; }

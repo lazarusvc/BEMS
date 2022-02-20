@@ -18,13 +18,13 @@ namespace DataAccessLibrary
         public Task<List<RoleModel>> GetRoles()
         {
             string sql = "select name,description from dbo.role;";
-            return _db.LoadListData<RoleModel, dynamic>(sql, new { });
+            return _db.GetListData<RoleModel, dynamic>(sql, new { });
         }
 
         public Task<RoleModel> GetRole(string name)
         {
             string sql = "select name,description from dbo.role where name=@name;";
-            return _db.LoadData<RoleModel, dynamic>(sql, new { name });
+            return _db.GetData<RoleModel, dynamic>(sql, new { name });
         }
 
         public Task<List<RoleModel>> GetUserRoles(string username)
@@ -33,19 +33,33 @@ namespace DataAccessLibrary
                             from dbo.user_role ur
                             inner join dbo.role r on  ur.role=r.name
                             where  ur.username=@username";
-            return _db.LoadListData<RoleModel, dynamic>(sql, new { username });
+            return _db.GetListData<RoleModel, dynamic>(sql, new { username });
         }
 
-        public Task<BudgetEstimateEntryModel> GetYearData(int year)
+        public Task<List<BudgetEstimateEntryModel>> GetDataForYear(int year)
         {
-            string sql = @"select *
-                            from dbo.Budget_Estimates
-                            where  year=@year;
-                            select *
-                            from dbo.Starting_Estimates
-                            where  year=@year;
-                            ";
-            return _db.LoadData<BudgetEstimateEntryModel, dynamic>(sql, new { year });
+            //todo:link the names to the query
+            
+            string sql = @"SELECT be.*, 
+                            LEFT([account],3) as soc,
+                            mn.[DESCRIPTION] as ministryName, 
+                            pn.[DESCRIPTION] as programName, 
+                            spn.[DESCRIPTION] as subprogramName, 
+                            socn.[DESCRIPTION] as socName, 
+                            an.[DESCRIPTION] as accountName, 
+                            pjn.[DESCRIPTION] as projectName, 
+                            secn.[DESCRIPTION] as sectorName
+                            FROM dbo.Budget_Estimates be
+                            LEFT JOIN [dbo].[vw_ss_ministry_name] mn on be.ministry=mn.[NAME]
+                            LEFT JOIN [dbo].[vw_ss_program_name] pn on be.program=pn.[NAME]
+                            LEFT JOIN [dbo].[vw_ss_subprog_name] spn on be.subprog=spn.[NAME]
+                            LEFT JOIN [dbo].[vw_ss_account_name] socn on LEFT(be.[account],3)=socn.[NAME]
+                            LEFT JOIN [dbo].[vw_ss_account_name] an on be.account=an.[NAME]
+                            LEFT JOIN [dbo].[vw_ss_project_name] pjn on be.project=pjn.[NAME]
+                            LEFT JOIN [dbo].[vw_ss_sector_name] secn on be.sector=secn.[NAME]
+                            WHERE  processing_year=@year";
+
+            return _db.GetListData<BudgetEstimateEntryModel, dynamic>(sql, new { year });
         }
 
     }
