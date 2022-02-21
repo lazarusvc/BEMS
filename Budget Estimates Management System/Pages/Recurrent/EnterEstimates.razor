@@ -1,6 +1,19 @@
-﻿<h2>Ministry Estimates</h2>
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
 
+<h2>Ministry Estimates</h2>
+
+@year
 
 @code {
-
+    [Parameter]
+    public int year{ get; set; }
+    public List<BudgetEstimateEntryModel> budgetItems;
+    protected override async Task OnInitializedAsync()
+    {
+      budgetItems=  await _db.GetDataForYear(year);
+      //Get Grouping by ministry
+     // var groups =  budgetItems.GroupBy(e=>e.ministry)
+    }
 }
