@@ -60,8 +60,7 @@ ALTER TABLE Budget_Estimates
 
 --Table for processing year.  Some years might need preconfiguration. eg. name changes merges etc.  Need a way to hide from end users
 CREATE TABLE Processing_Year
-(id int PRIMARY KEY IDENTITY(1,1),
-year int not null,
+(year int Primary Key,
 ready_for_data_entry bit not null)
 
 

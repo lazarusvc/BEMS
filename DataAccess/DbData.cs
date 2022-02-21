@@ -39,7 +39,7 @@ namespace DataAccessLibrary
         public Task<List<BudgetEstimateEntryModel>> GetDataForYear(int year)
         {
             //todo:link the names to the query
-            
+
             string sql = @"SELECT be.*, 
                             LEFT([account],3) as soc,
                             mn.[DESCRIPTION] as ministryName, 
@@ -60,6 +60,12 @@ namespace DataAccessLibrary
                             WHERE  processing_year=@year";
 
             return _db.GetListData<BudgetEstimateEntryModel, dynamic>(sql, new { year });
+        }
+
+        public Task<List<ProcessingYearModel>> GetYears()
+        {
+            string sql = "select year,ready_for_data_entry from dbo.Processing_Year;";
+            return _db.GetListData<ProcessingYearModel, dynamic>(sql, new { });
         }
 
     }

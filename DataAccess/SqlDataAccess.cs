@@ -22,12 +22,15 @@ namespace DataAccessLibrary
 
         public async Task<List<T>> GetListData<T, U>(string sql, U parameters)
         {
-            string connectionString = _config.GetConnectionString(ConnectionStringName);
-            using (IDbConnection connection = new SqlConnection(connectionString))
-            {
-                var data = await connection.QueryAsync<T>(sql, parameters);
-                return data.ToList();
-            }
+
+                string connectionString = _config.GetConnectionString(ConnectionStringName);
+                using (IDbConnection connection = new SqlConnection(connectionString))
+                {
+                    var data = await connection.QueryAsync<T>(sql, parameters);
+                    return data.ToList();
+                }
+
+            
         }
 
         public async Task<T> GetData<T, U>(string sql, U parameters)

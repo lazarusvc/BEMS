@@ -1,7 +1,42 @@
 ﻿@page "/recurrent"
 
-<h3>Recurrent</h3>
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+
+<h1>Recurrent Expenditure Estimates</h1>
+
+<div class="input-group mb-3">
+  <label class="input-group-text" for="inputGroupSelect01">Estimates for Year</label>
+  <select class="form-select" id="inputGroupSelect01" @bind="year_selected">
+    <option selected>Choose...</option>
+    @if (years is not null) {
+       @foreach (var year in years)
+            {
+                <option>@year.year</option>
+            }
+    }
+  </select>
+</div>
+
+
+<EnterEstimates></EnterEstimates>
+TO REMOVE: @year_selected
 
 @code {
+    private List<ProcessingYearModel> years;
+    private int year_selected;
+       //private int year_selected { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        years = await _db.GetYears();
+        //if dataentry then remove years which are not ready
+        /*if ()
+        {
+            years = years.FindAll(e => e.ready_for_data_entry == false);
+        }*/
+        
+
+    }
 }
