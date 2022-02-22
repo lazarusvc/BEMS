@@ -8,25 +8,72 @@
 
 <div class="input-group mb-3">
   <label class="input-group-text" for="inputGroupSelect01">Estimates for Year</label>
-  <select class="form-select" id="inputGroupSelect01" @bind="year_selected">
-    <option selected>Choose...</option>
-    @if (years is not null) {
+  <select class="form-select" id="inputGroupSelect01"  @onchange="ChangeYear" >
+    <option value="0" selected>Choose...</option>
+    @if (years == null)
+        {
+            <option selected>Loading...</option>
+        }
+    else 
+        {
        @foreach (var year in years)
             {
-                <option>@year.year</option>
+                <option value=@year.year>@year.displayYear</option>
             }
-    }
+        }
   </select>
 </div>
 
+@if (minGroup == null || minGroup.Count==0)
+{
+    if (@year_selected != 0)
+    {
+        <p>No entries found for @year_selected - @(year_selected+1)</p>
+    }
+    else
+    {
+        <p> Please select a year...</p>
+    }
 
-<EnterEstimates year=@year_selected></EnterEstimates>
+}
+else
+{
+    <table class="table table-hover">
+  
+         <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Ministry</th>
+              <th scope="col">@(year_selected-1)</th>
+              <th scope="col">@year_selected </th>
+              <th scope="col">@(year_selected+1) </th>
+              <th scope="col">@(year_selected+2)</th>
+            </tr>
+          </thead>
+  <tbody>
+        @foreach (var item in minGroup)
+        {
+                <tr>
+      <th scope="row">@item.ministry</th>
+      <td>@item.ministryName</td>
+      <td>@item.year0.ToString("C")</td>
+      <td>@item.year1.ToString("C")</td>
+      <td>@item.year2.ToString("C")</td>
+      <td>@item.year3.ToString("C")</td>
+    </tr>
+        }
+        </tbody>
+   </table>
+}
+
 
 
 @code {
     private List<ProcessingYearModel> years;
-    private int year_selected;
-       //private int year_selected { get; set; }
+    private int year_selected=0;
+
+    private List<BudgetEstimateEntryModel> budgetItems;
+    private List<ministryGroup> minGroup;
 
     protected override async Task OnInitializedAsync()
     {
@@ -34,9 +81,49 @@
         //if dataentry then remove years which are not ready
         /*if ()
         {
-            years = years.FindAll(e => e.ready_for_data_entry == false);
-        }*/
-        
+        years = years.FindAll(e => e.ready_for_data_entry == false);
+    }*/
+    }
+
+    private async void ChangeYear(ChangeEventArgs e)
+    { 
+
+        if (e == null || e.Value.ToString().Equals("Choose...")) {       
+            minGroup = null;
+            year_selected = 0;
+            base.StateHasChanged();
+            return; 
+        }
+
+        year_selected = Int32.Parse(e.Value.ToString());    
+
+
+        budgetItems=  await _db.GetDataForYear(year_selected);
+
+        minGroup= budgetItems.GroupBy(d => d.ministry)
+                    .Select(
+                        g => new ministryGroup()
+                        {
+                            ministry =  g.First().ministry,                            
+                            ministryName = g.First().ministryName,
+                            year0 = g.Sum(s => s.year0_amount),
+                            year1 = g.Sum(s => s.year0_amount),
+                            year2 = g.Sum(s => s.year0_amount),
+                            year3 = g.Sum(s => s.year0_amount)
+                        }).OrderBy(x=>x.ministry).ToList();
+        base.StateHasChanged();
 
     }
+
+    
+    public class ministryGroup
+    {
+        public string ministry { get; set; }
+        public string ministryName { get; set; }
+        public int year0 { get; set; }
+        public int year1 { get; set; }
+        public int year2 { get; set; }
+        public int year3 { get; set; }
+    }
+
 }
