@@ -1,0 +1,62 @@
+﻿@page "/recurrent/{year:int}"
+
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+
+<h3>Ministry Estimates</h3>
+
+
+@if (minGroup == null || minGroup.Count==0)
+{
+        <p>No entries found for @year - @(year+1)</p>
+}
+else
+{
+    <table class="table table-hover">
+  
+         <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Ministry</th>
+              <th scope="col">@(year-1)</th>
+              <th scope="col">@year </th>
+              <th scope="col">@(year+1) </th>
+              <th scope="col">@(year+2)</th>
+            </tr>
+          </thead>
+  <tbody>
+        @foreach (var item in minGroup)
+        {
+                <tr>
+      <th scope="row">@item.ministry</th>
+      <td>@item.ministryName</td>
+      <td>@item.year0.ToString("C")</td>
+      <td>@item.year1.ToString("C")</td>
+      <td>@item.year2.ToString("C")</td>
+      <td>@item.year3.ToString("C")</td>
+    </tr>
+        }
+        </tbody>
+   </table>
+}
+
+
+@code {
+    [Parameter]
+    public int year { get; set; }
+
+    private List<MinistryGroupModel> minGroup;
+
+    protected override async Task OnInitializedAsync()
+    {
+        minGroup=  await _db.GetMinDataForYear(year);
+    }
+
+      protected override async void OnParametersSet()
+    {
+        minGroup=  await _db.GetMinDataForYear(year);
+        base.StateHasChanged();
+    }
+
+}

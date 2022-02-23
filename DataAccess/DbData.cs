@@ -62,6 +62,20 @@ namespace DataAccessLibrary
             return _db.GetListData<BudgetEstimateEntryModel, dynamic>(sql, new { year });
         }
 
+        public Task<List<MinistryGroupModel>> GetMinDataForYear(int year)
+        {
+            //todo:link the names to the query
+
+            string sql = @"SELECT be.ministry, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as ministryName
+							FROM dbo.Budget_Estimates be
+                            LEFT JOIN [dbo].[vw_ss_ministry_name] mn on be.ministry=mn.[NAME]
+                            WHERE  processing_year=@year
+                            GROUP BY be.ministry, mn.[DESCRIPTION]";
+
+            return _db.GetListData<MinistryGroupModel, dynamic>(sql, new { year });
+        }
+
         public Task<List<ProcessingYearModel>> GetYears()
         {
             string sql = "select year,ready_for_data_entry from dbo.Processing_Year;";
