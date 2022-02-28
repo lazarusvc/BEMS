@@ -33,15 +33,24 @@ else {
       <tbody>
             @foreach (var item in minGroup)
             {
-                    <tr @onclick="() => NavigateTo(year,item.item)"> 
-          <th scope="row">@item.item</th>
-          <td>@item.itemName</td>
+                    <tr> 
+          <th scope="row" @onclick="() => NavigateTo(year,item.item)" style="cursor:pointer;">@item.item</th>
+          <td @onclick="() => NavigateTo(year,item.item)" style="cursor:pointer;">@item.itemName</td>
           <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
           <td class="text-end"><b>@item.year1.ToString("C")</b></td>
           <td class="text-end">@item.year2.ToString("C")</td>
           <td class="text-end">@item.year3.ToString("C")</td>
         </tr>
+
             }
+            <tr> 
+          <th scope="row"></th>
+          <td><b><i>Total:</i></b></td>
+          <td class="text-end" style="background-color:lightgray">@year0T.ToString("C")</td>
+          <td class="text-end"><b>@year1T.ToString("C")</b></td>
+          <td class="text-end">@year2T.ToString("C")</td>
+          <td class="text-end">@year3T.ToString("C")</td>
+        </tr>
             </tbody>
        </table>
     }
@@ -53,14 +62,27 @@ else {
 
     private List<GroupingModel> minGroup;
 
+    public int year0T = 0;
+    public int year1T = 0;
+    public int year2T = 0;
+    public int year3T = 0;
+
     protected override async Task OnInitializedAsync()
     {
         minGroup=  await _rdb.GetMinDataForYear(year);
+        year0T = minGroup.Sum(x=>x.year0);
+        year1T = minGroup.Sum(x=>x.year1);
+        year2T = minGroup.Sum(x=>x.year2);
+        year3T = minGroup.Sum(x=>x.year3);
     }
 
       protected override async void OnParametersSet()
     {
         minGroup=  await _rdb.GetMinDataForYear(year);
+        year0T = minGroup.Sum(x=>x.year0);
+        year1T = minGroup.Sum(x=>x.year1);
+        year2T = minGroup.Sum(x=>x.year2);
+        year3T = minGroup.Sum(x=>x.year3);
         base.StateHasChanged();
     }
 

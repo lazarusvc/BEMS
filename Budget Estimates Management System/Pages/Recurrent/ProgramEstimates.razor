@@ -35,15 +35,23 @@ else {
       <tbody>
             @foreach (var item in programGroup)
             {
-           <tr @onclick="() => NavigateTo(year,ministry,item.item)"> 
-          <th scope="row">@item.item</th>
-          <td>@item.itemName</td>
+           <tr> 
+          <th scope="row"  @onclick="() => NavigateTo(year,ministry,item.item)" style="cursor:pointer;">@item.item</th>
+          <td  @onclick="() => NavigateTo(year,ministry,item.item)" style="cursor:pointer;">@item.itemName</td>
           <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
           <td class="text-end"><b>@item.year1.ToString("C")</b></td>
           <td class="text-end">@item.year2.ToString("C")</td>
           <td class="text-end">@item.year3.ToString("C")</td>
         </tr>
             }
+                   <tr> 
+          <th scope="row"></th>
+          <td><b><i>Total:</i></b></td>
+          <td class="text-end" style="background-color:lightgray">@year0T.ToString("C")</td>
+          <td class="text-end"><b>@year1T.ToString("C")</b></td>
+          <td class="text-end">@year2T.ToString("C")</td>
+          <td class="text-end">@year3T.ToString("C")</td>
+        </tr>
             </tbody>
        </table>
     }
@@ -57,19 +65,31 @@ else {
 
 	private string ministryName;
 
+    public int year0T = 0;
+    public int year1T = 0;
+    public int year2T = 0;
+    public int year3T = 0;
+
 	private List<GroupingModel>? programGroup;
 
 	protected override async Task OnInitializedAsync()
     {
-		
-		ministryName= await _db.GetMinistryName(ministry);
+		try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         programGroup= await _rdb.GetProgramDataForYear(year,ministry);
+          year0T = programGroup.Sum(x=>x.year0);
+        year1T = programGroup.Sum(x=>x.year1);
+        year2T = programGroup.Sum(x=>x.year2);
+        year3T = programGroup.Sum(x=>x.year3);
     }
 
       protected override async void OnParametersSet()
     {
-       ministryName= await _db.GetMinistryName(ministry);
+        try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         programGroup= await _rdb.GetProgramDataForYear(year,ministry);
+        year0T = programGroup.Sum(x=>x.year0);
+        year1T = programGroup.Sum(x=>x.year1);
+        year2T = programGroup.Sum(x=>x.year2);
+        year3T = programGroup.Sum(x=>x.year3);
         base.StateHasChanged();
     }
 

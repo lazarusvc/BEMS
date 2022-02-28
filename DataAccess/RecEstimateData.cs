@@ -44,7 +44,7 @@ namespace DataAccessLibrary
             string sql = @"SELECT be.ministry as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
 							FROM dbo.Budget_Estimates be
-                            LEFT JOIN [dbo].[vw_ss_ministry_name] mn on be.ministry=mn.[NAME]
+                            LEFT OUTER JOIN [dbo].[vw_ss_ministry_name] mn on be.ministry=mn.[NAME]
                             WHERE  processing_year=@year
                             GROUP BY be.ministry, mn.[DESCRIPTION]
                             ORDER BY be.ministry";
@@ -58,7 +58,7 @@ namespace DataAccessLibrary
             string sql = @"SELECT be.program as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
 							FROM dbo.Budget_Estimates be
-                            LEFT JOIN [dbo].[vw_ss_program_name] mn on be.program=mn.[NAME]
+                            LEFT OUTER JOIN [dbo].[vw_ss_program_name] mn on be.program=mn.[NAME]
                             WHERE  processing_year=@year
                             AND be.ministry=@ministry
                             GROUP BY be.program, mn.[DESCRIPTION]
@@ -73,7 +73,7 @@ namespace DataAccessLibrary
             string sql = @"SELECT be.subprog as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
 							FROM dbo.Budget_Estimates be
-                            LEFT JOIN [dbo].[vw_ss_subprog_name] mn on be.program=mn.[NAME]
+                            LEFT OUTER JOIN [dbo].[vw_ss_subprog_name] mn on be.program=mn.[NAME]
                             WHERE  processing_year=@year
                             AND be.ministry=@ministry
                             AND be.program=@program

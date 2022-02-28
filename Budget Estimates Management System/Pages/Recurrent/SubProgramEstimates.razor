@@ -44,6 +44,14 @@ else {
           <td class="text-end">@item.year3.ToString("C")</td>
         </tr>
             }
+                   <tr> 
+          <th scope="row"></th>
+          <td><b><i>Total:</i></b></td>
+          <td class="text-end" style="background-color:lightgray">@year0T.ToString("C")</td>
+          <td class="text-end"><b>@year1T.ToString("C")</b></td>
+          <td class="text-end">@year2T.ToString("C")</td>
+          <td class="text-end">@year3T.ToString("C")</td>
+        </tr>
             </tbody>
        </table>
     }
@@ -60,6 +68,11 @@ else {
     private string ministryName;
     private string programName;
 
+    public int year0T = 0;
+    public int year1T = 0;
+    public int year2T = 0;
+    public int year3T = 0;
+
     private List<GroupingModel> subprogramGroup;
 
     protected override async Task OnInitializedAsync()
@@ -67,12 +80,20 @@ else {
         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
         subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
+            year0T = subprogramGroup.Sum(x=>x.year0);
+        year1T = subprogramGroup.Sum(x=>x.year1);
+        year2T = subprogramGroup.Sum(x=>x.year2);
+        year3T = subprogramGroup.Sum(x=>x.year3);
     }
     protected override async void OnParametersSet()
     {
         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
         subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
+        year0T = subprogramGroup.Sum(x=>x.year0);
+        year1T = subprogramGroup.Sum(x=>x.year1);
+        year2T = subprogramGroup.Sum(x=>x.year2);
+        year3T = subprogramGroup.Sum(x=>x.year3);
         base.StateHasChanged();
     }
 
