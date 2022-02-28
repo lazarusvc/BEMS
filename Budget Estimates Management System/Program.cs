@@ -11,6 +11,7 @@ builder.Services.AddServerSideBlazor();
 //Data Services
 builder.Services.AddTransient<ISqlDataAccess, SqlDataAccess>();
 builder.Services.AddTransient<IDbData, DbData>();
+builder.Services.AddTransient<IRecEstimateData, RecEstimateData>();
 
 //build app
 var app = builder.Build();

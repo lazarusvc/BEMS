@@ -1,9 +1,5 @@
 ﻿using DataAccessLibrary.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace DataAccessLibrary
 {
@@ -36,50 +32,29 @@ namespace DataAccessLibrary
             return _db.GetListData<RoleModel, dynamic>(sql, new { username });
         }
 
-        public Task<List<BudgetEstimateEntryModel>> GetDataForYear(int year)
-        {
-            //todo:link the names to the query
-
-            string sql = @"SELECT be.*, 
-                            LEFT([account],3) as soc,
-                            mn.[DESCRIPTION] as ministryName, 
-                            pn.[DESCRIPTION] as programName, 
-                            spn.[DESCRIPTION] as subprogramName, 
-                            socn.[DESCRIPTION] as socName, 
-                            an.[DESCRIPTION] as accountName, 
-                            pjn.[DESCRIPTION] as projectName, 
-                            secn.[DESCRIPTION] as sectorName
-                            FROM dbo.Budget_Estimates be
-                            LEFT JOIN [dbo].[vw_ss_ministry_name] mn on be.ministry=mn.[NAME]
-                            LEFT JOIN [dbo].[vw_ss_program_name] pn on be.program=pn.[NAME]
-                            LEFT JOIN [dbo].[vw_ss_subprog_name] spn on be.subprog=spn.[NAME]
-                            LEFT JOIN [dbo].[vw_ss_account_name] socn on LEFT(be.[account],3)=socn.[NAME]
-                            LEFT JOIN [dbo].[vw_ss_account_name] an on be.account=an.[NAME]
-                            LEFT JOIN [dbo].[vw_ss_project_name] pjn on be.project=pjn.[NAME]
-                            LEFT JOIN [dbo].[vw_ss_sector_name] secn on be.sector=secn.[NAME]
-                            WHERE  processing_year=@year";
-
-            return _db.GetListData<BudgetEstimateEntryModel, dynamic>(sql, new { year });
-        }
-
-        public Task<List<MinistryGroupModel>> GetMinDataForYear(int year)
-        {
-            //todo:link the names to the query
-
-            string sql = @"SELECT be.ministry, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
-                            mn.[DESCRIPTION] as ministryName
-							FROM dbo.Budget_Estimates be
-                            LEFT JOIN [dbo].[vw_ss_ministry_name] mn on be.ministry=mn.[NAME]
-                            WHERE  processing_year=@year
-                            GROUP BY be.ministry, mn.[DESCRIPTION]";
-
-            return _db.GetListData<MinistryGroupModel, dynamic>(sql, new { year });
-        }
-
         public Task<List<ProcessingYearModel>> GetYears()
         {
             string sql = "select year,ready_for_data_entry from dbo.Processing_Year;";
             return _db.GetListData<ProcessingYearModel, dynamic>(sql, new { });
+        }
+
+
+        public Task<string> GetMinistryName(string ministry)
+        {
+            string sql = "select [DESCRIPTION] from vw_ss_ministry_name where [NAME]=@ministry;";
+            return _db.GetSingleData<string, dynamic>(sql, new { ministry });
+        }
+
+        public Task<string> GetProgramName(string program)
+        {
+            string sql = "select [DESCRIPTION] from vw_ss_program_name where [NAME]=@program;";
+            return _db.GetSingleData<string, dynamic>(sql, new { program });
+        }
+
+        public Task<string> GetSubprogramName(string subprog)
+        {
+            string sql = "select [DESCRIPTION] from vw_ss_subprog_name where [NAME]=@subprog;";
+            return _db.GetSingleData<string, dynamic>(sql, new { subprog });
         }
 
     }

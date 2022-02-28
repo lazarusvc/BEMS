@@ -5,6 +5,7 @@ namespace DataAccessLibrary
 {
     public interface ISqlDataAccess
     {
+        Task<T> GetSingleData<T, U>(string sql, U parameters);
         Task<List<T>> GetListData<T, U>(string sql, U parameters);
         Task ExecuteSql<T>(string sql, T parameters);
         Task<T> GetData<T, U>(string sql, U parameters);

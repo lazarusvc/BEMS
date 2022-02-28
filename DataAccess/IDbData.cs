@@ -4,10 +4,11 @@ namespace DataAccessLibrary
 {
     public interface IDbData
     {
-        Task<List<MinistryGroupModel>> GetMinDataForYear(int year);
-        Task<List<BudgetEstimateEntryModel>> GetDataForYear(int year);
+        Task<string> GetMinistryName(string ministry);
+        Task<string> GetProgramName(string program);
         Task<RoleModel> GetRole(string name);
         Task<List<RoleModel>> GetRoles();
+        Task<string> GetSubprogramName(string subprog);
         Task<List<RoleModel>> GetUserRoles(string username);
         Task<List<ProcessingYearModel>> GetYears();
     }

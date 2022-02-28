@@ -43,6 +43,16 @@ namespace DataAccessLibrary
             }
         }
 
+        public async Task<T> GetSingleData<T, U>(string sql, U parameters)
+        {
+            string connectionString = _config.GetConnectionString(ConnectionStringName);
+            using (IDbConnection connection = new SqlConnection(connectionString))
+            {
+                var data = await connection.QuerySingleAsync<T>(sql, parameters);
+                return data;
+            }
+        }
+
         public async Task ExecuteSql<T>(string sql, T parameters)
         {
             string connectionString = _config.GetConnectionString(ConnectionStringName);

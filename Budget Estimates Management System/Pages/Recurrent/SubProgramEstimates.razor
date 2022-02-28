@@ -1,18 +1,20 @@
-﻿@page "/recurrent/{year:int}"
-
+﻿@page "/recurrent/{year:int}/{ministry}/{program}"
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
+@inject IDbData _db;
 @inject IRecEstimateData _rdb;
-@inject NavigationManager NavigationManager
 
-<h3>Ministry Estimates</h3>
+<RecNav year=@year ministry=@ministry program=@program></RecNav>
 
-@if (minGroup == null )
+<h2><a href="/recurrent/@year/@ministry">(@ministry) @ministryName</a></h2>
+<h3>(@program) @programName</h3>
+
+@if (subprogramGroup == null )
 {
    <Loading></Loading>
 }
 else {
-    @if  (minGroup.Count==0)
+    @if  (subprogramGroup.Count==0)
     {
             <p>No entries found for @year - @(year+1)</p>
     }
@@ -20,10 +22,10 @@ else {
     {
         <table class="table table-hover">
   
-             <thead style="background-color:lightseagreen">
+             <thead style="background-color:lightskyblue">
                 <tr>
                   <th scope="col">#</th>
-                  <th scope="col">Ministry</th>
+                  <th scope="col">Sub Program</th>
                   <th scope="col" class="text-end">Estimates @(year-1)/@(year)</th>
                   <th scope="col" class="text-end">Estimates @year/@(year+1) </th>
                   <th scope="col" class="text-end">Estimates @(year+1)/@(year+2) </th>
@@ -31,9 +33,9 @@ else {
                 </tr>
               </thead>
       <tbody>
-            @foreach (var item in minGroup)
+            @foreach (var item in subprogramGroup)
             {
-                    <tr @onclick="() => NavigateTo(year,item.item)"> 
+           <tr> 
           <th scope="row">@item.item</th>
           <td>@item.itemName</td>
           <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
@@ -48,26 +50,23 @@ else {
 }
 
 @code {
+	[Parameter]
+	public int year { get; set; }
+	[Parameter]
+	public string ministry { get; set; }
     [Parameter]
-    public int year { get; set; }
+	public string program { get; set; }
 
-    private List<GroupingModel> minGroup;
+	private string ministryName;
+    private string programName;
 
-    protected override async Task OnInitializedAsync()
+	private List<GroupingModel> subprogramGroup;
+
+	protected override async Task OnInitializedAsync()
     {
-        minGroup=  await _rdb.GetMinDataForYear(year);
+		
+		ministryName= await _db.GetMinistryName(ministry);
+        programName= await _db.GetProgramName(program);
+        subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
     }
-
-      protected override async void OnParametersSet()
-    {
-        minGroup=  await _rdb.GetMinDataForYear(year);
-        base.StateHasChanged();
-    }
-
-    private void NavigateTo(int year, string ministry)
-    {
-         NavigationManager.NavigateTo($"recurrent/{year}/{ministry}", forceLoad: true);
-  
-    }
-
 }

@@ -1,0 +1,79 @@
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IRecEstimateData _rdb;
+@inject NavigationManager NavigationManager
+ 
+<div class="btn-group" role="group">
+     <button type="button" class="btn btn-secondary" @onclick="GoToYearView">@year/@(year+1)</button>
+    <button id="btnGroupDrop1" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      @ministry
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+      @if (minGroup is null)
+        {
+            <li><a class="dropdown-item" href="#">Loading...</a></li>
+        } else
+        {
+            @foreach (var item in minGroup)
+            {
+                <li><a class="@isDisabled(@item.item,ministry)" href="recurrent/@year/@item.item">(@item.item) @item.itemName</a></li>
+            }
+
+        }
+    </ul>
+    @if (program is not null)
+    {
+            <button id="btnGroupDrop1" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      @program
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+      @if (progGroup is null)
+        {
+            <li><a class="dropdown-item" href="#">Loading...</a></li>
+        } else
+        {
+            @foreach (var item in progGroup)
+            {
+                <li><a class="@isDisabled(@item.item,ministry)" href="recurrent/@year/@item.item">(@item.item) @item.itemName</a></li>
+            }
+
+        }
+    </ul>
+    }
+</div> 
+
+@code {
+    [Parameter]
+    public int year { get; set; }
+    [Parameter]
+    public string ministry { get; set; }
+    [Parameter]
+    public string program { get; set; }    
+
+
+    private List<GroupingModel>? progGroup;
+    private List<GroupingModel> minGroup;
+
+    protected override async Task OnInitializedAsync()
+    {
+        minGroup=  await _rdb.GetMinDataForYear(year);
+        if (program is not null)
+        {
+           progGroup=await _rdb.GetProgramDataForYear(year,ministry); 
+        }
+    }
+
+    private void GoToYearView()
+    {
+        NavigationManager.NavigateTo($"recurrent/{year}", forceLoad: true);
+    }
+
+    private string isDisabled(string v1, string v2)
+    {
+        if (v1.Equals(v2))        {
+            return "dropdown-item disabled"; 
+        }
+           return "dropdown-item"; 
+    }
+
+}
