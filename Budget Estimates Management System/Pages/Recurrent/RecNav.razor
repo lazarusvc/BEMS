@@ -34,7 +34,7 @@
         {
             @foreach (var item in progGroup)
             {
-                <li><a class="@isDisabled(@item.item,ministry)" href="recurrent/@year/@item.item">(@item.item) @item.itemName</a></li>
+                <li><a class="@isDisabled(@item.item,program)" href="recurrent/@year/@ministry/@item.item">(@item.item) @item.itemName</a></li>
             }
 
         }

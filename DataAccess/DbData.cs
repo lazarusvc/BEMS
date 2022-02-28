@@ -42,7 +42,8 @@ namespace DataAccessLibrary
         public Task<string> GetMinistryName(string ministry)
         {
             string sql = "select [DESCRIPTION] from vw_ss_ministry_name where [NAME]=@ministry;";
-            return _db.GetSingleData<string, dynamic>(sql, new { ministry });
+           return  _db.GetSingleData<string, dynamic>(sql, new { ministry });
+            
         }
 
         public Task<string> GetProgramName(string program)

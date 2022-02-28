@@ -50,23 +50,30 @@ else {
 }
 
 @code {
-	[Parameter]
-	public int year { get; set; }
-	[Parameter]
-	public string ministry { get; set; }
     [Parameter]
-	public string program { get; set; }
+    public int year { get; set; }
+    [Parameter]
+    public string ministry { get; set; }
+    [Parameter]
+    public string program { get; set; }
 
-	private string ministryName;
+    private string ministryName;
     private string programName;
 
-	private List<GroupingModel> subprogramGroup;
+    private List<GroupingModel> subprogramGroup;
 
-	protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-		
-		ministryName= await _db.GetMinistryName(ministry);
-        programName= await _db.GetProgramName(program);
+        try { ministryName= await _db.GetMinistryName(ministry); } catch{}
+        try { programName = await _db.GetProgramName(program); } catch{}
         subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
     }
+    protected override async void OnParametersSet()
+    {
+        try { ministryName= await _db.GetMinistryName(ministry); } catch{}
+        try { programName = await _db.GetProgramName(program); } catch{}
+        subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
+        base.StateHasChanged();
+    }
+
 }
