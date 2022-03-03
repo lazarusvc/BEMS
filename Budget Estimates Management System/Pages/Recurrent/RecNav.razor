@@ -40,6 +40,25 @@
         }
     </ul>
     }
+    @if (subprogram is not null)
+    {
+            <button id="btnGroupDrop1" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      @subprogram
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+      @if (subprogramGroup is null)
+        {
+            <li><a class="dropdown-item" href="#">Loading...</a></li>
+        } else
+        {
+            @foreach (var item in subprogramGroup)
+            {
+                <li><a class="@isDisabled(@item.item,subprogram)" href="recurrent/@year/@ministry/@program/@item.item">(@item.item) @item.itemName</a></li>
+            }
+
+        }
+    </ul>
+    }
 </div> 
 
 @code {
@@ -49,10 +68,12 @@
     public string ministry { get; set; }
     [Parameter]
     public string program { get; set; }    
-
+    [Parameter]
+    public string subprogram { get; set; }   
 
     private List<GroupingModel>? progGroup;
     private List<GroupingModel> minGroup;
+    private List<GroupingModel> subprogramGroup;
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,6 +81,10 @@
         if (program is not null)
         {
            progGroup=await _rdb.GetProgramDataForYear(year,ministry); 
+        }
+        if (subprogram is not null)
+        {
+           subprogramGroup=await _rdb.GetSubProgramDataForYear(year,ministry,program); 
         }
     }
 

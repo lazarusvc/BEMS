@@ -73,7 +73,7 @@ namespace DataAccessLibrary
             string sql = @"SELECT be.subprog as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
 							FROM dbo.Budget_Estimates be
-                            LEFT OUTER JOIN [dbo].[vw_ss_subprog_name] mn on be.program=mn.[NAME]
+                            LEFT OUTER JOIN [dbo].[vw_ss_subprog_name] mn on be.subprog=mn.[NAME]
                             WHERE  processing_year=@year
                             AND be.ministry=@ministry
                             AND be.program=@program
@@ -83,6 +83,22 @@ namespace DataAccessLibrary
             return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program });
         }
 
+        public Task<List<GroupingModel>> GetAccountDataForYear(int year, string ministry, string program, string subprogram)
+        {
+
+            string sql = @"SELECT SUBSTRING(be.account,1,3) as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on SUBSTRING(be.account,1,3) =mn.[NAME]
+                            WHERE  processing_year=@year
+                            AND be.ministry=@ministry
+                            AND be.program=@program
+                            AND be.subprog=@subprogram
+                            GROUP BY SUBSTRING(be.account,1,3) , mn.[DESCRIPTION]
+                            ORDER BY SUBSTRING(be.account,1,3) ";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program,subprogram });
+        }
 
     }
 }

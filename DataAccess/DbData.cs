@@ -52,7 +52,7 @@ namespace DataAccessLibrary
             return _db.GetSingleData<string, dynamic>(sql, new { program });
         }
 
-        public Task<string> GetSubprogramName(string subprog)
+        public Task<string> GetSubProgramName(string subprog)
         {
             string sql = "select [DESCRIPTION] from vw_ss_subprog_name where [NAME]=@subprog;";
             return _db.GetSingleData<string, dynamic>(sql, new { subprog });
