@@ -5,7 +5,7 @@
  
 <div class="btn-group" role="group">
      <button type="button" class="btn btn-secondary" @onclick="GoToYearView">@year/@(year+1)</button>
-    <button id="btnGroupDrop1" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+    <button id="btnGroupDrop1" type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
       @ministry
     </button>
     <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
@@ -59,7 +59,27 @@
         }
     </ul>
     }
+     @if (account is not null)
+    {
+            <button id="btnGroupDrop1" type="button" class="btn btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      @account
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+      @if (accountGroup is null)
+        {
+            <li><a class="dropdown-item" href="#">Loading...</a></li>
+        } else
+        {
+            @foreach (var item in accountGroup)
+            {
+                <li><a class="@isDisabled(@item.item,account)" href="recurrent/@year/@ministry/@program/@subprogram/@item.item">(@item.item) @item.itemName</a></li>
+            }
+
+        }
+    </ul>
+    }
 </div> 
+<p></p>
 
 @code {
     [Parameter]
@@ -69,11 +89,14 @@
     [Parameter]
     public string program { get; set; }    
     [Parameter]
-    public string subprogram { get; set; }   
+    public string subprogram { get; set; }       
+    [Parameter]
+    public string account { get; set; }   
 
     private List<GroupingModel>? progGroup;
     private List<GroupingModel> minGroup;
     private List<GroupingModel> subprogramGroup;
+    private List<GroupingModel> accountGroup;
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,6 +108,10 @@
         if (subprogram is not null)
         {
            subprogramGroup=await _rdb.GetSubProgramDataForYear(year,ministry,program); 
+        }
+        if (account is not null)
+        {
+           accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram);
         }
     }
 

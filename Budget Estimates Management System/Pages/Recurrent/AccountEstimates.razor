@@ -1,14 +1,17 @@
 ﻿@page "/recurrent/{year:int}/{ministry}/{program}/{subprogram}"
+@using Budget_Estimates_Management_System.Models;
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
+@inject NavigationManager NavigationManager
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 
 <RecNav year=@year ministry=@ministry program=@program subprogram=@subprogram></RecNav>
+<h4><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h4>
+<h3><a href="/recurrent/@year/@ministry/@program">@program - @programName</a></h3>
+<h2>@subprogram - @subprogramName</h2>
 
-<h2><a href="/recurrent/@year/@ministry">(@ministry) @ministryName</a></h2>
-<h3><a href="/recurrent/@year/@ministry/@program">(@program) @programName</a></h3>
-<h4>(@subprogram) @subprogramName</h4>
+
 
 @if (accountGroup == null )
 {
@@ -37,8 +40,8 @@ else {
             @foreach (var item in accountGroup)
             {
            <tr> 
-          <th scope="row" style="cursor:pointer;">@item.item</th>
-          <td style="cursor:pointer;">@item.itemName</td>
+          <th scope="row" @onclick="() => NavigateTo(year,ministry,program,subprogram,item.item)" style="cursor:pointer;">@item.item</th>
+          <td  @onclick="() => NavigateTo(year,ministry,program,subprogram,item.item)" style="cursor:pointer;">@item.itemName</td>
           <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
           <td class="text-end"><b>@item.year1.ToString("C")</b></td>
           <td class="text-end">@item.year2.ToString("C")</td>
@@ -72,6 +75,7 @@ else {
     private string programName;
     private string subprogramName;
 
+
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
@@ -88,7 +92,7 @@ else {
         year0T = accountGroup.Sum(x=>x.year0);
         year1T = accountGroup.Sum(x=>x.year1);
         year2T = accountGroup.Sum(x=>x.year2);
-        year3T = accountGroup.Sum(x=>x.year3);
+        year3T = accountGroup.Sum(x=>x.year3);     
     }
 
     protected override async void OnParametersSet()
@@ -104,4 +108,9 @@ else {
         base.StateHasChanged();
     }
 
+       private void NavigateTo(int year, string ministry, string program, string subprogram, string account)
+    {
+         NavigationManager.NavigateTo($"recurrent/{year}/{ministry}/{program}/{subprogram}/{account}", forceLoad: true);
+  
+    }
 }

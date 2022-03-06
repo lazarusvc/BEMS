@@ -1,0 +1,104 @@
+﻿@page "/addentry"
+@using  Budget_Estimates_Management_System.Models;
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+
+<EditForm Model="@entry">
+    <h3>Add Budget Entry</h3>
+    <hr />
+
+    <div  class="form-floating">
+            <InputSelect id="processingYear" placeholder="Year" class="form-select"
+                       @bind-Value="entry.processing_year" >
+                        @if (years == null)
+                        {
+                            <option selected>Loading...</option>
+                        }
+                    else 
+                        {
+                       @foreach (var year in years.Where(x=>!x.year_closed))
+                            {
+                                <option value=@year.year>@year.displayYear</option>
+                            }
+        }
+                </InputSelect>
+        <label for="processingYear" >
+            Processing Year
+        </label>
+    </div>
+    <div  class="form-floating">
+        <label for="ministry">
+                 <InputSelect id="processingYear" placeholder="Ministry" class="form-select"
+                       @bind-Value="entry.ministry" >
+                        @if (ministries == null)
+                        {
+                            <option selected>Loading...</option>
+                        }
+                    else 
+                        {
+                       @foreach (var year in years.Where(x=>!x.year_closed))
+                            {
+                                <option value=@year.year>@year.displayYear</option>
+                            }
+        }
+                </InputSelect>
+            Ministry
+        </label>
+
+    </div>
+        <div class="form-floating">
+        <label for="program">
+            Program
+        </label>
+
+    </div>
+        <div class="form-floating">
+        <label for="subprog">
+            Sub-Program
+        </label>
+
+    </div> 
+    <div class="form-floating">
+        <label for="account" >
+            Account
+        </label>
+
+    </div> 
+
+</EditForm>
+
+@code {
+    [Parameter]
+    public int year { get; set; }
+    [Parameter]
+    public string ministry { get; set; }
+    [Parameter]
+    public string program { get; set; }
+    [Parameter]
+    public string subprogram { get; set; }
+    [Parameter]
+    public string accountType { get; set; }
+
+    private Budget_Estimates_Management_System.Models.BudgetEstimatesModel entry = new Budget_Estimates_Management_System.Models.BudgetEstimatesModel();
+    private List<ProcessingYearModel> years;
+    private List<string> ministries;
+    private List<string> programs;
+    private List<string> subprograms;
+    private List<string> accounts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //set up the drop lists
+         years = await _db.GetYears();
+
+        if (year!=null) { entry.processing_year=year; }
+        if (ministry!=null) { entry.ministry=ministry; }
+        if (program!=null) { entry.program=ministry; }
+        if (subprogram!=null) { entry.subprog=ministry; }
+        if (accountType!=null) { entry.account=accountType; }
+
+    }
+
+
+}

@@ -33,17 +33,17 @@ namespace DataAccessLibrary
             
         }
 
-        public async Task<T> GetData<T, U>(string sql, U parameters)
+        public async Task<T> GetSingleValueData<T, U>(string sql, U parameters)
         {
             string connectionString = _config.GetConnectionString(ConnectionStringName);
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
-                var data = await connection.QueryAsync<T>(sql, parameters);
-                return data.FirstOrDefault();
+                var data = await connection.ExecuteScalarAsync<T>(sql, parameters);
+                return data;
             }
         }
 
-        public async Task<T> GetSingleData<T, U>(string sql, U parameters)
+        public async Task<T> GetSingleRowData<T, U>(string sql, U parameters)
         {
             string connectionString = _config.GetConnectionString(ConnectionStringName);
             using (IDbConnection connection = new SqlConnection(connectionString))

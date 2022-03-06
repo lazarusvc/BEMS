@@ -1,0 +1,23 @@
+﻿@using Budget_Estimates_Management_System.Models;
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+  <ol class="breadcrumb">
+      @foreach (var item in breadcrumbList)
+      {
+        @if (!item.active)
+        {
+            <li class="breadcrumb-item"><a href="@item.link">@item.text</a></li>
+        }
+        else
+        {
+            <li class="breadcrumb-item active" aria-current="page">@item.text</li>                  
+        }
+      }
+  </ol>
+</nav>
+
+@code {
+    [Parameter]
+    public List<BreadcrumbModel> breadcrumbList { get; set; }
+
+}

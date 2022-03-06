@@ -6,9 +6,8 @@
 @inject NavigationManager NavigationManager
 
 <RecNav year=@year ministry=@ministry program=@program></RecNav>
-
-<h2><a href="/recurrent/@year/@ministry">(@ministry) @ministryName</a></h2>
-<h3>(@program) @programName</h3>
+<h3><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h3>
+<h2>@program - @programName</h2>
 
 @if (subprogramGroup == null )
 {

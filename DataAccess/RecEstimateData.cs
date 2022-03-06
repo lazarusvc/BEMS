@@ -12,7 +12,7 @@ namespace DataAccessLibrary
             _db = db;
         }
 
-        public Task<List<BudgetEstimateEntryModel>> GetDataForYear(int year)
+        public Task<List<BudgetEstimateEntryModel>> GetDataForYear(int year, string ministry, string program, string subprogram,string account)
         {
             //todo:link the names to the query
 
