@@ -100,5 +100,54 @@ namespace DataAccessLibrary
             return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program,subprogram });
         }
 
+
+        public Task<List<ListModel>> GetDependantMinistries()
+        {
+
+            string sql = @"SELECT distinct Name, Description 
+                            FROM [dbo].[vw_ss_ministry_name] a
+                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.ministry
+                            ORDER BY Name";
+
+            return _db.GetListData<ListModel, dynamic>(sql,new { });
+        }
+        public Task<List<ListModel>> GetDependantPrograms(string ministry)
+        {
+
+            string sql = @" SELECT distinct Name, Description 
+                            FROM [dbo].[vw_ss_program_name] a
+                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.program
+                            WHERE b.ministry=@ministry
+                            ORDER BY Name";
+
+            return _db.GetListData<ListModel, dynamic>(sql, new { ministry });
+        }
+        public Task<List<ListModel>> GetDependantSubPrograms(string ministry, string program)
+        {
+
+            string sql = @"SELECT distinct Name, Description 
+                            FROM [dbo].[vw_ss_program_name] a
+                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.program
+                            WHERE b.ministry=@ministry
+                            and b.program=@program
+                            ORDER BY Name";
+
+            return _db.GetListData<ListModel, dynamic>(sql, new {ministry, program });
+        }
+
+        public Task<List<ListModel>> GetDependantAccounts(string ministry, string program,string subprogram)
+        {
+
+            string sql = @"SELECT distinct Name, Description 
+                            FROM [dbo].[vw_ss_program_name] a
+                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.program
+                            WHERE b.ministry=@ministry
+                            and b.program=@program
+                            and b.subprog=@subprogram
+                            ORDER BY Name";
+
+            return _db.GetListData<ListModel, dynamic>(sql, new { ministry, program, subprogram });
+        }
+
     }
 }

@@ -3,6 +3,7 @@
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IDbData _db;
+@inject IRecEstimateData _rdb;
 
 <EditForm Model="@entry">
     <h3>Add Budget Entry</h3>
@@ -29,7 +30,7 @@
     </div>
     <div  class="form-floating">
         <label for="ministry">
-                 <InputSelect id="processingYear" placeholder="Ministry" class="form-select"
+                 <InputSelect id="ministry" placeholder="Ministry" class="form-select"
                        @bind-Value="entry.ministry" >
                         @if (ministries == null)
                         {
@@ -37,9 +38,9 @@
                         }
                     else 
                         {
-                       @foreach (var year in years.Where(x=>!x.year_closed))
+                       @foreach (var item in ministries)
                             {
-                                <option value=@year.year>@year.displayYear</option>
+                                <option value=@item.item>@item.itemName</option>
                             }
         }
                 </InputSelect>
@@ -48,18 +49,60 @@
 
     </div>
         <div class="form-floating">
+                   <InputSelect id="program" placeholder="Program" class="form-select"
+                       @bind-Value="entry.program" >
+                        @if (programs == null)
+                        {
+                            <option selected>Loading...</option>
+                        }
+                    else 
+                        {
+                       @foreach (var item in programs)
+                            {
+                                <option value=@item.item>@item.itemName</option>
+                            }
+        }
+                </InputSelect>
         <label for="program">
             Program
         </label>
 
     </div>
         <div class="form-floating">
+               <InputSelect id="subprogram" placeholder="Sub-Program" class="form-select"
+                       @bind-Value="entry.subprog" >
+                        @if (subprograms == null)
+                        {
+                            <option selected>Loading...</option>
+                        }
+                    else 
+                        {
+                       @foreach (var item in subprograms)
+                            {
+                                <option value=@item.item>@item.itemName</option>
+                            }
+        }
+                </InputSelect>
         <label for="subprog">
             Sub-Program
         </label>
 
     </div> 
     <div class="form-floating">
+           <InputSelect id="account" placeholder="Account" class="form-select"
+                       @bind-Value="entry.account" >
+                        @if (accounts == null)
+                        {
+                            <option selected>Loading...</option>
+                        }
+                    else 
+                        {
+                       @foreach (var item in accounts)
+                            {
+                                <option value=@item.item>@item.itemName</option>
+                            }
+        }
+                </InputSelect>
         <label for="account" >
             Account
         </label>
@@ -82,21 +125,34 @@
 
     private Budget_Estimates_Management_System.Models.BudgetEstimatesModel entry = new Budget_Estimates_Management_System.Models.BudgetEstimatesModel();
     private List<ProcessingYearModel> years;
-    private List<string> ministries;
-    private List<string> programs;
-    private List<string> subprograms;
-    private List<string> accounts;
+    private List<ListModel> ministries;
+    private List<ListModel> programs;
+    private List<ListModel> subprograms;
+    private List<ListModel> accounts;
 
     protected override async Task OnInitializedAsync()
     {
         //set up the drop lists
-         years = await _db.GetYears();
+        years = await _db.GetYears();
 
         if (year!=null) { entry.processing_year=year; }
-        if (ministry!=null) { entry.ministry=ministry; }
-        if (program!=null) { entry.program=ministry; }
-        if (subprogram!=null) { entry.subprog=ministry; }
-        if (accountType!=null) { entry.account=accountType; }
+        //Get the list data for ministry
+        ministries = await _rdb.GetDependantMinistries();
+        if (ministry!=null) { 
+            entry.ministry=ministry; 
+            programs = await _rdb.GetDependantPrograms(entry.ministry);
+        }
+        if (program!=null) { 
+            entry.program=program;
+            subprograms = await _rdb.GetDependantSubPrograms(entry.ministry,entry.program);
+        }
+        if (subprogram!=null) { 
+            entry.subprog=subprogram; 
+            accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog);
+        }
+        if (accountType!=null) { 
+             accounts = (await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog)).Where(x=>x.item.StartsWith(accountType)).ToList();
+        }
 
     }
 

@@ -63,3 +63,16 @@ SELECT NAME COLLATE SQL_Latin1_General_CP1_CI_AS AS Name, DESCRIPTION COLLATE SQ
   and [TYPE]='D'
   and ENABLED=1
   and NAME <>'';
+
+CREATE VIEW vw_ss_ledger_accounts as
+SELECT [ldr_entity_id] COLLATE SQL_Latin1_General_CP1_CI_AS as ldr_entity_id
+      ,[ministry] COLLATE SQL_Latin1_General_CP1_CI_AS as ministry
+      ,[program] COLLATE SQL_Latin1_General_CP1_CI_AS as program
+      ,[subprog] COLLATE SQL_Latin1_General_CP1_CI_AS as subprog
+      ,[account] COLLATE SQL_Latin1_General_CP1_CI_AS as account
+      ,[project] COLLATE SQL_Latin1_General_CP1_CI_AS as project
+      ,[sof] COLLATE SQL_Latin1_General_CP1_CI_AS as sof
+      ,[sector] COLLATE SQL_Latin1_General_CP1_CI_AS as sector
+  FROM [DBSglep].[dbo].[ldr_acct]
+  WHERE acct_type_code='E'
+  AND close_date>GETDATE();
