@@ -6,9 +6,17 @@
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 
-<EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit">
-    <h3>Add Budget Entry</h3>     
-    <hr />
+<EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+<div class="modal fade" id="newEntry" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Add Budget Entry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+ 
      <DataAnnotationsValidator />
     <div  class="form-floating" style="padding-bottom:5px">
             <InputSelect id="processingYear" placeholder="Year" class="form-select"
@@ -33,7 +41,7 @@
     <div  class="form-floating" style="padding-bottom:5px">
                          <InputSelect id="ministry" placeholder="Ministry" class="form-select" disabled=@minDisabled
                        @bind-Value="@entry.ministry" >
-                        @if (ministries == null || (entry.processing_year==0 || entry.processing_year==null))
+                        @if (ministries == null)
                         {
                             <option selected>Select Processing Year first...</option>
                         }
@@ -126,7 +134,7 @@
                             <option value="" selected>Choose...</option>
                        @foreach (var item in accounts)
                             {
-                                <option value=@item.Name disabled=@isAccountDisabled(@item.Name)>@item.Name - @item.Description</option>
+                                <option value=@item.Name>@item.Name - @item.Description</option>
                             }
         }
                 </InputSelect>
@@ -198,7 +206,7 @@
 </div>
     </div>
     <div class="col-md">
-    <div class="form-floating" style="padding-bottom:5px">
+    <div class="form-floating" style="padding-bottom:5px;">
            <InputNumber id="year3"  class="form-control"
                        @bind-Value="entry.year3_amount" >               
                 </InputNumber>
@@ -208,16 +216,23 @@
         </div>
     </div>
     </div>
-
-        <br />
-         <button type="submit" class="btn btn-success">Save</button>
    <div style="color: red">
         @saveError
       </div>
          <div style="color: green">
         @saveSuccess
       </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+         <button type="submit" class="btn btn-success">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
 </EditForm>
+
 
 @code {
     [Parameter]
@@ -240,7 +255,6 @@
     private List<ListItemModel> subprograms;
     private List<ListItemModel> accountTypes;
     private List<ListItemModel> accounts;
-    private List<ListItemModel> accountsEntered;
 
     private bool yearDisabled = false;
     private bool minDisabled = false;
@@ -265,12 +279,15 @@
         years = await _db.GetYears();
 
         if (year!=0) { 
-            entry.processing_year=year; 
+            if (years.Where(z => z.year == year&&!z.year_closed).Count() != 0)
+            {
+                entry.processing_year = year;
+                year0Desc = String.Format("{0} - {1}", year - 1, year);
+                year1Desc = String.Format("{0} - {1}", year, year + 1);
+                year2Desc = String.Format("{0} - {1}", year + 1, year + 2);
+                year3Desc = String.Format("{0} - {1}", year + 2, year + 3);
+            }
             yearDisabled = true;
-            year0Desc = String.Format("{0} - {1}", year - 1, year);
-            year1Desc = String.Format("{0} - {1}", year, year+1);
-            year2Desc = String.Format("{0} - {1}", year+1, year+2);
-            year3Desc = String.Format("{0} - {1}", year+2, year+3);
         }
         //Get the list data for ministry
         ministries = await _rdb.GetDependantMinistries();
@@ -292,17 +309,17 @@
         if (!String.IsNullOrWhiteSpace(accountType)) {
             accountTypeDisabled = true;
             accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType);
-            accountsEntered = await _rdb.GetEnteredAccounts(entry.processing_year,entry.ministry,entry.program,entry.subprog,accountType);
         }
         //TODO: set user name
         //set required hidden fields
+        entry.account = null;
         entry.entered_by = "woodmank";
         entry.project="";
         entry.sector = "";
         entry.sof = "";
         entry.lastcode = "";
-
     }
+
 
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
@@ -370,11 +387,10 @@
         //need to clear all dependencies    
         entry.account = null;        
         accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType);
-        accountsEntered = await _rdb.GetEnteredAccounts(entry.processing_year,entry.ministry,entry.program,entry.subprog,accountType);
         base.StateHasChanged();
     }
 
-    private async void YearChanged()
+    private void YearChanged()
     {
         year0Desc = String.Format("{0} - {1}", entry.processing_year - 1, entry.processing_year);
         year1Desc = String.Format("{0} - {1}", entry.processing_year, entry.processing_year+1);
@@ -382,12 +398,48 @@
         year3Desc = String.Format("{0} - {1}", entry.processing_year+2, entry.processing_year+3);
     }
 
-    private bool isAccountDisabled(string v1)
+    protected override async void OnParametersSet()
     {
-        if (accountsEntered.Where(x=>x.Name.Contains(v1)).Count()>0) {
-            return true; 
+        //TODO: if year not in list set it to null
+        if (year!=0) {
+            if (years.Where(z => z.year == year&&!z.year_closed).Count() != 0)
+            {
+                entry.processing_year = year;
+                year0Desc = String.Format("{0} - {1}", year - 1, year);
+                year1Desc = String.Format("{0} - {1}", year, year + 1);
+                year2Desc = String.Format("{0} - {1}", year + 1, year + 2);
+                year3Desc = String.Format("{0} - {1}", year + 2, year + 3);
+            }
+            yearDisabled = true;
         }
-        return false; 
+        //Get the list data for ministry
+        ministries = await _rdb.GetDependantMinistries();
+        if (!String.IsNullOrWhiteSpace(ministry)) { 
+            entry.ministry=ministry; 
+            programs = await _rdb.GetDependantPrograms(entry.ministry);
+            minDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(program)) { 
+            entry.program=program;
+            subprograms = await _rdb.GetDependantSubPrograms(entry.ministry,entry.program);
+            progDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(subprogram)) { 
+            entry.subprog=subprogram; 
+            accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry,entry.program,entry.subprog);
+            sprogDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(accountType)) {
+            accountTypeDisabled = true;
+            accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType);
+        }
+        entry.account = null;
+        entry.entered_by = "woodmank";
+        entry.project="";
+        entry.sector = "";
+        entry.sof = "";
+        entry.lastcode = "";
+        base.StateHasChanged();
     }
 
     private async void  HandleValidSubmit()
@@ -395,15 +447,25 @@
         var config = new MapperConfiguration(cfg => cfg.CreateMap<BudgetEstimateVModel , BudgetEstimatesModel>());
         var mapper = new Mapper(config);
         BudgetEstimatesModel mapped = mapper.Map<BudgetEstimatesModel>(entry);
-
+        saveError = "";
+        saveSuccess = "";
         try
         {
-            //TODO:
             int affectedRows=  await _rdb.SaveRecEntry(mapped);      
+            //TODO: on parameter change, statechange
             //save successfully.  Reset form
-            entry=new BudgetEstimateVModel();
-            saveSuccess = "Record Successfully Saved.";
-            base.StateHasChanged();
+            if (affectedRows==0)
+            {
+                saveError = "Something happened.  Record was not saved";
+                base.StateHasChanged();
+            } else
+            {
+                entry=new BudgetEstimateVModel();
+                //TODO:Set the parameter fields back
+                saveSuccess = "Record Successfully Saved.";
+                base.StateHasChanged();
+            }
+           
         }
         catch(Exception e)
         {
@@ -411,6 +473,12 @@
             base.StateHasChanged();
         }
         
+    }
+
+    private  void  HandleInvalidSubmit()
+    {     
+        saveError = "Please complete the form properly. Thank you.";
+        base.StateHasChanged();                
     }
 
 }
