@@ -53,12 +53,13 @@ namespace DataAccessLibrary
             }
         }
 
-        public async Task ExecuteSql<T>(string sql, T parameters)
+        public async Task<int> ExecuteSql<T>(string sql, T parameters)
         {
             string connectionString = _config.GetConnectionString(ConnectionStringName);
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
-                await connection.ExecuteAsync(sql, parameters);
+               var data =await connection.ExecuteAsync(sql, parameters);
+                return data;
             }
         }
 

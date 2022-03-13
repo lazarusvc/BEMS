@@ -7,7 +7,7 @@ namespace DataAccessLibrary
     {
         Task<T> GetSingleRowData<T, U>(string sql, U parameters);
         Task<List<T>> GetListData<T, U>(string sql, U parameters);
-        Task ExecuteSql<T>(string sql, T parameters);
+        Task<int> ExecuteSql<T>(string sql, T parameters);
         Task<T> GetSingleValueData<T, U>(string sql, U parameters);
         Tuple<IEnumerable<T1>, IEnumerable<T2>, IEnumerable<T3>> GetMultipleDataSets<T1, T2, T3>(string sql, object parameters,
                                         Func<GridReader, IEnumerable<T1>> func1,

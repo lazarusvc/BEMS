@@ -1,8 +1,8 @@
 ﻿namespace DataAccessLibrary.Models
 {
-    public class ListModel
+    public class ListItemModel
     {
-        public string item { get; set; }
-        public string itemName { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

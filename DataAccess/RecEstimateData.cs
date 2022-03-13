@@ -101,17 +101,17 @@ namespace DataAccessLibrary
         }
 
 
-        public Task<List<ListModel>> GetDependantMinistries()
+        public Task<List<ListItemModel>> GetDependantMinistries()
         {
 
-            string sql = @"SELECT distinct Name, Description 
+            string sql = @"SELECT distinct Name , Description 
                             FROM [dbo].[vw_ss_ministry_name] a
                             LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.ministry
                             ORDER BY Name";
 
-            return _db.GetListData<ListModel, dynamic>(sql,new { });
+            return _db.GetListData<ListItemModel, dynamic>(sql,new { });
         }
-        public Task<List<ListModel>> GetDependantPrograms(string ministry)
+        public Task<List<ListItemModel>> GetDependantPrograms(string ministry)
         {
 
             string sql = @" SELECT distinct Name, Description 
@@ -120,34 +120,127 @@ namespace DataAccessLibrary
                             WHERE b.ministry=@ministry
                             ORDER BY Name";
 
-            return _db.GetListData<ListModel, dynamic>(sql, new { ministry });
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry });
         }
-        public Task<List<ListModel>> GetDependantSubPrograms(string ministry, string program)
+        public Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string program)
         {
 
             string sql = @"SELECT distinct Name, Description 
-                            FROM [dbo].[vw_ss_program_name] a
-                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.program
+                            FROM [dbo].[vw_ss_subprog_name] a
+                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.subprog
                             WHERE b.ministry=@ministry
                             and b.program=@program
                             ORDER BY Name";
 
-            return _db.GetListData<ListModel, dynamic>(sql, new {ministry, program });
+            return _db.GetListData<ListItemModel, dynamic>(sql, new {ministry, program });
         }
 
-        public Task<List<ListModel>> GetDependantAccounts(string ministry, string program,string subprogram)
+        public Task<List<ListItemModel>> GetDependantAccountTypes(string ministry, string program, string subprogram)
         {
 
             string sql = @"SELECT distinct Name, Description 
-                            FROM [dbo].[vw_ss_program_name] a
-                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.program
+                            FROM [dbo].[vw_ss_account_name] a
+                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=LEFT(b.account,3)
                             WHERE b.ministry=@ministry
                             and b.program=@program
                             and b.subprog=@subprogram
                             ORDER BY Name";
 
-            return _db.GetListData<ListModel, dynamic>(sql, new { ministry, program, subprogram });
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram });
         }
+
+        public Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program,string subprogram, string acctype)
+        {
+
+            string sql = @"SELECT distinct Name, Description 
+                            FROM [dbo].[vw_ss_account_name] a
+                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.account
+                            WHERE b.ministry=@ministry
+                            and b.program=@program
+                            and b.subprog=@subprogram
+                            and b.account like @acctype+'%'
+                            ORDER BY Name";
+
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram,acctype });
+        }
+        public Task<List<ListItemModel>> GetEnteredAccounts(int year,string ministry, string program, string subprogram, string acctype)
+        {
+
+            string sql = @"SELECT distinct Name, Description 
+                            FROM [dbo].[vw_ss_account_name] a
+                            LEFT JOIN  Budget_Estimates b ON a.Name=b.account
+                            WHERE b.processing_year=@year
+                            and b.ministry=@ministry
+                            and b.program=@program
+                            and b.subprog=@subprogram
+                            and b.account like @acctype+'%'
+                            ORDER BY Name";
+
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { year, ministry, program, subprogram, acctype });
+        }
+
+        public Task<int>  SaveRecEntry(BudgetEstimatesModel bem)
+        {
+
+            string sql = @"INSERT INTO BUDGET_ESTIMATES([processing_year]
+                            ,[ministry]
+                            ,[program]
+                            ,[subprog]
+                            ,[account]
+                            ,[project]
+                            ,[sof]
+                            ,[sector]
+                            ,[lastcode]
+                            ,[quantity]
+                            ,[year0_amount]
+                            ,[year1_amount]
+                            ,[year2_amount]
+                            ,[year3_amount]
+                            ,[is_by_law]
+                            ,[comment]
+                            ,[sort_position]
+                            ,[version_no]
+                            ,[is_current]
+                            ,[flagged]
+                            ,[flagged_comment]
+                            ,[entered_by]
+                            ,[date_entered]
+                            ,[modified_by]
+                            ,[last_modified]
+                            ,[entry_status_id]
+                            ,[label])
+                        VALUES(@processing_year
+                            ,@ministry
+                            ,@program
+                            ,@subprog
+                            ,@account
+                            ,@project
+                            ,@sof
+                            ,@sector
+                            ,@lastcode
+                            ,@quantity
+                            ,@year0_amount
+                            ,@year1_amount
+                            ,@year2_amount
+                            ,@year3_amount
+                            ,@is_by_law
+                            ,null
+                            ,1
+                            ,1
+                            ,1
+                            ,0
+                            ,null
+                            ,@entered_by
+                            ,GETDATE()
+                            ,null
+                            ,null
+                            ,1
+                            ,@label);";
+
+            return _db.ExecuteSql<BudgetEstimatesModel>(sql, bem);
+        }
+
+
 
     }
 }
