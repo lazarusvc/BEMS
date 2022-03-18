@@ -1,0 +1,157 @@
+﻿@using Budget_Estimates_Management_System.Models;
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IRecEstimateData _rdb;
+
+<tr> 
+          <th scope="row"   @onclick="e => this.Collapsed = !this.Collapsed" style="cursor:pointer;"> <span class= "@(this.Collapsed ? "oi oi-caret-bottom" : "oi oi-caret-top")" aria-hidden="true" style="@(this.Collapsed ? "color:black" : "color:blue")"></span> @item.item</th>
+          <td @onclick="e => this.Collapsed = !this.Collapsed" style="cursor:pointer;">@item.itemName</td>
+          <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
+          <td class="text-end"><b>@item.year1.ToString("C")</b></td>
+          <td class="text-end">@item.year2.ToString("C")</td>
+          <td class="text-end">@item.year3.ToString("C")</td>
+        </tr>
+        @if (!Collapsed)
+        {
+             @if  (accounts is null)
+                {
+                    <tr>
+                        <td colspan="6">
+                                No entries found for @year - @(year+1)
+                        </td>
+                    </tr>   
+                      
+                }
+                else
+                { <tr>
+                            <td colspan="6">
+                      <div class="row" style="background-color:lightyellow;" >
+                          <div class="col-1"><b>By Law</b></div>
+                          <div class="col-3"><b>Description</b></div>
+                          <div class="col-1"><b>Qty</b></div>
+                          <div class="col-md"><b>Estimates @(year-1)/@(year)</b></div>
+                          <div class="col-md"><b>Estimates @year/@(year+1)</b> </div>
+                          <div class="col-md"><b>Estimates @(year+1)/@(year+2)</b> </div>
+                          <div class="col-md"><b>Estimates @(year+2)/@(year+3)</b></div>
+                          <div class="col-1"></div>
+                      </div>
+                      </td>
+              </tr>
+              
+                    @foreach (var account in accounts)
+                    {
+                       <tr>
+                           <td colspan="6">
+                                  <RecEditEntry account=account></RecEditEntry>  
+                                 
+                                  </td>
+                           </tr>  
+                    }  
+                 <tr >
+                      <td colspan="6"><button type="button" class="btn btn-outline-success" @onclick="AddRow">Add Row</button></td>
+                 </tr>
+
+                  
+                }
+        }
+
+
+@code {
+    [Parameter]
+    public GroupingModel item { get; set; }
+    [Parameter]
+    public int year { get; set; }
+    [Parameter]
+    public string ministry { get; set; }
+    [Parameter]
+    public string program { get; set; }
+    [Parameter]
+    public string subprogram { get; set; }
+
+    public bool Collapsed = true;
+
+    List<BudgetEstimatesModel> accounts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //TODO: Button should add a row and refresh list
+        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item);
+
+    }
+
+    private async void AddRow()
+    {
+        //save new record.
+        try
+        {
+            BudgetEstimatesModel mapped = new BudgetEstimatesModel();
+            mapped.processing_year =year;
+            mapped.ministry =ministry;
+            mapped.program =program;
+            mapped.subprog =subprogram;
+            mapped.account =item.item;
+            mapped.project ="";
+            mapped.sof ="";
+            mapped.sector ="";
+            mapped.lastcode ="";
+            mapped.label ="";
+            mapped.quantity =0;
+            mapped.year0_amount =0;
+            mapped.year1_amount =0;
+            mapped.year2_amount =0;
+            mapped.year3_amount =0;
+            mapped.is_by_law =false;
+            mapped.comment ="";
+            mapped.sort_position =0;
+            mapped.version_no =0;
+            mapped.is_current =true;
+            mapped.flagged =false;
+            mapped.flagged_comment ="";
+            mapped.entered_by ="woodmank";
+            mapped.date_entered =DateTime.Now;
+            mapped.entry_status_id =1;
+            int affectedRows=  await _rdb.SaveRecEntry(mapped);      
+            //save successfully.  Reset form
+            if (affectedRows!=0)
+            {
+                //refresh list
+                accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item);
+                base.StateHasChanged();
+            } 
+
+        }
+        catch
+        {
+
+        }
+
+
+    }
+
+
+    private async void DeleteRow(BudgetEstimatesModel delRec)
+    {
+        //TODO: Pass funtion to child
+        //save new record.
+        try
+        {
+            int affectedRows=  await _rdb.RemoveRecEntry(delRec.id);      
+            //save successfully.  Reset form
+            if (affectedRows!=0)
+            {
+                //refresh list
+                accounts.Remove(delRec);
+                //  base.StateHasChanged();
+            } 
+
+        }
+        catch (Exception e)
+        {
+           
+        }
+
+
+    }
+
+
+}

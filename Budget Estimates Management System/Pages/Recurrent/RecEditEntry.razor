@@ -1,0 +1,79 @@
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IRecEstimateData _rdb;
+
+
+@if (account is null)
+{
+
+} else
+{
+	<EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit">
+	<div class="row">
+		<div class="col-sm-1">
+               <InputCheckbox 
+                       @bind-Value="account.is_by_law" >               
+                </InputCheckbox>
+				<button type="button" class="btn @(String.IsNullOrWhiteSpace(account.comment) ? "btn-info":"btn-outline-info") btn-sm" ><span class="oi oi-comment-square"></span></button>
+		</div>
+		<div class="col-3">
+               <InputText  class="form-control"
+                       @bind-Value="account.label" >               
+                </InputText>
+		</div>
+		<div class="col-1">
+               <InputNumber  class="form-control"
+                       @bind-Value="account.quantity" >               
+                </InputNumber>
+		</div>
+		<div class="col-md">
+           <InputNumber  class="form-control" disabled="true"
+                       @bind-Value="account.year0_amount" >               
+                </InputNumber>
+        </div>
+		<div class="col-md">
+           <InputNumber   class="form-control"
+                       @bind-Value="account.year1_amount" >               
+                </InputNumber>
+        </div>
+		<div class="col-md">
+           <InputNumber   class="form-control"
+                       @bind-Value="account.year2_amount" >               
+                </InputNumber>
+        </div>
+		 <div class="col-md">
+           <InputNumber  class="form-control"
+                       @bind-Value="account.year3_amount" >               
+                </InputNumber>
+        </div>
+		<div class="col-1">			
+			 <button type="button" class="btn @(account.flagged ? "btn-warning":"btn-outline-dark") btn-sm" @onclick="()=>{ account.flagged=!account.flagged;}"><span class="oi oi-flag"></span></button>
+			 <button type="button" class="btn btn-outline-danger btn-sm"><span class="oi oi-delete"></span></button>
+		</div>
+	</div>
+	</EditForm>	
+}
+
+@code {
+	[Parameter]
+	public BudgetEstimatesModel account { get; set; }
+
+	private EditContext EditContext;
+	protected override async Task OnInitializedAsync()
+	{
+		//Initial Edit Context
+		EditContext = new EditContext(account);
+		EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+	}
+
+	private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+	{
+		//TODO: if field changes save changes
+	}
+
+	private async void HandleValidSubmit()
+	{
+		//TODO: update field
+	}
+
+}

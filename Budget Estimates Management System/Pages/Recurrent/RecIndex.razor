@@ -18,7 +18,7 @@
         {
        @foreach (var year in years)
             {
-                <option value=@year.year>@year.displayYear</option>
+                <option value=@year.year>@year.displayYear @(year.year_closed? "(Year Closed)":"")</option>
             }
         }
   </select>  

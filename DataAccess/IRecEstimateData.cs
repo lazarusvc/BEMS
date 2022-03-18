@@ -17,5 +17,6 @@ namespace DataAccessLibrary
         Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program, string subprogram,string acctype);
         Task<List<ListItemModel>> GetEnteredAccounts(int year, string ministry, string program, string subprogram, string acctype);
         Task<int> SaveRecEntry(BudgetEstimatesModel bem);
+        Task<int> RemoveRecEntry(int id);
     }
 }

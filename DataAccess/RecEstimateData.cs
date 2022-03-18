@@ -22,7 +22,8 @@ namespace DataAccessLibrary
                             AND ministry=@ministry
                             AND be.program=@program
                             AND be.subprog=@subprogram
-                            AND be.account=@account";
+                            AND be.account=@account
+                            AND be.is_current=1";
 
             return _db.GetListData<BudgetEstimatesModel, dynamic>(sql, new { year, ministry, program, subprogram, account });
         }
@@ -35,6 +36,7 @@ namespace DataAccessLibrary
 							FROM dbo.Budget_Estimates be
                             LEFT OUTER JOIN [dbo].[vw_ss_ministry_name] mn on be.ministry=mn.[NAME]
                             WHERE  processing_year=@year
+                            AND be.is_current=1
                             GROUP BY be.ministry, mn.[DESCRIPTION]
                             ORDER BY be.ministry";
 
@@ -50,6 +52,7 @@ namespace DataAccessLibrary
                             LEFT OUTER JOIN [dbo].[vw_ss_program_name] mn on be.program=mn.[NAME]
                             WHERE  processing_year=@year
                             AND be.ministry=@ministry
+                            AND be.is_current=1
                             GROUP BY be.program, mn.[DESCRIPTION]
                             ORDER BY be.program";
 
@@ -66,6 +69,7 @@ namespace DataAccessLibrary
                             WHERE  processing_year=@year
                             AND be.ministry=@ministry
                             AND be.program=@program
+                            AND be.is_current=1
                             GROUP BY be.subprog, mn.[DESCRIPTION]
                             ORDER BY be.subprog";
 
@@ -83,6 +87,7 @@ namespace DataAccessLibrary
                             AND be.ministry=@ministry
                             AND be.program=@program
                             AND be.subprog=@subprogram
+                            AND be.is_current=1
                             GROUP BY SUBSTRING(be.account,1,3) , mn.[DESCRIPTION]
                             ORDER BY SUBSTRING(be.account,1,3) ";
 
@@ -101,6 +106,7 @@ namespace DataAccessLibrary
                             AND be.program=@program
                             AND be.subprog=@subprogram
                             AND be.account like @accountType+'%'
+                            AND be.is_current=1
                             GROUP BY be.account, mn.[DESCRIPTION]
                             ORDER BY be.account ";
 
@@ -246,6 +252,15 @@ namespace DataAccessLibrary
             return _db.ExecuteSql<BudgetEstimatesModel>(sql, bem);
         }
 
+        public Task<int> RemoveRecEntry(int id)
+        {
+
+            string sql = @"UPDATE BUDGET_ESTIMATES
+                           SET is_current=0
+                           WHERE id=@id;";
+
+            return _db.ExecuteSql(sql,new { id } );
+        }
 
 
     }
