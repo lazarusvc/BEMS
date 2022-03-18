@@ -1,19 +1,18 @@
-﻿@page "/recurrent/{year:int}/{ministry}/{program}/{subprogram}"
+﻿@page "/recurrent/{year:int}/{ministry}/{program}/{subprogram}/{accountType}"
 @using Budget_Estimates_Management_System.Models;
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
-@inject NavigationManager NavigationManager
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 
-<RecNav year=@year ministry=@ministry program=@program subprogram=@subprogram></RecNav>
-<h4><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h4>
-<h3><a href="/recurrent/@year/@ministry/@program">@program - @programName</a></h3>
-<h2>@subprogram - @subprogramName</h2>
+<RecNav year=@year ministry=@ministry program=@program subprogram=@subprogram account=@accountType></RecNav>
+<h5><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h5>
+<h4><a href="/recurrent/@year/@ministry/@program">@program - @programName</a></h4>
+<h3><a href="/recurrent/@year/@ministry/@program/@subprogram">@subprogram - @subprogramName</a></h3>
+<h2>@accountType - @accountTypeName</h2>
 
-
-
-@if (accountGroup == null )
+ 
+@if (accountGroup is null )
 {
    <Loading></Loading>
 }
@@ -39,14 +38,7 @@ else {
       <tbody>
             @foreach (var item in accountGroup)
             {
-           <tr> 
-          <th scope="row" @onclick="() => NavigateTo(year,ministry,program,subprogram,item.item)" style="cursor:pointer;">@item.item</th>
-          <td  @onclick="() => NavigateTo(year,ministry,program,subprogram,item.item)" style="cursor:pointer;">@item.itemName</td>
-          <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
-          <td class="text-end"><b>@item.year1.ToString("C")</b></td>
-          <td class="text-end">@item.year2.ToString("C")</td>
-          <td class="text-end">@item.year3.ToString("C")</td>
-        </tr>
+               <RecLineDetail item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram></RecLineDetail>
             }
                    <tr> 
           <th scope="row"></th>
@@ -61,8 +53,9 @@ else {
     }
 }
 
+
 @code {
-    [Parameter]
+	[Parameter]
     public int year { get; set; }
     [Parameter]
     public string ministry { get; set; }
@@ -70,16 +63,18 @@ else {
     public string program { get; set; }
     [Parameter]
     public string subprogram { get; set; }
-
-    private string ministryName;
-    private string programName;
-    private string subprogramName;
-
+    [Parameter]
+    public string accountType { get; set; }
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
+
+    private string ministryName;
+    private string programName;
+    private string subprogramName;
+    private string accountTypeName;
 
     private List<GroupingModel> accountGroup;
 
@@ -88,29 +83,32 @@ else {
         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
         try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
-        accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram);
+        try { accountTypeName = await _db.GetAccountName(accountType); } catch{}
+
+        accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram,accountType);
         year0T = accountGroup.Sum(x=>x.year0);
         year1T = accountGroup.Sum(x=>x.year1);
         year2T = accountGroup.Sum(x=>x.year2);
         year3T = accountGroup.Sum(x=>x.year3);     
+
+        
     }
 
-    protected override async void OnParametersSet()
+     protected override async void OnParametersSet()
     {
-         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
+          try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
         try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
-        accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram);
+        try { accountTypeName = await _db.GetAccountName(accountType); } catch{}
+
+        accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram,accountType);
         year0T = accountGroup.Sum(x=>x.year0);
         year1T = accountGroup.Sum(x=>x.year1);
         year2T = accountGroup.Sum(x=>x.year2);
-        year3T = accountGroup.Sum(x=>x.year3);
+        year3T = accountGroup.Sum(x=>x.year3);   
+
         base.StateHasChanged();
     }
 
-       private void NavigateTo(int year, string ministry, string program, string subprogram, string account)
-    {
-         NavigationManager.NavigateTo($"recurrent/{year}/{ministry}/{program}/{subprogram}/{account}", forceLoad: true);
-  
-    }
+
 }

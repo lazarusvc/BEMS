@@ -87,7 +87,7 @@
 </div> 
 <p></p>
 
-<AddEntry year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@account></AddEntry>
+<RecAddEntry year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@account></RecAddEntry>
 
 @code {
     [Parameter]
@@ -119,7 +119,7 @@
         }
         if (account is not null)
         {
-           accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram);
+           accountGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
         }
     }
 

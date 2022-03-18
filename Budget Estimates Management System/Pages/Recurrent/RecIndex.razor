@@ -10,7 +10,7 @@
   <label class="input-group-text" for="inputGroupSelect01">Estimates for Year</label>
   <select class="form-select" id="inputGroupSelect01"  @bind=year_selected >
     <option value="0" selected>Choose...</option>
-    @if (years == null)
+    @if (years is null)
         {
             <option selected>Loading...</option>
         }
@@ -29,7 +29,7 @@
 
 @if (@year_selected != 0)
 {
-    <MinistryEstimates year=@year_selected></MinistryEstimates>
+    <RecLevel1 year=@year_selected></RecLevel1>
 }
 
 

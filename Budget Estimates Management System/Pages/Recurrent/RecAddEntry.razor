@@ -21,7 +21,7 @@
     <div  class="form-floating" style="padding-bottom:5px">
             <InputSelect id="processingYear" placeholder="Year" class="form-select"
                        @bind-Value="@entry.processing_year" disabled=@yearDisabled>
-                        @if (years == null)
+                        @if (years is null)
                         {
                             <option selected>Loading...</option>
                         }
@@ -41,7 +41,7 @@
     <div  class="form-floating" style="padding-bottom:5px">
                          <InputSelect id="ministry" placeholder="Ministry" class="form-select" disabled=@minDisabled
                        @bind-Value="@entry.ministry" >
-                        @if (ministries == null)
+                        @if (ministries is null)
                         {
                             <option selected>Select Processing Year first...</option>
                         }
@@ -62,7 +62,7 @@
         <div class="form-floating" style="padding-bottom:5px">
                    <InputSelect id="program" placeholder="Program" class="form-select" disabled=@progDisabled
                        @bind-Value="@entry.program" >
-                        @if (programs == null)
+                        @if (programs is null)
                         {
                             <option selected>Select a Ministry first...</option>
                         }
@@ -83,7 +83,7 @@
         <div class="form-floating" style="padding-bottom:5px">
                <InputSelect id="subprogram" placeholder="Sub-Program" class="form-select" disabled=@sprogDisabled
                        @bind-Value="@entry.subprog">
-                        @if (subprograms == null)
+                        @if (subprograms is null)
                         {
                             <option selected>Select a Program first...</option>
                         }
@@ -104,7 +104,7 @@
     <div class="form-floating" style="padding-bottom:5px">
            <InputSelect id="accountType"  class="form-select"
                        @bind-Value="@accountType"  disabled="@accountTypeDisabled">
-                        @if (accountTypes == null)
+                        @if (accountTypes is null)
                         {
                             <option selected>Select a Sub-Program first...</option>
                         }
@@ -125,7 +125,7 @@
     <div class="form-floating" style="padding-bottom:5px">
            <InputSelect id="account" placeholder="Account" class="form-select"
                        @bind-Value="@entry.account" >
-                        @if (accounts == null)
+                        @if (accounts is null)
                         {
                             <option selected>Select a Account Type first...</option>
                         }
@@ -400,7 +400,12 @@
 
     protected override async void OnParametersSet()
     {
-        //TODO: if year not in list set it to null
+        SetFields();
+        base.StateHasChanged();
+    }
+
+    private async void SetFields()
+    {
         if (year!=0) {
             if (years.Where(z => z.year == year&&!z.year_closed).Count() != 0)
             {
@@ -424,6 +429,7 @@
             subprograms = await _rdb.GetDependantSubPrograms(entry.ministry,entry.program);
             progDisabled = true;
         }
+
         if (!String.IsNullOrWhiteSpace(subprogram)) { 
             entry.subprog=subprogram; 
             accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry,entry.program,entry.subprog);
@@ -439,7 +445,6 @@
         entry.sector = "";
         entry.sof = "";
         entry.lastcode = "";
-        base.StateHasChanged();
     }
 
     private async void  HandleValidSubmit()
@@ -461,7 +466,7 @@
             } else
             {
                 entry=new BudgetEstimateVModel();
-                //TODO:Set the parameter fields back
+                SetFields();
                 saveSuccess = "Record Successfully Saved.";
                 base.StateHasChanged();
             }
