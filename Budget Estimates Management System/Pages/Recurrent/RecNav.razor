@@ -87,7 +87,7 @@
 </div> 
 <p></p>
 
-<RecAddEntry year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@account></RecAddEntry>
+<RecAddEntry year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@account OnSaveEntry="OnSaveEntry"></RecAddEntry>
 
 @code {
     [Parameter]
@@ -100,6 +100,8 @@
     public string subprogram { get; set; }       
     [Parameter]
     public string account { get; set; }   
+    [Parameter]
+	public EventCallback OnSaveEntry { get; set; }
 
     private List<GroupingModel>? progGroup;
     private List<GroupingModel> minGroup;

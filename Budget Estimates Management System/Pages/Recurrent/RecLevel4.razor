@@ -6,7 +6,7 @@
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 
-<RecNav year=@year ministry=@ministry program=@program subprogram=@subprogram></RecNav>
+<RecNav year=@year ministry=@ministry program=@program subprogram=@subprogram OnSaveEntry="RefreshList"></RecNav>
 <h4><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h4>
 <h3><a href="/recurrent/@year/@ministry/@program">@program - @programName</a></h3>
 <h2>@subprogram - @subprogramName</h2>
@@ -112,5 +112,10 @@ else {
     {
          NavigationManager.NavigateTo($"recurrent/{year}/{ministry}/{program}/{subprogram}/{account}", forceLoad: true);
   
+    }
+    private async void RefreshList()
+    {
+           accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
+          base.StateHasChanged();
     }
 }

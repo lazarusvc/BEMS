@@ -5,7 +5,7 @@
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 
-<RecNav year=@year ministry=@ministry program=@program subprogram=@subprogram account=@accountType></RecNav>
+<RecNav year=@year ministry=@ministry program=@program subprogram=@subprogram account=@accountType OnSaveEntry="RefreshList"></RecNav>
 <h5><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h5>
 <h4><a href="/recurrent/@year/@ministry/@program">@program - @programName</a></h4>
 <h3><a href="/recurrent/@year/@ministry/@program/@subprogram">@subprogram - @subprogramName</a></h3>
@@ -38,7 +38,7 @@ else {
       <tbody>
             @foreach (var item in accountGroup)
             {
-               <RecLevel6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram></RecLevel6>
+               <RecLevel6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram OnEntryEdit="RefreshList"></RecLevel6>
             }
                    <tr> 
           <th scope="row"></th>
@@ -55,7 +55,7 @@ else {
 
 
 @code {
-	[Parameter]
+    [Parameter]
     public int year { get; set; }
     [Parameter]
     public string ministry { get; set; }
@@ -91,12 +91,12 @@ else {
         year2T = accountGroup.Sum(x=>x.year2);
         year3T = accountGroup.Sum(x=>x.year3);     
 
-        
+
     }
 
-     protected override async void OnParametersSet()
+    protected override async void OnParametersSet()
     {
-          try { ministryName= await _db.GetMinistryName(ministry); } catch{}
+        try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
         try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
         try { accountTypeName = await _db.GetAccountName(accountType); } catch{}
@@ -110,5 +110,11 @@ else {
         base.StateHasChanged();
     }
 
+
+    private async void RefreshList()
+    {
+          accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram,accountType);
+          base.StateHasChanged();
+    }
 
 }

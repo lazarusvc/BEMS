@@ -42,8 +42,7 @@
                     {
                        <tr>
                            <td colspan="6">
-                                  <RecEditEntry account=account></RecEditEntry>  
-                                 
+                                  <RecEditEntry account=account  OnEntryDeleted = "DeleteRow" OnEntryEdit="OnEntryEdit"></RecEditEntry>  
                                   </td>
                            </tr>  
                     }  
@@ -68,17 +67,26 @@
     public string program { get; set; }
     [Parameter]
     public string subprogram { get; set; }
+    [Parameter]
+	public EventCallback OnEntryEdit { get; set; }
 
     public bool Collapsed = true;
 
     List<BudgetEstimatesModel> accounts;
 
     protected override async Task OnInitializedAsync()
-    {
-        //TODO: Button should add a row and refresh list
+    {        
         accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item);
 
     }
+
+    protected override async void OnParametersSet()
+    {
+        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item);
+
+        base.StateHasChanged();
+    }
+
 
     private async void AddRow()
     {
@@ -103,13 +111,10 @@
             mapped.year3_amount =0;
             mapped.is_by_law =false;
             mapped.comment ="";
-            mapped.sort_position =0;
-            mapped.version_no =0;
-            mapped.is_current =true;
             mapped.flagged =false;
             mapped.flagged_comment ="";
-            mapped.entered_by ="woodmank";
-            mapped.date_entered =DateTime.Now;
+            mapped.modified_by ="woodmank";
+            mapped.last_modified =DateTime.Now;
             mapped.entry_status_id =1;
             int affectedRows=  await _rdb.SaveRecEntry(mapped);      
             //save successfully.  Reset form
@@ -132,7 +137,6 @@
 
     private async void DeleteRow(BudgetEstimatesModel delRec)
     {
-        //TODO: Pass funtion to child
         //save new record.
         try
         {
@@ -142,7 +146,7 @@
             {
                 //refresh list
                 accounts.Remove(delRec);
-                //  base.StateHasChanged();
+                 base.StateHasChanged();
             } 
 
         }
@@ -150,9 +154,7 @@
         {
            
         }
+    }        
 
-
-    }
-
-
+    
 }

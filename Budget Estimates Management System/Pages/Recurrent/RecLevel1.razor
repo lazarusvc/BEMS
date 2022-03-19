@@ -9,7 +9,7 @@
 
 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#newEntry">Add New Entry</button>
 <p />
-<RecAddEntry year=@year></RecAddEntry>
+<RecAddEntry year=@year OnSaveEntry="RefreshList"></RecAddEntry>
 
 @if (minGroup is null )
 {
@@ -94,6 +94,12 @@ else {
     {
          NavigationManager.NavigateTo($"recurrent/{year}/{ministry}", forceLoad: true);
   
+    }
+
+    private async void RefreshList()
+    {
+       minGroup=  await _rdb.GetMinDataForYear(year);
+        base.StateHasChanged();
     }
 
 }

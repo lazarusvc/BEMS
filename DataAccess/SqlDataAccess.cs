@@ -1,12 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
+﻿using Dapper;
+using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dapper;
 using static Dapper.SqlMapper;
 
 namespace DataAccessLibrary
@@ -23,14 +18,14 @@ namespace DataAccessLibrary
         public async Task<List<T>> GetListData<T, U>(string sql, U parameters)
         {
 
-                string connectionString = _config.GetConnectionString(ConnectionStringName);
-                using (IDbConnection connection = new SqlConnection(connectionString))
-                {
-                    var data = await connection.QueryAsync<T>(sql, parameters);
-                    return data.ToList();
-                }
+            string connectionString = _config.GetConnectionString(ConnectionStringName);
+            using (IDbConnection connection = new SqlConnection(connectionString))
+            {
+                var data = await connection.QueryAsync<T>(sql, parameters);
+                return data.ToList();
+            }
 
-            
+
         }
 
         public async Task<T> GetSingleValueData<T, U>(string sql, U parameters)
@@ -58,7 +53,7 @@ namespace DataAccessLibrary
             string connectionString = _config.GetConnectionString(ConnectionStringName);
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
-               var data =await connection.ExecuteAsync(sql, parameters);
+                var data = await connection.ExecuteAsync(sql, parameters);
                 return data;
             }
         }

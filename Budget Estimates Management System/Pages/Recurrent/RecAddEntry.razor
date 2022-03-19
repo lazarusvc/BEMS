@@ -245,6 +245,8 @@
     public string subprogram { get; set; }
     [Parameter]
     public string accountType { get; set; }
+    [Parameter]
+	public EventCallback OnSaveEntry { get; set; }
 
     private EditContext EditContext;
 
@@ -313,12 +315,11 @@
         //TODO: set user name
         //set required hidden fields
         entry.account = null;
-        entry.entered_by = "woodmank";
+        entry.modified_by = "woodmank";
         entry.project="";
         entry.sector = "";
         entry.sof = "";
         entry.lastcode = "";
-        entry.is_current = true;
     }
 
 
@@ -441,12 +442,11 @@
             accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType);
         }
         entry.account = null;
-        entry.entered_by = "woodmank";
+        entry.modified_by ="woodmank";
         entry.project="";
         entry.sector = "";
         entry.sof = "";
         entry.lastcode = "";
-        entry.is_current = true;
     }
 
     private async void  HandleValidSubmit()
@@ -458,8 +458,8 @@
         saveSuccess = "";
         try
         {
+            mapped.last_modified =DateTime.Now;
             int affectedRows=  await _rdb.SaveRecEntry(mapped);      
-            //TODO: on parameter change, statechange
             //save successfully.  Reset form
             if (affectedRows==0)
             {
@@ -471,6 +471,8 @@
                 SetFields();
                 saveSuccess = "Record Successfully Saved.";
                 base.StateHasChanged();
+                //run the parent procedure
+                await OnSaveEntry.InvokeAsync();
             }
            
         }

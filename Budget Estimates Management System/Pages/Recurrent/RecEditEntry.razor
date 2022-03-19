@@ -8,13 +8,14 @@
 
 } else
 {
-	<EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit">
+	<EditForm EditContext="EditContext">
 	<div class="row g-2">
 		<div class="col-sm-1">
                <InputCheckbox 
                        @bind-Value="account.is_by_law" >               
                 </InputCheckbox>
-				<button type="button" class="btn @(String.IsNullOrWhiteSpace(account.comment) ? "btn-outline-info":"btn-outline") btn-sm" ><span class="oi oi-comment-square"></span></button>
+				<button type="button" class="btn @(String.IsNullOrWhiteSpace(account.comment)&&String.IsNullOrWhiteSpace(account.flagged_comment) ? "btn-outline-secondary":"btn-outline-info") btn-sm" 
+				@onclick="()=>{ showComments=!showComments;}"><span class="oi oi-comment-square"></span></button>
 		</div>
 		<div class="col-3">
                <InputText  class="form-control"
@@ -64,22 +65,24 @@
 
 			<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
 			  <div class="btn-group me-2" role="group" aria-label="First group">
-				<button type="button" class="btn @(account.flagged ? "btn-warning":"btn-outline-dark") btn-sm" @onclick="()=>{ account.flagged=!account.flagged;}"><span class="oi oi-flag"></span></button>
+				<button type="button" class="btn @(account.flagged ? "btn-warning":"btn-outline-secondary") btn-sm" @onclick="()=>{ account.flagged=!account.flagged;}"><span class="oi oi-flag"></span></button>
 			  </div>
 				 <div class="dropdown">
 			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
 				<span class="oi oi-delete"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-				<li><a class="dropdown-item" href="#">Delete</a></li>
+				<li><a class="dropdown-item" @onclick="DeleteClicked">Delete</a></li>
 			  </ul>
 			</div>
 			</div>			 
 			
 		</div>
 	</div>
-	<div class="row g-2">
-			<div class="col-6">        
+	@if (showComments)
+		{
+			<div class="row g-2">
+				<div class="col-6">        
 				<div class="input-group">
   <span class="input-group-text">Comment</span>
   <InputText  @bind-Value="account.comment" class="form-control">               
@@ -96,12 +99,19 @@
 </div>
            </div>
 		</div>
+		}
 	</EditForm>	
 }
 
 @code {
 	[Parameter]
 	public BudgetEstimatesModel account { get; set; }
+	[Parameter]
+	public EventCallback<BudgetEstimatesModel> OnEntryDeleted { get; set; }
+	[Parameter]
+	public EventCallback OnEntryEdit { get; set; }
+
+	private bool showComments=false;
 
 	private EditContext EditContext;
 	protected override async Task OnInitializedAsync()
@@ -111,14 +121,48 @@
 		EditContext.OnFieldChanged += EditContext_OnFieldChanged;
 	}
 
-	private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+	private async void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
 	{
 		//TODO: if field changes save changes
+		//Check to see if form is valid to save changes		
+		//Check to see if figures were changed so that we update
+		if (EditContext.Validate())
+		{
+			//Update row
+			try
+			{
+				account.modified_by = "woodmank";
+				account.last_modified = DateTime.Now;
+				int affectedRows=  await _rdb.UpdateRecEntry(account);      
+					//save successfully.  Reset form
+					if (affectedRows!=0)
+					{
+						//refresh list
+							if (e.FieldIdentifier.FieldName == "year0_amount"||
+								e.FieldIdentifier.FieldName == "year1_amount"||
+								e.FieldIdentifier.FieldName == "year2_amount"||
+								e.FieldIdentifier.FieldName == "year3_amount")
+								{
+								//invoke update	
+								   await OnEntryEdit.InvokeAsync();
+								}	
+					} 
+
+				}
+				catch (Exception ex)
+				{
+           
+				}
+				
+		}
+
 	}
 
-	private async void HandleValidSubmit()
+	
+	private async void DeleteClicked()
 	{
-		//TODO: update field
+		await OnEntryDeleted.InvokeAsync(account);
 	}
+
 
 }

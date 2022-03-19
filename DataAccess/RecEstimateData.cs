@@ -12,7 +12,7 @@ namespace DataAccessLibrary
             _db = db;
         }
 
-        public Task<List<BudgetEstimatesModel>> GetDataForYear(int year, string ministry, string program, string subprogram,string account)
+        public Task<List<BudgetEstimatesModel>> GetDataForYear(int year, string ministry, string program, string subprogram, string account)
         {
             //todo:link the names to the query
 
@@ -87,7 +87,7 @@ namespace DataAccessLibrary
                             GROUP BY SUBSTRING(be.account,1,3) , mn.[DESCRIPTION]
                             ORDER BY SUBSTRING(be.account,1,3) ";
 
-            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program,subprogram });
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program, subprogram });
         }
 
         public Task<List<GroupingModel>> GetAccountDataForYear(int year, string ministry, string program, string subprogram, string accountType)
@@ -105,7 +105,7 @@ namespace DataAccessLibrary
                             GROUP BY be.account, mn.[DESCRIPTION]
                             ORDER BY be.account ";
 
-            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program, subprogram,accountType });
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program, subprogram, accountType });
         }
 
         public Task<List<ListItemModel>> GetDependantMinistries()
@@ -116,7 +116,7 @@ namespace DataAccessLibrary
                             LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.ministry
                             ORDER BY Name";
 
-            return _db.GetListData<ListItemModel, dynamic>(sql,new { });
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { });
         }
         public Task<List<ListItemModel>> GetDependantPrograms(string ministry)
         {
@@ -139,7 +139,7 @@ namespace DataAccessLibrary
                             and b.program=@program
                             ORDER BY Name";
 
-            return _db.GetListData<ListItemModel, dynamic>(sql, new {ministry, program });
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program });
         }
 
         public Task<List<ListItemModel>> GetDependantAccountTypes(string ministry, string program, string subprogram)
@@ -156,7 +156,7 @@ namespace DataAccessLibrary
             return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram });
         }
 
-        public Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program,string subprogram, string acctype)
+        public Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program, string subprogram, string acctype)
         {
 
             string sql = @"SELECT distinct Name, Description 
@@ -168,9 +168,9 @@ namespace DataAccessLibrary
                             and b.account like @acctype+'%'
                             ORDER BY Name";
 
-            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram,acctype });
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram, acctype });
         }
-        public Task<List<ListItemModel>> GetEnteredAccounts(int year,string ministry, string program, string subprogram, string acctype)
+        public Task<List<ListItemModel>> GetEnteredAccounts(int year, string ministry, string program, string subprogram, string acctype)
         {
 
             string sql = @"SELECT distinct Name, Description 
@@ -186,7 +186,7 @@ namespace DataAccessLibrary
             return _db.GetListData<ListItemModel, dynamic>(sql, new { year, ministry, program, subprogram, acctype });
         }
 
-        public Task<int>  SaveRecEntry(BudgetEstimatesModel bem)
+        public Task<int> SaveRecEntry(BudgetEstimatesModel bem)
         {
 
             string sql = @"INSERT INTO BUDGET_ESTIMATES([processing_year]
@@ -205,13 +205,8 @@ namespace DataAccessLibrary
                             ,[year3_amount]
                             ,[is_by_law]
                             ,[comment]
-                            ,[sort_position]
-                            ,[version_no]
-                            ,[is_current]
                             ,[flagged]
                             ,[flagged_comment]
-                            ,[entered_by]
-                            ,[date_entered]
                             ,[modified_by]
                             ,[last_modified]
                             ,[entry_status_id]
@@ -231,18 +226,13 @@ namespace DataAccessLibrary
                             ,@year2_amount
                             ,@year3_amount
                             ,@is_by_law
-                            ,null
-                            ,1
-                            ,1
-                            ,1
-                            ,0
-                            ,null
-                            ,@entered_by
-                            ,GETDATE()
-                            ,null
-                            ,null
-                            ,1
-                            ,@label);";
+                            ,@comment
+                            ,@flagged
+                            ,@flagged_comment
+                            ,@modified_by
+                            ,@last_modified
+                            ,@entry_status_id
+                            ,@label)";
 
             return _db.ExecuteSql<BudgetEstimatesModel>(sql, bem);
         }
@@ -253,9 +243,32 @@ namespace DataAccessLibrary
             string sql = @"DELETE FROM BUDGET_ESTIMATES
                            WHERE id=@id;";
 
-            return _db.ExecuteSql(sql,new { id } );
+            return _db.ExecuteSql(sql, new { id });
         }
 
+
+        public Task<int> UpdateRecEntry(BudgetEstimatesModel bem)
+        {
+
+            string sql = @"UPDATE BUDGET_ESTIMATES
+                        SET 
+                           quantity =@quantity
+                            ,year0_amount=@year0_amount
+                            ,year1_amount=@year1_amount
+                            ,year2_amount=@year2_amount
+                            ,year3_amount=@year3_amount
+                            ,is_by_law=@is_by_law
+                            ,comment=@comment
+                            ,flagged=@flagged
+                            ,flagged_comment=@flagged_comment
+                            ,modified_by=@modified_by
+                            ,last_modified=@last_modified
+                            ,entry_status_id=@entry_status_id
+                            ,label=@label
+                         WHERE id=@id";
+
+            return _db.ExecuteSql<BudgetEstimatesModel>(sql, bem);
+        }
 
     }
 }

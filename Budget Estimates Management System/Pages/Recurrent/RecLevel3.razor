@@ -5,7 +5,7 @@
 @inject IRecEstimateData _rdb;
 @inject NavigationManager NavigationManager
 
-<RecNav year=@year ministry=@ministry program=@program></RecNav>
+<RecNav year=@year ministry=@ministry program=@program OnSaveEntry="RefreshList"></RecNav>
 <h3><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h3>
 <h2>@program - @programName</h2>
 
@@ -101,5 +101,10 @@ else {
     {
          NavigationManager.NavigateTo($"recurrent/{year}/{ministry}/{program}/{subprogram}", forceLoad: true);
   
+    }
+    private async void RefreshList()
+    {
+         subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
+          base.StateHasChanged();
     }
 }

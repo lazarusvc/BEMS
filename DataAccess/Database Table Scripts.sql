@@ -28,15 +28,10 @@ year2_amount int NOT NULL,
 year3_amount int NOT NULL,
 is_by_law bit NOT NULL,
 comment nvarchar(150),
-sort_position tinyint,
-version_no tinyint NOT NULL,
-is_current bit NOT NULL,
 flagged bit NOT NULL,
 flagged_comment nvarchar(150),
-entered_by nvarchar(50) NOT NULL,
-date_entered datetime NOT NULL,
-modified_by datetime,
-last_modified nvarchar(50),
+modified_by nvarchar(50),
+last_modified datetime,
 entry_status_id tinyint NOT NULL
 );
 

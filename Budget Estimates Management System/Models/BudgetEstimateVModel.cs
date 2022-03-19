@@ -9,7 +9,7 @@ namespace Budget_Estimates_Management_System.Models
         [Range(2020, 3000, ErrorMessage = "Please enter year")]
         public int processing_year { get; set; }
         [Required]
-        [Display(Name ="Ministry")]
+        [Display(Name = "Ministry")]
         public string ministry { get; set; }
         [Required]
         [Display(Name = "Program")]
@@ -44,15 +44,9 @@ namespace Budget_Estimates_Management_System.Models
         public int year3_amount { get; set; }
         [Required]
         public bool is_by_law { get; set; }
-        public byte sort_position { get; set; }
-        public byte version_no { get; set; }
-        public bool is_current { get; set; }
         public bool flagged { get; set; }
         public string flagged_comment { get; set; }
         [Required]
-        public string entered_by { get; set; }
-        [Required]
-        public DateTime date_entered { get; set; }
         public string modified_by { get; set; }
         public DateTime last_modified { get; set; }
         [Required]
