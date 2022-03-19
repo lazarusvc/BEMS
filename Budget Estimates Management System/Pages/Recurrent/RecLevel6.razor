@@ -25,14 +25,14 @@
                 else
                 { <tr>
                             <td colspan="6">
-                      <div class="row" style="background-color:lightyellow;" >
-                          <div class="col-1"><b>By Law</b></div>
-                          <div class="col-3"><b>Description</b></div>
-                          <div class="col-1"><b>Qty</b></div>
-                          <div class="col-md"><b>Estimates @(year-1)/@(year)</b></div>
-                          <div class="col-md"><b>Estimates @year/@(year+1)</b> </div>
-                          <div class="col-md"><b>Estimates @(year+1)/@(year+2)</b> </div>
-                          <div class="col-md"><b>Estimates @(year+2)/@(year+3)</b></div>
+                      <div class="row g-2" style="background-color:lightyellow;" >
+                          <div class="col-1"><b><br>By Law</b></div>
+                          <div class="col-3"><b><br>Description</b></div>
+                          <div class="col-1"><b><br>Qty</b></div>
+                          <div class="col-md"><b>Estimates <br> @(year-1)/@(year)</b></div>
+                          <div class="col-md"><b>Estimates <br> @year/@(year+1)</b> </div>
+                          <div class="col-md"><b>Estimates <br> @(year+1)/@(year+2)</b> </div>
+                          <div class="col-md"><b>Estimates <br> @(year+2)/@(year+3)</b></div>
                           <div class="col-1"></div>
                       </div>
                       </td>
@@ -48,7 +48,8 @@
                            </tr>  
                     }  
                  <tr >
-                      <td colspan="6"><button type="button" class="btn btn-outline-success" @onclick="AddRow">Add Row</button></td>
+                      <td colspan="6"><button type="button" class="btn btn-outline-success" @onclick="AddRow"><span class="oi oi-plus"></span> Add Row</button>
+                          </td>
                  </tr>
 
                   
