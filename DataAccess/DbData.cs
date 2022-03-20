@@ -42,5 +42,16 @@ namespace DataAccessLibrary
             string sql = "select [DESCRIPTION] from vw_ss_account_name where [NAME]=@account;";
             return _db.GetSingleValueData<string, dynamic>(sql, new { account });
         }
+
+        public Task<List<ListItemModel>> GetUserRoles()
+        {
+
+            string sql = @"SELECT [id] as Name , [status_descp] asDescription 
+                            FROM [User_Roles]
+                            ORDER BY status_descp;";
+
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { });
+        }
+
     }
 }

@@ -146,6 +146,8 @@
             {
                 //refresh list
                 accounts.Remove(delRec);
+                //invoke refresh
+                await OnEntryEdit.InvokeAsync();
                  base.StateHasChanged();
             } 
 

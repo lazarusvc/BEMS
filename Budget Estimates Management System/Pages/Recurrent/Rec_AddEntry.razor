@@ -1,6 +1,4 @@
-﻿@page "/addRecEntry"
-@using Budget_Estimates_Management_System.Models;
-@using DataAccessLibrary.Models;
+﻿@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @using AutoMapper;
 @inject IDbData _db;
@@ -246,11 +244,11 @@
     [Parameter]
     public string accountType { get; set; }
     [Parameter]
-	public EventCallback OnSaveEntry { get; set; }
+    public EventCallback OnSaveEntry { get; set; }
 
     private EditContext EditContext;
 
-    private BudgetEstimateVModel entry = new BudgetEstimateVModel();
+    private BudgetEstimatesModel entry = new BudgetEstimatesModel();
     private List<ProcessingYearModel> years;
     private List<ListItemModel> ministries;
     private List<ListItemModel> programs;
@@ -409,6 +407,7 @@
     private async void SetFields()
     {
         if (year!=0) {
+            if (years is null) { years = await _db.GetYears(); }
             if (years.Where(z => z.year == year&&!z.year_closed).Count() != 0)
             {
                 entry.processing_year = year;
@@ -441,25 +440,22 @@
             accountTypeDisabled = true;
             accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType);
         }
-        entry.account = null;
+        entry.account =null;
         entry.modified_by ="woodmank";
         entry.project="";
         entry.sector = "";
         entry.sof = "";
-        entry.lastcode = "";
+        entry.lastcode = ""; 
     }
 
     private async void  HandleValidSubmit()
     {     
-        var config = new MapperConfiguration(cfg => cfg.CreateMap<BudgetEstimateVModel , BudgetEstimatesModel>());
-        var mapper = new Mapper(config);
-        BudgetEstimatesModel mapped = mapper.Map<BudgetEstimatesModel>(entry);
         saveError = "";
         saveSuccess = "";
         try
         {
-            mapped.last_modified =DateTime.Now;
-            int affectedRows=  await _rdb.SaveRecEntry(mapped);      
+            entry.last_modified =DateTime.Now;
+            int affectedRows=  await _rdb.SaveRecEntry(entry);      
             //save successfully.  Reset form
             if (affectedRows==0)
             {
@@ -467,7 +463,7 @@
                 base.StateHasChanged();
             } else
             {
-                entry=new BudgetEstimateVModel();
+                entry=new BudgetEstimatesModel();
                 SetFields();
                 saveSuccess = "Record Successfully Saved.";
                 base.StateHasChanged();
