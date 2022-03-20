@@ -59,4 +59,30 @@ CREATE TABLE Processing_Year
 ready_for_data_entry bit not null,
 year_closed bit not null)
 
+--User Tables
 
+CREATE TABLE Users
+(userName nvarchar(50) Primary Key,
+userRole tinyint not null)
+
+CREATE TABLE User_Roles
+(
+id tinyint PRIMARY KEY,
+status_descp nvarchar(50)
+);
+
+--Default Values
+INSERT INTO User_Roles
+VALUES (0,'Admin'),(1,'Budget Staff'),(2,'Ministry Staff');
+--Foreign Keys
+ALTER TABLE Users
+   ADD CONSTRAINT UsersRoles FOREIGN KEY (userRole)
+      REFERENCES User_Roles (id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+
+CREATE TABLE User_Access
+(id int PRIMARY KEY IDENTITY(1,1),
+userName nvarchar(50),
+subprogram nvarchar(5)
+);

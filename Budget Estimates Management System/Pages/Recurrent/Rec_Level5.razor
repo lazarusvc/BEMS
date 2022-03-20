@@ -5,7 +5,7 @@
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 
-<RecNav year=@year ministry=@ministry program=@program subprogram=@subprogram account=@accountType OnSaveEntry="RefreshList"></RecNav>
+<Rec_Nav year=@year ministry=@ministry program=@program subprogram=@subprogram account=@accountType OnSaveEntry="RefreshList"></Rec_Nav>
 <h5><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h5>
 <h4><a href="/recurrent/@year/@ministry/@program">@program - @programName</a></h4>
 <h3><a href="/recurrent/@year/@ministry/@program/@subprogram">@subprogram - @subprogramName</a></h3>
@@ -38,7 +38,7 @@ else {
       <tbody>
             @foreach (var item in accountGroup)
             {
-               <RecLevel6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram OnEntryEdit="RefreshList"></RecLevel6>
+               <Rec_Level6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram OnEntryEdit="RefreshList"></Rec_Level6>
             }
                    <tr> 
           <th scope="row"></th>
