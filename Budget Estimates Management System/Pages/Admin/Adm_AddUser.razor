@@ -34,7 +34,6 @@
                     }
                 else 
                     {
-                    <option value="" selected>Choose...</option>
                 @foreach (var item in roles)
                     {
                 <option value=@item.Name>@item.Description</option>
@@ -79,6 +78,7 @@
         //Initial Edit Context
         EditContext = new EditContext(user);
         roles = await _db.GetUserRoles();
+        user.userRole = 2;
     }
 
     private async void HandleValidSubmit()

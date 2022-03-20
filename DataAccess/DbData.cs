@@ -46,7 +46,7 @@ namespace DataAccessLibrary
         public Task<List<ListItemModel>> GetUserRoles()
         {
 
-            string sql = @"SELECT [id] as Name , [status_descp] asDescription 
+            string sql = @"SELECT [id] as Name , [status_descp] as Description 
                             FROM [User_Roles]
                             ORDER BY status_descp;";
 
