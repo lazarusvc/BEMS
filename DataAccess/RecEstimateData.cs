@@ -186,7 +186,7 @@ namespace DataAccessLibrary
             return _db.GetListData<ListItemModel, dynamic>(sql, new { year, ministry, program, subprogram, acctype });
         }
 
-        public Task<int> SaveRecEntry(BudgetEstimatesModel bem)
+        public Task<int> AddNewRecEntry(BudgetEstimatesModel bem)
         {
 
             string sql = @"INSERT INTO BUDGET_ESTIMATES([processing_year]

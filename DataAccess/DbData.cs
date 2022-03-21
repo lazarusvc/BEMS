@@ -46,11 +46,48 @@ namespace DataAccessLibrary
         public Task<List<ListItemModel>> GetUserRoles()
         {
 
-            string sql = @"SELECT [id] as Name , [status_descp] as Description 
+            string sql = @"SELECT [id] as Name , [roleDescp] as Description 
                             FROM [User_Roles]
-                            ORDER BY status_descp;";
+                            ORDER BY roleDescp;";
 
             return _db.GetListData<ListItemModel, dynamic>(sql, new { });
+        }
+
+        public Task<int> AddNewUser(UserModel um)
+        {
+
+            string sql = @"INSERT INTO Users(userName,userRole)
+                        VALUES(@userName,@userRole)";
+
+            return _db.ExecuteSql<UserModel>(sql, um);
+        }
+
+        public Task<List<UserModel>> GetUsers()
+        {
+            string sql = @"select userName,userRole, roleDescp
+                From dbo.Users
+                LEFT JOIN User_Roles on id=userRole
+                Order by userName;";
+            return _db.GetListData<UserModel, dynamic>(sql, new { });
+        }
+
+        public Task<int> DeleteUser(string id)
+        {
+
+            string sql = @"DELETE FROM users
+                           WHERE userName=@id;";
+
+            return _db.ExecuteSql(sql, new { id });
+        }
+
+        public Task<int> UpdateUser(UserModel um)
+        {
+
+            string sql = @"Update users
+                           userRole=@userRole 
+                           WHERE userName=@userName;";
+
+            return _db.ExecuteSql(sql, new { um });
         }
 
     }

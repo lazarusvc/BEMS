@@ -116,7 +116,7 @@
             mapped.modified_by ="woodmank";
             mapped.last_modified =DateTime.Now;
             mapped.entry_status_id =1;
-            int affectedRows=  await _rdb.SaveRecEntry(mapped);      
+            int affectedRows=  await _rdb.AddNewRecEntry(mapped);      
             //save successfully.  Reset form
             if (affectedRows!=0)
             {

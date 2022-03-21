@@ -68,7 +68,7 @@ userRole tinyint not null)
 CREATE TABLE User_Roles
 (
 id tinyint PRIMARY KEY,
-status_descp nvarchar(50)
+roleDescp nvarchar(50)
 );
 
 --Default Values

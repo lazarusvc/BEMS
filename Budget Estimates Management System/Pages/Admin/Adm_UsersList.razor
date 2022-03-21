@@ -1,5 +1,108 @@
-﻿
+﻿@using Budget_Estimates_Management_System.Models;
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+
+
+    <p />
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newUser">Add New User</button>
+    <p />
+    <Adm_AddUser OnSaveUser="RefreshList"></Adm_AddUser>
+    <p />
+    <div class="col-6" >
+    <table class="table table-hover ">
+  <thead>
+    <tr>
+      <th scope="col">User Name</th>
+      <th scope="col">User Role</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+
+       @if (users is not null)
+        {
+          @foreach (var user in users)
+        {
+                  <tr>
+          <td>@user.userName</td>
+                        <td>
+                            @user.roleDescp                     
+                        </td>
+                        <td>
+              <div class="btn-group" role="group">
+              <div class="btn-group me-2" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm" @onclick="()=>{editUser=user;}" data-bs-toggle="modal" data-bs-target="#editUser"><span class="oi oi-pencil"></span></button>                
+              </div>
+              <div class="btn-group me-2" role="group">
+                <button type="button" class="btn btn-outline-info btn-sm" @onclick="()=>{editUser=user;}" data-bs-toggle="modal" data-bs-target="#userSecurity"><span class="oi oi-eye"></span></button>                
+              </div>
+              <div class="btn-group me-2" role="group" >
+                 <div class="dropdown">
+			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+				<span class="oi oi-delete"></span>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+				<li><a class="dropdown-item" @onclick="()=>{DeleteClicked(user);}">Delete</a></li>
+			  </ul>
+			</div>
+              </div>            
+            </div>
+
+          </td>
+        </tr> 
+        }
+    }
+
+  </tbody>
+        <tfoot>
+          <tr>
+          <td colspan="3" >NAV ITEMS</td>
+        </tr>
+      </tfoot>    
+</table>
+</div>
 
 @code {
+
+    private List<UserModel> users;
+
+    private UserModel editUser;
+    private List<ListItemModel> roles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Initial Edit Context
+        roles = await _db.GetUserRoles();
+        users = await _db.GetUsers();
+    }
+
+    private async void RefreshList()
+    {
+        users = await _db.GetUsers();
+        base.StateHasChanged();
+    }
+
+    private async void DeleteClicked(UserModel usr)
+    {
+        //save new record.
+        try
+        {
+            int affectedRows= await _db.DeleteUser(usr.userName);          
+            //save successfully.  Reset form
+            if (affectedRows!=0)
+            {
+                //refresh list
+                users.Remove(usr);
+                //invoke refresh
+                base.StateHasChanged();
+            } 
+
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
 
 }

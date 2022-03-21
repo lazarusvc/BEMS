@@ -7,19 +7,14 @@
     <a class="nav-link @(whichPage==1?"active":"")" aria-current="page" @onclick="()=>{whichPage=1;}" style="cursor:pointer;" >Users</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link @(whichPage==2?"active":"")" @onclick="()=>{whichPage=2;}" style="cursor:pointer;">User Access</a>
+    <a class="nav-link @(whichPage==2?"active":"")" @onclick="()=>{whichPage=2;}" style="cursor:pointer;">Budget Periods</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link @(whichPage==3?"active":"")" @onclick="()=>{whichPage=3;}" style="cursor:pointer;">Budget Years</a>
+    <a class="nav-link @(whichPage==3?"active":"")" @onclick="()=>{whichPage=3;}" style="cursor:pointer;">Not Sure Yet</a>
   </li>
 </ul>
 @if (whichPage==1)
-{
-    <p />
-    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newUser">Add New User</button>
-    <p />
-    <Adm_AddUser></Adm_AddUser>
-    <p />
+{    
     <Adm_UsersList></Adm_UsersList>
 
 } else if (whichPage==2)

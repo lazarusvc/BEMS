@@ -3,12 +3,13 @@
 @inject IDbData _db;
 
 
-<EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit">
+
 <div class="modal fade" id="newUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered ">
+   <EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Add Budget Entry</h5>
+        <h5 class="modal-title" id="staticBackdropLabel">Add User</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -58,13 +59,16 @@
          <button type="submit" class="btn btn-success">Save</button>
       </div>
     </div>
+    </EditForm>
   </div>
   </div>
-</EditForm>
+
 
 @code {
     [Parameter]
-    public string userId{ get; set; }
+    public EventCallback OnSaveUser { get; set; }
+
+
     private EditContext EditContext;
 
     private UserModel user = new UserModel();
@@ -76,14 +80,57 @@
     protected override async Task OnInitializedAsync()
     {
         //Initial Edit Context
-        EditContext = new EditContext(user);
+        EditContext = new EditContext(user);        
         roles = await _db.GetUserRoles();
         user.userRole = 2;
+
     }
 
-    private async void HandleValidSubmit()
-    {
+    private async void  HandleValidSubmit()
+    {     
+        saveError = "";
+        saveSuccess = "";
+        try
+        {
+            int affectedRows=  await _db.AddNewUser(user);      
+            //save successfully.  Reset form
+            if (affectedRows==0)
+            {
+                saveError = "Something happened.  Record was not saved";
+                base.StateHasChanged();
+            } else
+            {
+                user=new UserModel();
+                EditContext = new EditContext(user);
+                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+                user.userRole = 2;                
+                saveSuccess = "Record Successfully Saved.";
+                base.StateHasChanged();
+                //run the parent procedure
+                await OnSaveUser.InvokeAsync();
+                
+            }
+           
+        }
+        catch(Exception e)
+        {
+            saveError = e.Message;
+            base.StateHasChanged();
+        }
         
+    }
+
+    private  void  HandleInvalidSubmit()
+    {     
+        saveSuccess = "";
+        saveError = "Enter a Username. Thank you.";
+        base.StateHasChanged();                
+    }
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        //clear any save messages because we entering new stull
+        saveSuccess = "";
+        saveError = "";
     }
 
 }

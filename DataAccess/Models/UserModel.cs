@@ -9,9 +9,10 @@ namespace DataAccessLibrary.Models
 {
     public class UserModel
     {
-        [Required]
+        [Required(AllowEmptyStrings = false)]
         public string userName { get; set; }
         [Required]
         public Int16 userRole { get; set; }
+        public string roleDescp { get; set; }
     }
 }

@@ -10,5 +10,9 @@ namespace DataAccessLibrary
         Task<string> GetAccountName(string account);
         Task<List<ProcessingYearModel>> GetYears();
         Task<List<ListItemModel>> GetUserRoles();
+        Task<int> AddNewUser(UserModel um);
+        Task<List<UserModel>> GetUsers();
+        Task<int> DeleteUser(string id);
+        Task<int> UpdateUser(UserModel um);
     }
 }

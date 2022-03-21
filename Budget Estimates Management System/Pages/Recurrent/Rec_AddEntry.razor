@@ -4,9 +4,10 @@
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 
-<EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+
 <div class="modal fade" id="newEntry" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
+      <EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="staticBackdropLabel">Add Budget Entry</h5>
@@ -227,9 +228,10 @@
          <button type="submit" class="btn btn-success">Save</button>
       </div>
     </div>
+    </EditForm>
   </div>
 </div>
-</EditForm>
+
 
 
 @code {
@@ -323,6 +325,9 @@
 
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
+        //clear any save messages because we entering new stull
+        saveSuccess = "";
+        saveError = "";
 
         if (e.FieldIdentifier.FieldName == "processing_year")
         {
@@ -419,26 +424,26 @@
             yearDisabled = true;
         }
         //Get the list data for ministry
-        ministries = await _rdb.GetDependantMinistries();
+        if (ministries is null) { ministries = await _rdb.GetDependantMinistries(); }
         if (!String.IsNullOrWhiteSpace(ministry)) { 
-            entry.ministry=ministry; 
-            programs = await _rdb.GetDependantPrograms(entry.ministry);
+            entry.ministry=ministry;
+            if (programs is null) { programs = await _rdb.GetDependantPrograms(entry.ministry); }
             minDisabled = true;
         }
         if (!String.IsNullOrWhiteSpace(program)) { 
             entry.program=program;
-            subprograms = await _rdb.GetDependantSubPrograms(entry.ministry,entry.program);
+            if (subprograms is null) { subprograms = await _rdb.GetDependantSubPrograms(entry.ministry, entry.program); }
             progDisabled = true;
         }
 
         if (!String.IsNullOrWhiteSpace(subprogram)) { 
-            entry.subprog=subprogram; 
-            accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry,entry.program,entry.subprog);
+            entry.subprog=subprogram;
+            if (accountTypes is null) { accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry, entry.program, entry.subprog); }
             sprogDisabled = true;
         }
         if (!String.IsNullOrWhiteSpace(accountType)) {
             accountTypeDisabled = true;
-            accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType);
+            if (accounts is null) { accounts = await _rdb.GetDependantAccounts(entry.ministry, entry.program, entry.subprog, accountType); }
         }
         entry.account =null;
         entry.modified_by ="woodmank";
@@ -455,7 +460,7 @@
         try
         {
             entry.last_modified =DateTime.Now;
-            int affectedRows=  await _rdb.SaveRecEntry(entry);      
+            int affectedRows=  await _rdb.AddNewRecEntry(entry);      
             //save successfully.  Reset form
             if (affectedRows==0)
             {
@@ -464,6 +469,8 @@
             } else
             {
                 entry=new BudgetEstimatesModel();
+                EditContext = new EditContext(entry);
+                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
                 SetFields();
                 saveSuccess = "Record Successfully Saved.";
                 base.StateHasChanged();
@@ -482,6 +489,7 @@
 
     private  void  HandleInvalidSubmit()
     {     
+        saveSuccess = "";
         saveError = "Please complete the form properly. Thank you.";
         base.StateHasChanged();                
     }
