@@ -477,11 +477,12 @@
                 //run the parent procedure
                 await OnSaveEntry.InvokeAsync();
             }
-           
+
         }
         catch(Exception e)
         {
-            saveError = e.Message;
+            saveError = e.Message; 
+
             base.StateHasChanged();
         }
         

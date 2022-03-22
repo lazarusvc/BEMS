@@ -83,11 +83,11 @@ namespace DataAccessLibrary
         public Task<int> UpdateUser(UserModel um)
         {
 
-            string sql = @"Update users
-                           userRole=@userRole 
+            string sql = @"UPDATE users
+                           SET userRole=@userRole
                            WHERE userName=@userName;";
 
-            return _db.ExecuteSql(sql, new { um });
+            return _db.ExecuteSql(sql,  um);
         }
 
     }

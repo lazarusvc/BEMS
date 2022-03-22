@@ -4,12 +4,12 @@
 
 
 
-<div class="modal fade" id="newUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="editUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered ">
    <EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Add User</h5>
+        <h5 class="modal-title" id="staticBackdropLabel">Edit User</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -19,7 +19,7 @@
     
   
     <div class="form-floating">
-           <InputText  @bind-Value="user.userName" class="form-control" placeholder="GOCD User Name">               
+           <InputText  @bind-Value="user.userName" class="form-control" placeholder="GOCD User Name" disabled="true">               
                 </InputText>
         <label for="label" >
             GOCD Username
@@ -66,6 +66,8 @@
 
 @code {
     [Parameter]
+    public UserModel parUser { get; set; }
+    [Parameter]
     public EventCallback OnSaveUser { get; set; }
 
 
@@ -80,10 +82,20 @@
     protected override async Task OnInitializedAsync()
     {
         //Initial Edit Context
-        EditContext = new EditContext(user);        
+        EditContext = new EditContext(user);       
+        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
         roles = await _db.GetUserRoles();
-        user.userRole = 2;
+    }
 
+    protected override async void OnParametersSet()
+    {
+        if (parUser is not null)
+        {
+            user.userName = parUser.userName;
+            user.userRole = parUser.userRole;
+        }
+        
+        base.StateHasChanged();
     }
 
     private async void  HandleValidSubmit()
@@ -92,7 +104,7 @@
         saveSuccess = "";
         try
         {
-            int affectedRows=  await _db.AddNewUser(user);      
+            int affectedRows=  await _db.UpdateUser(user);      
             //save successfully.  Reset form
             if (affectedRows==0)
             {
@@ -103,7 +115,6 @@
                 user=new UserModel();
                 EditContext = new EditContext(user);
                 EditContext.OnFieldChanged += EditContext_OnFieldChanged;
-                user.userRole = 2;                
                 saveSuccess = "Record Successfully Saved.";
                 base.StateHasChanged();
                 //run the parent procedure
@@ -114,11 +125,7 @@
         }
         catch(Exception e)
         {
-            if (e.Message.Contains("PK_Users"))
-            {
-                saveError = "User already entered";
-            }
-            else { saveError = e.Message; }
+            saveError = e.Message;
             base.StateHasChanged();
         }
         
@@ -127,7 +134,7 @@
     private  void  HandleInvalidSubmit()
     {     
         saveSuccess = "";
-        saveError = "Enter a Username. Thank you.";
+        saveError = "Unable to save changes.";
         base.StateHasChanged();                
     }
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
