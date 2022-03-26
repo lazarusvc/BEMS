@@ -14,5 +14,7 @@ namespace DataAccessLibrary
         Task<List<UserModel>> GetUsers();
         Task<int> DeleteUser(string id);
         Task<int> UpdateUser(UserModel um);
+        Task<List<ListItemModel>> GetUserAccess(string username);
+        Task<int> MergeUserAccess(List<UserAccessModel> uam);
     }
 }

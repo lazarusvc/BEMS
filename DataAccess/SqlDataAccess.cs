@@ -6,7 +6,7 @@ using static Dapper.SqlMapper;
 
 namespace DataAccessLibrary
 {
-    public class SqlDataAccess : ISqlDataAccess
+    public class SqlDataAccess : ISqlDataAccess, IDisposable
     {
         private readonly IConfiguration _config;
         private string ConnectionStringName { get; set; } = "Default";
@@ -94,7 +94,48 @@ namespace DataAccessLibrary
             return returnResults;
         }
 
+        private IDbConnection _connection;
+        private IDbTransaction _transaction;
 
+        public void StartTransaction()
+        {
+            string connectionString = _config.GetConnectionString(ConnectionStringName);
+            _connection = new SqlConnection(connectionString);
+            _connection.Open(); 
+            _transaction = _connection.BeginTransaction();
+
+        }
+
+        public void CommitTransaction()
+        {
+            _transaction?.Commit();
+            _connection?.Close();
+        }
+
+        public void RollbackTransaction()
+        { 
+            _transaction?.Rollback();
+            _connection?.Close();
+        }
+
+        public void Dispose()
+        {
+            CommitTransaction();
+        }
+
+        public async Task<int> SaveDataInTransaction<T>(string sql, T parameters)
+        {          
+            var data = await _connection.ExecuteAsync(sql, parameters, transaction: _transaction);
+            return data;
+        }
+
+        public async Task<List<T>> GetListDataInTransaction<T, U>(string sql, U parameters)
+        {
+
+                var data = await _connection.QueryAsync<T>(sql, parameters, transaction:_transaction);
+                return data.ToList();
+
+        }
 
     }
 }

@@ -16,6 +16,11 @@ namespace DataAccessLibrary
         Tuple<IEnumerable<T1>, IEnumerable<T2>> GetMultipleDataSets<T1, T2>(string sql, object parameters,
                                  Func<GridReader, IEnumerable<T1>> func1,
                                  Func<GridReader, IEnumerable<T2>> func2);
+        void StartTransaction();
+        void CommitTransaction();
+        void RollbackTransaction();
+        Task<int> SaveDataInTransaction<T>(string sql, T parameters);
+        Task<List<T>> GetListDataInTransaction<T, U>(string sql, U parameters);
     }
 }
 
@@ -26,5 +31,22 @@ namespace DataAccessLibrary
             var foosAndBars = this.GetMultipleDataSets(sql, new { param = "baz" }, gr => gr.Read<Foo>(), gr => gr.Read<Bar>());
             var foos = foosAndBars.Item1;
             var bars = foosAndBars.Item2;
+ * 
+ * ********/
+
+/*******
+ * Example usage transaction
+ * 
+ *using (SqlDataAccess sql = new SqlDataAccess())
+ *{
+ *try{
+ *sql.StartTransaction();
+ *sql.SaveDataIntTransaction(xxx,xx)
+ *sql.LoadDataInTransaction(xx,xx)
+ *sql.CommitTransaction();
+ *}
+ *catch {sql.RollbackTransaction;
+ *throw}
+ *}
  * 
  * ********/

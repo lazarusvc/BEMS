@@ -3,8 +3,9 @@
     enum DataAccess
     {
         Admin = 0,
-        BudgetAdmin = 1,
-        DataEntry = 2
+        BudgetStaff = 1,
+        MinistryStaff = 2,
+        PsipStaff =3,
     }
 
     enum EntryStatus

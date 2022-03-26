@@ -1,5 +1,6 @@
-﻿using DataAccessLibrary.Models;
-
+﻿using Dapper;
+using DataAccessLibrary.Models;
+using System.Data;
 
 namespace DataAccessLibrary
 {
@@ -88,6 +89,45 @@ namespace DataAccessLibrary
                            WHERE userName=@userName;";
 
             return _db.ExecuteSql(sql,  um);
+        }
+
+        public Task<List<ListItemModel>> GetUserAccess(string username)
+        {
+
+            string sql = @"SELECT [subprogram] as Name , [DESCRIPTION] as Description 
+                            FROM [User_Access]
+                            LEFT JOIN vw_ss_subprog_name on [NAME]=[subprogram]
+                            WHERE userName=@username
+                            ORDER BY subprogram;";
+
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { username });
+        }
+
+        public Task<int> MergeUserAccess(List<UserAccessModel> uam)
+        {
+
+            string sql = @"MERGE User_Access AS Target
+                            USING @TVP_Access	AS Source
+                            ON Source.userName = Target.userName
+                            AND Source.subprogram =Target.subprogram
+
+                            WHEN NOT MATCHED BY Target THEN
+                                INSERT (userName,subprogram) 
+                                VALUES (Source.userName,Source.subprogram)   
+    
+                            WHEN NOT MATCHED BY Source
+                            AND Target.userName IN (SELECT userName FROM @TVP_Access)  THEN
+                                DELETE;";
+
+            var dt = new DataTable();
+            dt.Columns.Add("userName", typeof(string));
+            dt.Columns.Add("subprogram", typeof(string));
+            foreach (var item in uam)
+            {
+                dt.Rows.Add(item.userName,item.subprogram);
+            }
+
+            return _db.ExecuteSql(sql, new { TVP_Access = dt.AsTableValuedParameter("User_Access") });
         }
 
     }

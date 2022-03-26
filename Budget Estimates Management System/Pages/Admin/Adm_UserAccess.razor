@@ -1,0 +1,217 @@
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@inject IRecEstimateData _rdb;
+
+
+
+<div class="modal fade" id="userAccess" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg ">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Acess for @(parUser is null? "": parUser.userName)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+          <div class="row"><div class="col-6">
+          <div  class="mb-3" >
+                      <label for="ministry" >
+            Ministry
+        </label>
+   <select id="ministry" placeholder="Ministry" class="form-select"   @onchange="ChangeSubPrograms">
+                        @if (ministries is null)
+                        {
+                            <option selected>Select Processing Year first...</option>
+                        }
+                    else 
+                        {
+                       <option value="" selected>Choose...</option>
+                       @foreach (var item in ministries)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </select>
+          
+    </div>
+    </div>
+    <div class="row">
+    <div class="col-5">
+  <label for="subprograms" class="form-label">Sub-Programs</label>
+      <select id="subprograms" class="form-select"  size="10" multiple @bind="optionHolder">
+              @if (subprograms is null)
+                        {
+                           <option value="">Select the ministry first...</option> 
+                        }
+                    else 
+                        {
+                       @foreach (var item in subprograms)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+            </select>
+    
+</div>
+<div class="col-1" style="padding-top:30px">
+    <button type="button" class="btn btn-outline-primary" @onclick="AddSelectedToList" ><span class="oi oi-arrow-thick-right"></span></button>
+    <p></p>
+    <button type="button" class="btn btn-outline-danger" @onclick="RemoveSelectedToList"><span class="oi oi-arrow-thick-left"></span></button>
+</div>
+<div class="col-6">
+    <label for="acess" class="form-label">Acess to...</label>
+      <select id="accessTo" class="form-select" size="10"  multiple @bind="userHolder">
+              @if (accessTo is null)
+                        {
+                            <option selected>Add items from the other list</option>
+                        }
+                    else 
+                        {
+                       @foreach (var item in accessTo)
+                            {
+                                <option value=@item.Name> @item.Name - @item.Description</option>
+                            }
+        }
+            </select>
+    </div>
+
+    </div></div>
+  
+   <div style="color: red">
+        @saveError
+      </div>
+         <div style="color: green">
+        @saveSuccess
+      </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+         <button type="submit" class="btn btn-success" @onclick="SaveSelections">Save</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+@code {
+    [Parameter]
+    public UserModel parUser { get; set; }
+
+    private string saveError;
+    private string saveSuccess;
+
+    private List<ListItemModel> ministries;
+    private List<ListItemModel> subprograms;
+    private List<ListItemModel> accessTo;
+    public string[] optionHolder { get; set; } = new string[] { };
+    public string[] userHolder { get; set; } = new string[] { };
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Get the list data for ministry
+        ministries = await _rdb.GetDependantMinistries();        
+
+    }
+
+
+    protected override async void OnParametersSet()
+    {
+        //Load the list of permissions from the user
+        if (parUser is not null)
+        {
+             saveError = "";
+             saveSuccess = "";
+            accessTo = await _db.GetUserAccess(parUser.userName);
+            base.StateHasChanged();
+        }
+    }
+
+    private async void ChangeSubPrograms(ChangeEventArgs e)
+    {
+        if (e is null)
+        {
+            subprograms = null;
+        } else
+        {
+            subprograms = await _rdb.GetDependantSubPrograms(e.Value.ToString()); 
+            base.StateHasChanged();
+        }
+
+    }
+
+    private async void AddSelectedToList()
+    {
+        //add to list if not empty
+        if (optionHolder.Count()!=0 && !String.IsNullOrWhiteSpace(optionHolder[0]))
+        {
+            foreach (var item in optionHolder)
+            {
+                if (accessTo.Where(x=>x.Name.Contains(item)).Count()==0)
+                {
+                    string descp = subprograms.Where(x=>x.Name.Equals(item)).FirstOrDefault().Description;
+                    accessTo.Add(new ListItemModel { Name = item, Description = descp });
+                }
+            }
+            accessTo.Sort((u1, u2) => u1.Name.CompareTo(u2.Name));
+        }
+
+    }
+
+    private void RemoveSelectedToList()
+    {
+        //add to list if not empty
+        if (userHolder.Count()!=0 && !String.IsNullOrWhiteSpace(userHolder[0]))
+        {
+            foreach (var item in userHolder)
+            {
+                accessTo.RemoveAll(r => r.Name.Equals(item));
+
+            }
+            accessTo.Sort((u1, u2) => u1.Name.CompareTo(u2.Name));
+        }
+    }
+
+    private async void SaveSelections()
+    {
+        if (userHolder.Count() == 0)
+        {
+            saveError = "No subporgams were assigned.";
+            base.StateHasChanged();
+            return;  
+        }
+        //Convert list to UserAccess Model
+        List<UserAccessModel> usera = new List<UserAccessModel>();
+        foreach (var item in accessTo)
+        {
+            usera.Add(new UserAccessModel {userName=parUser.userName,subprogram=item.Name });
+        }
+        //Merge to user access list
+        saveError = "";
+        saveSuccess = "";
+        try
+        {
+            int affectedRows=  await _db.MergeUserAccess(usera);      
+            //save successfully.  Reset form
+            if (affectedRows==0)
+            {
+                saveError = "Something happened.  Records were not saved";
+                base.StateHasChanged();
+            } else
+            {      
+                saveSuccess = "Record Successfully Saved.";
+                base.StateHasChanged();               
+            }
+           
+        }
+        catch(Exception e)
+        {
+            saveError = e.Message; 
+            base.StateHasChanged();
+        }
+
+    }
+
+
+}

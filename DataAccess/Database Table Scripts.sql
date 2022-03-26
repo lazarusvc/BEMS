@@ -82,7 +82,17 @@ ALTER TABLE Users
       ON UPDATE CASCADE
 
 CREATE TABLE User_Access
-(id int PRIMARY KEY IDENTITY(1,1),
-userName nvarchar(50),
-subprogram nvarchar(5)
+(userName nvarchar(50),
+subprogram nvarchar(5),
 );
+ALTER TABLE User_Access
+ADD CONSTRAINT [PK_User_Access] PRIMARY KEY CLUSTERED 
+(
+	[userName] ASC,
+	[subprogram] ASC
+);
+
+CREATE TYPE [User_Access] AS TABLE(
+	[userName] [nvarchar](50) NOT NULL,
+	[subprogram] [nvarchar](5) NOT NULL
+ )
