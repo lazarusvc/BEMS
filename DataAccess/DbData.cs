@@ -130,5 +130,16 @@ namespace DataAccessLibrary
             return _db.ExecuteSql(sql, new { TVP_Access = dt.AsTableValuedParameter("User_Access") });
         }
 
+        public Task<string> GetUserRole(string user)
+        {
+
+            string sql = @"SELECT [userRole] 
+                            FROM [Users]
+                            WHERE userName=@user;";
+
+            return _db.GetSingleValueData<string, dynamic>(sql, new { user });
+        }
+
+
     }
 }

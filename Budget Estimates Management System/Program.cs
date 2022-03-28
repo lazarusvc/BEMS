@@ -1,5 +1,7 @@
+using Budget_Estimates_Management_System.Authentication;
 using DataAccessLibrary;
-
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,10 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddTransient<ISqlDataAccess, SqlDataAccess>();
 builder.Services.AddTransient<IDbData, DbData>();
 builder.Services.AddTransient<IRecEstimateData, RecEstimateData>();
+//Authentication
+builder.Services.AddScoped<ProtectedSessionStorage>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+
 
 //build app
 var app = builder.Build();

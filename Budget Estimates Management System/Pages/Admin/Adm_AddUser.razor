@@ -1,7 +1,7 @@
 ﻿@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IDbData _db;
-
+@attribute [Authorize(Roles = "Administrator")]
 
 
 <div class="modal fade" id="newUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -82,7 +82,7 @@
         //Initial Edit Context
         EditContext = new EditContext(user);        
         roles = await _db.GetUserRoles();
-        user.userRole = 2;
+        user.userRole = "MinistryStaff";
 
     }
 
@@ -103,7 +103,7 @@
                 user=new UserModel();
                 EditContext = new EditContext(user);
                 EditContext.OnFieldChanged += EditContext_OnFieldChanged;
-                user.userRole = 2;                
+                user.userRole = "MinistryStaff";                
                 saveSuccess = "Record Successfully Saved.";
                 base.StateHasChanged();
                 //run the parent procedure

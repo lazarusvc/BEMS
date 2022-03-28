@@ -1,7 +1,7 @@
 ﻿@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IDbData _db;
-
+@attribute [Authorize(Roles = "Administrator")]
 
 
 <div class="modal fade" id="editUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">

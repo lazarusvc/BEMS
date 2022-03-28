@@ -1,0 +1,68 @@
+﻿@using Budget_Estimates_Management_System.Models;
+@using Budget_Estimates_Management_System.Authentication;
+@using DataAccessLibrary;
+@inject AuthenticationStateProvider authStateProvider;
+@inject NavigationManager navManager;
+@inject IDbData _db;
+@inject IJSRuntime JS
+
+@page "/login"
+
+
+<div class="row">
+	<div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+		<div class="mb-3 text-center">
+			<h3>Login</h3>
+		</div>
+		<EditForm Model="user" OnValidSubmit="HandleLogin">
+			<DataAnnotationsValidator/>
+			<div class="mb-3" style="padding-bottom:15px">
+				<label for="username">GOCD Username</label>
+				<InputText id="username" @bind-Value="user.username" class="form-control" placeholder="User Name"></InputText>
+				<ValidationMessage For="@(()=>user.username)"></ValidationMessage>
+			</div>
+			<div class="mb-3"  style="padding-bottom:15px">
+				<label for="password">Password</label>
+				<InputText id="password" @bind-Value="user.password" class="form-control" type="password" placeholder="Password"></InputText>
+				<ValidationMessage For="@(()=>user.password)"></ValidationMessage>
+			</div>
+			<div class="mb-3 d-grid gap-2">
+				<button type="submit" class="btn btn-outline-primary">Login</button>
+			</div>
+			
+		</EditForm>
+	</div>
+</div>
+@code {
+	private LoginModel user = new LoginModel();
+
+	private async Task HandleLogin()
+	{
+		//TODO:Tie this to active directory authentication
+		try {
+			string userRole = await _db.GetUserRole(user.username);
+			if (userRole is null)
+			{
+				await JS.InvokeVoidAsync("alert","Invalid User Name or Password");
+				return;
+			}
+			var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+			await customAuthStateProvider.UpdateAuthenticationState(
+					new UserSessionModel
+					{
+						UserName = user.username,
+						Role = userRole
+					}
+				);
+				navManager.NavigateTo("/", true);
+		} 
+		catch(Exception e)
+		{
+			await JS.InvokeVoidAsync("alert","An Error Occurred while trying to log in");
+			return;
+		}
+
+		
+	}
+
+}

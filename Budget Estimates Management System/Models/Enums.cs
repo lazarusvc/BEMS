@@ -1,6 +1,6 @@
 ﻿namespace Budget_Estimates_Management_System.Models
 {
-    enum DataAccess
+    enum UserRoleType
     {
         Admin = 0,
         BudgetStaff = 1,

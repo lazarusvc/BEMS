@@ -63,17 +63,17 @@ year_closed bit not null)
 
 CREATE TABLE Users
 (userName nvarchar(50) Primary Key,
-userRole tinyint not null)
+userRole nvarchar(50) not null)
 
 CREATE TABLE User_Roles
 (
-id tinyint PRIMARY KEY,
+id nvarchar(50) PRIMARY KEY,
 roleDescp nvarchar(50)
 );
 
 --Default Values
 INSERT INTO User_Roles
-VALUES (0,'Admin'),(1,'Budget Staff'),(2,'Ministry Staff');
+VALUES ('Administrator','Administrator'),('BudgetStaff','Budget Staff'),('MinistryStaff','Ministry Staff'),('PsipStaff','PSIP Staff');
 --Foreign Keys
 ALTER TABLE Users
    ADD CONSTRAINT UsersRoles FOREIGN KEY (userRole)

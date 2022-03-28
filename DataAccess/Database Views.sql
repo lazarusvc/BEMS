@@ -76,3 +76,13 @@ SELECT [ldr_entity_id] COLLATE SQL_Latin1_General_CP1_CI_AS as ldr_entity_id
   FROM [DBSglep].[dbo].[ldr_acct]
   WHERE acct_type_code='E'
   AND close_date>GETDATE();
+
+
+  
+CREATE VIEW vw_user_access as
+SELECT DISTINCT [User_Access].userName, 
+      [ministry]
+      ,[program]
+      ,[subprog]     
+  FROM [Budget_Estimates]
+  INNER JOIN [User_Access] ON [Budget_Estimates].subprog = [User_Access] .subprogram;

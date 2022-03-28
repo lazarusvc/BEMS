@@ -2,7 +2,7 @@
 @using DataAccessLibrary;
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
-
+@attribute [Authorize(Roles = "Administrator")]
 
 
 <div class="modal fade" id="userAccess" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
