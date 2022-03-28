@@ -159,6 +159,7 @@
 
     }
 
+
     private void RemoveSelectedToList()
     {
         //add to list if not empty
@@ -175,7 +176,7 @@
 
     private async void SaveSelections()
     {
-        if (userHolder.Count() == 0)
+        if (accessTo.Count() == 0)
         {
             saveError = "No subporgams were assigned.";
             base.StateHasChanged();
