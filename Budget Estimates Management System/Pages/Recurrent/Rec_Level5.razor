@@ -4,6 +4,7 @@
 @using DataAccessLibrary;
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
 <Rec_Nav year=@year ministry=@ministry program=@program subprogram=@subprogram account=@accountType OnSaveEntry="RefreshList"></Rec_Nav>
 <h5><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h5>
@@ -27,6 +28,7 @@ else {
   
              <thead style="background-color:lightskyblue">
                 <tr>
+                  <th scope="col"></th>
                   <th scope="col">#</th>
                   <th scope="col">Sub Program</th>
                   <th scope="col" class="text-end">Estimates <br>@(year-1)/@(year)</th>
@@ -40,10 +42,10 @@ else {
             {
                <Rec_Level6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram OnEntryEdit="RefreshList"></Rec_Level6>
             }
-                   <tr> 
+                   <tr  style="background-color:lightyellow"> 
           <th scope="row"></th>
-          <td><b><i>Total:</i></b></td>
-          <td class="text-end" style="background-color:lightgray">@year0T.ToString("C")</td>
+          <td colspan="2"><b><i>Total:</i></b></td>
+          <td class="text-end" style="background-color:lightgoldenrodyellow">@year0T.ToString("C")</td>
           <td class="text-end"><b>@year1T.ToString("C")</b></td>
           <td class="text-end">@year2T.ToString("C")</td>
           <td class="text-end">@year3T.ToString("C")</td>

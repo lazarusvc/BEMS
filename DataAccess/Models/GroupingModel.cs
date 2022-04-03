@@ -8,5 +8,7 @@
         public int year1 { get; set; }
         public int year2 { get; set; }
         public int year3 { get; set; }
+        public int status { get; set; }
+        public int flagged { get; set; }
     }
 }

@@ -5,6 +5,8 @@
 @inject NavigationManager NavigationManager
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
+@inject IJSRuntime JsRuntime
 
 <Rec_Nav year=@year ministry=@ministry program=@program subprogram=@subprogram OnSaveEntry="RefreshList"></Rec_Nav>
 <h4><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h4>
@@ -28,6 +30,7 @@ else {
   
              <thead style="background-color:lightskyblue">
                 <tr>
+                  <th scope="col"></th>
                   <th scope="col">#</th>
                   <th scope="col">Sub Program</th>
                   <th scope="col" class="text-end">Estimates<br> @(year-1)/@(year)</th>
@@ -39,8 +42,9 @@ else {
       <tbody>
             @foreach (var item in accountTypeGroup)
             {
-           <tr> 
-          <th scope="row" @onclick="() => NavigateTo(year,ministry,program,subprogram,item.item)" style="cursor:pointer;">@item.item</th>
+                    <tr> 
+                        <td @onclick="() => NavigateTo(year,ministry,program,subprogram,item.item)" style="cursor:pointer;width: 1%;">@if (item.flagged>0) {<span class="oi oi-flag"></span> }</td>
+                        <th scope="row" @onclick="() => NavigateTo(year,ministry,program,subprogram,item.item)" style="cursor:pointer;">@item.item</th>
           <td  @onclick="() => NavigateTo(year,ministry,program,subprogram,item.item)" style="cursor:pointer;">@item.itemName</td>
           <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
           <td class="text-end"><b>@item.year1.ToString("C")</b></td>
@@ -48,13 +52,51 @@ else {
           <td class="text-end">@item.year3.ToString("C")</td>
         </tr>
             }
-                   <tr> 
+                   <tr  style="background-color:lightyellow"> 
           <th scope="row"></th>
-          <td><b><i>Total:</i></b></td>
-          <td class="text-end" style="background-color:lightgray">@year0T.ToString("C")</td>
+          <td colspan="2"><b><i>Total:</i></b></td>
+          <td class="text-end" style="background-color:lightgoldenrodyellow">@year0T.ToString("C")</td>
           <td class="text-end"><b>@year1T.ToString("C")</b></td>
           <td class="text-end">@year2T.ToString("C")</td>
           <td class="text-end">@year3T.ToString("C")</td>
+        </tr>
+                   <tr> 
+          <th scope="row"></th>
+          <td colspan="5">
+            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"  title="Submit Budget"
+              disabled="@(status==0?false:true)">
+				<span class="oi oi-task"></span> Submit Budget
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="SubmitSubProgram">Submit</a></li>
+			  </ul>
+                <AuthorizeView  Roles="Administrator, BudgetStaff"> 
+                 <button class="btn btn-outline-warning btn-sm dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false"  title="Send Back to Ministry"
+                 disabled="@(status==1?false:true)">
+				    <span class="oi oi-loop"></span> Send Back to Ministry
+			      </button>
+			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+				    <li><a href="javascript:void(0)" class="dropdown-item">Send Back</a></li>
+			      </ul>
+                 <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Approve Budget"
+                 disabled="@(status==1?false:true)">
+				    <span class="oi oi-check"></span> Approve Budget
+			      </button>
+			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
+				    <li><a href="javascript:void(0)" class="dropdown-item">Approve</a></li>
+			      </ul>
+             </AuthorizeView>
+             <AuthorizeView  Roles="Administrator"> 
+                  <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Un-Approve Budget"
+                  disabled="@(status==2?false:true)">
+				    <span class="oi oi-action-undo"></span> Un-Approve Budget
+			      </button>
+			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
+				    <li><a href="javascript:void(0)" class="dropdown-item">Un-Approve</a></li>
+			      </ul>
+             </AuthorizeView>
+          </td>
+          
         </tr>
             </tbody>
        </table>
@@ -74,6 +116,7 @@ else {
     private string ministryName;
     private string programName;
     private string subprogramName;
+    private int status;
 
 
     public int year0T = 0;
@@ -88,6 +131,8 @@ else {
         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
         try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
+        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
+        //TODO:GET STATUS
         accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
         year0T = accountTypeGroup.Sum(x=>x.year0);
         year1T = accountTypeGroup.Sum(x=>x.year1);
@@ -97,9 +142,10 @@ else {
 
     protected override async void OnParametersSet()
     {
-         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
+        try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
         try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
+        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
         accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
         year0T = accountTypeGroup.Sum(x=>x.year0);
         year1T = accountTypeGroup.Sum(x=>x.year1);
@@ -108,14 +154,27 @@ else {
         base.StateHasChanged();
     }
 
-       private void NavigateTo(int year, string ministry, string program, string subprogram, string account)
+    private void NavigateTo(int year, string ministry, string program, string subprogram, string account)
     {
-         NavigationManager.NavigateTo($"recurrent/{year}/{ministry}/{program}/{subprogram}/{account}", forceLoad: true);
-  
+        NavigationManager.NavigateTo($"recurrent/{year}/{ministry}/{program}/{subprogram}/{account}", forceLoad: true);
+
     }
     private async void RefreshList()
     {
-           accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
-          base.StateHasChanged();
+        accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
+        base.StateHasChanged();
+    }
+
+    private async void SubmitSubProgram()
+    {
+        int success = await _rdb.SetRecEntryStatus(year,subprogram,(int) EntryStatus.Submitted);
+        //Show pop up when saved 
+        if (success>0)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Success!"); // Alert
+  
+        }
+
+
     }
 }

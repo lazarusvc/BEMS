@@ -4,6 +4,7 @@
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 @inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
 <Rec_Nav year=@year ministry=@ministry program=@program OnSaveEntry="RefreshList"></Rec_Nav>
 <h3><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h3>
@@ -24,7 +25,8 @@ else {
   
              <thead style="background-color:lightskyblue">
                 <tr>
-                  <th scope="col">#</th>
+                  <th></th>
+                  <th scope="col">#</th>                  
                   <th scope="col">Sub Program</th>
                   <th scope="col" class="text-end">Estimates<br>@(year-1)/@(year)</th>
                   <th scope="col" class="text-end">Estimates <br>@year/@(year+1) </th>
@@ -35,8 +37,34 @@ else {
       <tbody>
             @foreach (var item in subprogramGroup)
             {
-           <tr> 
-          <th scope="row" @onclick="() => NavigateTo(year,ministry,program,item.item)" style="cursor:pointer;">@item.item</th>
+                    <tr> 
+                        <td style="width: 13%">
+               <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"  title="Submit Budget"
+               disabled="@(item.status==0?false:true)">
+				<span class="oi oi-task"></span>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+				<li><a href="javascript:void(0)" class="dropdown-item">Submit</a></li>
+			  </ul>
+              <AuthorizeView  Roles="Administrator, BudgetStaff"> 
+             <button class="btn btn-outline-warning btn-sm dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false"  title="Send Back to Ministry"
+             disabled="@(item.status==1?false:true)"
+             >
+				<span class="oi oi-loop"></span>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+				<li><a href="javascript:void(0)" class="dropdown-item">Send Back</a></li>
+			  </ul>
+             <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Approve Budget"
+             disabled="@(item.status==1?false:true)">
+				<span class="oi oi-check"></span>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
+				<li><a href="javascript:void(0)" class="dropdown-item">Approve Budget</a></li>
+			  </ul>
+              </AuthorizeView> 
+              </td>
+          <th  @onclick="() => NavigateTo(year,ministry,program,item.item)" style="cursor:pointer;">@item.item</th>
           <td @onclick="() => NavigateTo(year,ministry,program,item.item)" style="cursor:pointer;">@item.itemName</td>
           <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
           <td class="text-end"><b>@item.year1.ToString("C")</b></td>
@@ -44,14 +72,14 @@ else {
           <td class="text-end">@item.year3.ToString("C")</td>
         </tr>
             }
-                   <tr> 
+                   <tr  style="background-color:lightyellow"> 
           <th scope="row"></th>
-          <td><b><i>Total:</i></b></td>
-          <td class="text-end" style="background-color:lightgray">@year0T.ToString("C")</td>
+          <td colspan="2"><b><i>Total:</i></b></td>
+          <td class="text-end" style="background-color:lightgoldenrodyellow">@year0T.ToString("C")</td>
           <td class="text-end"><b>@year1T.ToString("C")</b></td>
           <td class="text-end">@year2T.ToString("C")</td>
           <td class="text-end">@year3T.ToString("C")</td>
-        </tr>
+        </tr>             
             </tbody>
        </table>
     }

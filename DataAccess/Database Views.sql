@@ -86,3 +86,30 @@ SELECT DISTINCT [User_Access].userName,
       ,[subprog]     
   FROM [Budget_Estimates]
   INNER JOIN [User_Access] ON [Budget_Estimates].subprog = [User_Access] .subprogram;
+
+
+CREATE VIEW vw_subprogram_submitted as
+SELECT DISTINCT 
+      [processing_year]
+      ,[ministry]
+      ,[program]
+      ,[subprog]     
+  FROM [Budget_Estimates]
+WHERE entry_status_id=1;
+
+
+CREATE VIEW vw_subprogram_approved as
+SELECT DISTINCT 
+      [processing_year]
+      ,[ministry]
+      ,[program]
+      ,[subprog]     
+  FROM [Budget_Estimates]  
+ WHERE entry_status_id=2;
+
+CREATE VIEW [dbo].[vw_subprogram_sub_apv]
+AS
+SELECT  processing_year, subprog, ministry, program, max(entry_status_id) as status
+FROM            dbo.Budget_Estimates
+WHERE        entry_status_id in (1,2)
+GROUP BY processing_year, subprog, ministry, program

@@ -3,7 +3,8 @@
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavigationManager;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
 
 <h3>Ministry Estimates</h3>
 
@@ -47,10 +48,10 @@ else {
         </tr>
 
             }
-            <tr> 
-          <th scope="row"></th>
+            <tr style="background-color:lightyellow"> 
+          <th scope="row" ></th>
           <td><b><i>Total:</i></b></td>
-          <td class="text-end" style="background-color:lightgray">@year0T.ToString("C")</td>
+          <td class="text-end" style="background-color:lightgoldenrodyellow">@year0T.ToString("C")</td>
           <td class="text-end"><b>@year1T.ToString("C")</b></td>
           <td class="text-end">@year2T.ToString("C")</td>
           <td class="text-end">@year3T.ToString("C")</td>

@@ -2,6 +2,7 @@
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
 @inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
  
 <div class="btn-group" role="group">
     <div class="btn-group me-2" role="group" aria-label="First group">
@@ -132,9 +133,10 @@
 
     private string isDisabled(string v1, string v2)
     {
-        if (v1.Equals(v2))        {
+      /* Disabled this as it allows quick navigation back to the top level 
+       * if (v1.Equals(v2))        {
             return "dropdown-item disabled"; 
-        }
+        }*/
            return "dropdown-item"; 
     }
 

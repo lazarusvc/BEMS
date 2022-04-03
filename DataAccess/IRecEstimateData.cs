@@ -20,5 +20,7 @@ namespace DataAccessLibrary
         Task<int> AddNewRecEntry(BudgetEstimatesModel bem);
         Task<int> RemoveRecEntry(int id);
         Task<int> UpdateRecEntry(BudgetEstimatesModel bem);
+        Task<int> SetRecEntryStatus(int pyear, string subprog, int status);
+        Task<int> GetSubProgramStatus(int pyear, string subprog);
     }
 }

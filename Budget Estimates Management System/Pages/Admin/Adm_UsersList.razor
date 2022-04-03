@@ -42,18 +42,18 @@
                         <td>
               <div class="btn-group" role="group">
               <div class="btn-group me-2" role="group">
-                <button type="button" class="btn btn-outline-primary btn-sm" @onclick="()=>{selectedUser=user;}" data-bs-toggle="modal" data-bs-target="#editUser"><span class="oi oi-pencil"></span></button>                
+                <button type="button" class="btn btn-outline-primary btn-sm" @onclick="()=>{selectedUser=user;}" data-bs-toggle="modal" data-bs-target="#editUser" data-toggle="tooltip"  title="Change Role"><span class="oi oi-pencil"></span></button>                
               </div>
               <div class="btn-group me-2" role="group">
-                <button type="button" class="btn btn-outline-info btn-sm" @onclick="()=>{selectedUser=user;}" data-bs-toggle="modal" data-bs-target="#userAccess"><span class="oi oi-eye"></span></button>                
+                <button type="button" class="btn btn-outline-info btn-sm" @onclick="()=>{selectedUser=user;}" data-bs-toggle="modal" data-bs-target="#userAccess" data-toggle="tooltip"  title="Set Access to Sub-programs"><span class="oi oi-eye"></span></button>                
               </div>
               <div class="btn-group me-2" role="group" >
                  <div class="dropdown">
-			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" data-toggle="tooltip"  title="Delete User">
 				<span class="oi oi-delete"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-				<li><a class="dropdown-item" @onclick="()=>{DeleteClicked(user);}">Delete</a></li>
+				<li><a class="dropdown-item" href="javascript:void(0)" @onclick="()=>{DeleteClicked(user);}">Delete</a></li>
 			  </ul>
 			</div>
               </div>            

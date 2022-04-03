@@ -61,10 +61,14 @@ namespace DataAccessLibrary
         {
 
             string sql = @"SELECT be.subprog as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
-                            mn.[DESCRIPTION] as itemName
+                            mn.[DESCRIPTION] as itemName, max([vw_subprogram_sub_apv].status) as status
 							FROM dbo.Budget_Estimates be
                             LEFT OUTER JOIN [dbo].[vw_ss_subprog_name] mn on be.subprog=mn.[NAME]
-                            WHERE  processing_year=@year
+                        	LEFT OUTER JOIN [vw_subprogram_sub_apv] on  [vw_subprogram_sub_apv].processing_year=@year
+                            AND [vw_subprogram_sub_apv].ministry=@ministry
+                            AND [vw_subprogram_sub_apv].program=@program
+                            AND [vw_subprogram_sub_apv].subprog=be.subprog
+                            WHERE  be.processing_year=@year
                             AND be.ministry=@ministry
                             AND be.program=@program
                             GROUP BY be.subprog, mn.[DESCRIPTION]
@@ -77,10 +81,18 @@ namespace DataAccessLibrary
         {
 
             string sql = @"SELECT SUBSTRING(be.account,1,3) as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
-                            mn.[DESCRIPTION] as itemName
+                            mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
 							FROM dbo.Budget_Estimates be
-                            LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on SUBSTRING(be.account,1,3) =mn.[NAME]
-                            WHERE  processing_year=@year
+                            LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on SUBSTRING(be.account,1,3) =mn.[NAME]							
+                            LEFT OUTER JOIN (SELECT SUBSTRING(account,1,3) as acc,count(*) as cc
+                                                          FROM dbo.Budget_Estimates
+                                                          WHERE  processing_year=@year
+														  AND ministry=@ministry
+														  AND program=@program
+														  AND subprog=@subprogram
+							                              AND flagged=1
+														  group by SUBSTRING(account,1,3)) as o on SUBSTRING(be.account,1,3) = o.acc
+							WHERE  be.processing_year=@year
                             AND be.ministry=@ministry
                             AND be.program=@program
                             AND be.subprog=@subprogram
@@ -94,16 +106,26 @@ namespace DataAccessLibrary
         {
 
             string sql = @"SELECT be.account as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
-                            mn.[DESCRIPTION] as itemName
+                            mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
 							FROM dbo.Budget_Estimates be
-                            LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on be.account =mn.[NAME]
-                            WHERE  processing_year=@year
+                            LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on SUBSTRING(be.account,1,3) =mn.[NAME]							
+                            LEFT OUTER JOIN (SELECT SUBSTRING(account,1,3) as acc,count(*) as cc
+                                                          FROM dbo.Budget_Estimates
+                                                          WHERE  processing_year=@year
+														  AND ministry=@ministry
+														  AND program=@program
+														  AND subprog=@subprogram
+                                                          AND account like @accountType+'%'
+							                              AND flagged=1
+														  group by SUBSTRING(account,1,3)) as o on SUBSTRING(be.account,1,3) = o.acc
+						    WHERE  be.processing_year=@year
                             AND be.ministry=@ministry
                             AND be.program=@program
                             AND be.subprog=@subprogram
                             AND be.account like @accountType+'%'
-                            GROUP BY be.account, mn.[DESCRIPTION]
-                            ORDER BY be.account ";
+                            GROUP BY be.account , mn.[DESCRIPTION]
+                            ORDER BY be.account;
+                             ";
 
             return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program, subprogram, accountType });
         }
@@ -279,6 +301,29 @@ namespace DataAccessLibrary
                          WHERE id=@id";
 
             return _db.ExecuteSql<BudgetEstimatesModel>(sql, bem);
+        }
+
+        public Task<int> SetRecEntryStatus(int pyear,string subprog, int status)
+        {
+
+            string sql = @"UPDATE BUDGET_ESTIMATES
+                        SET 
+                           [entry_status_id]=@status
+                         WHERE subprog=@subprog
+                        AND processing_year=@pyear";
+
+            return _db.ExecuteSql<dynamic>(sql, new { pyear,subprog, status });
+        }
+
+        public Task<int> GetSubProgramStatus(int pyear, string subprog)
+        {
+
+            string sql = @"SELECT [status] 
+                            FROM [vw_subprogram_sub_apv]
+                            WHERE processing_year=@pyear
+                            AND subprog=@subprog";
+
+            return _db.GetSingleValueData<int, dynamic>(sql, new { pyear, subprog });
         }
 
     }

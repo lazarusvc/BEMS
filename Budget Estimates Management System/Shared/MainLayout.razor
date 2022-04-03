@@ -8,8 +8,17 @@
     </div>
 
     <main>
-        <div class="top-row px-4">           
-              <a class="nav-link px-3" href="help">Help</a>
+        <div class="top-row px-4">         
+            <AuthorizeView>
+	            <Authorized>		            
+                    <div class="px-3">@context.User.Identity.Name </div>
+                    <span class="oi oi-person"></span>
+		        </Authorized>
+            </AuthorizeView>
+             <AuthorizeView Roles="Administrator">
+                    <span class="px-3 oi oi-command"></span>
+            </AuthorizeView>
+              <a class="nav-link px-3" href="/help">Help</a>
         </div>
 
         <article class="content px-4">

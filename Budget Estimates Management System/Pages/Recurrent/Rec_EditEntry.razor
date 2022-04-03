@@ -1,6 +1,7 @@
 ﻿@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
 
 @if (account is null)
@@ -12,26 +13,26 @@
 	<div class="row g-2">
 		<div class="col-sm-1">
                <InputCheckbox 
-                       @bind-Value="account.is_by_law" >               
+                       @bind-Value="account.is_by_law" disabled="@isDisabled">               
                 </InputCheckbox>
 				<button type="button" class="btn @(String.IsNullOrWhiteSpace(account.comment)&&String.IsNullOrWhiteSpace(account.flagged_comment) ? "btn-outline-secondary":"btn-outline-info") btn-sm" 
-				@onclick="()=>{ showComments=!showComments;}"><span class="oi oi-comment-square"></span></button>
+				@onclick="()=>{ showComments=!showComments;}" data-toggle="tooltip"  title="Show Comments"><span class="oi oi-comment-square"></span></button>
 		</div>
 		<div class="col-3">
                <InputText  class="form-control"
-                       @bind-Value="account.label" >               
+                       @bind-Value="account.label" disabled="@isDisabled">               
                 </InputText>
 		</div>
 		<div class="col-1">
                <InputNumber  class="form-control"
-                       @bind-Value="account.quantity" >               
+                       @bind-Value="account.quantity" disabled="@isDisabled">               
                 </InputNumber>
 		</div>
 		<div class="col-md">
            	<div class="input-group mb-2">
   <span class="input-group-text">$</span>
   <InputNumber   class="form-control" disabled="true"
-                       @bind-Value="account.year2_amount" >               
+                       @bind-Value="account.year2_amount">               
                 </InputNumber>
 </div>
         </div>
@@ -39,7 +40,7 @@
           	<div class="input-group mb-2">
   <span class="input-group-text">$</span>
   <InputNumber   class="form-control"
-                       @bind-Value="account.year1_amount" >               
+                       @bind-Value="account.year1_amount" disabled="@isDisabled">               
                 </InputNumber>
 </div>
         </div>
@@ -48,7 +49,7 @@
 			<div class="input-group mb-2">
   <span class="input-group-text">$</span>
   <InputNumber   class="form-control"
-                       @bind-Value="account.year2_amount" >               
+                       @bind-Value="account.year2_amount" disabled="@isDisabled">               
                 </InputNumber>
 </div>
            
@@ -57,22 +58,22 @@
            	<div class="input-group mb-2">
   <span class="input-group-text">$</span>
   <InputNumber   class="form-control"
-                       @bind-Value="account.year3_amount" >               
+                       @bind-Value="account.year3_amount" disabled="@isDisabled">               
                 </InputNumber>
 </div>
         </div>
 		<div class="col-1">			
 
-			<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+			<div class="btn-toolbar" role="toolbar" >
 			  <div class="btn-group me-2" role="group" aria-label="First group">
-				<button type="button" class="btn @(account.flagged ? "btn-warning":"btn-outline-secondary") btn-sm" @onclick="()=>{ account.flagged=!account.flagged;}"><span class="oi oi-flag"></span></button>
+				<button type="button" class="btn @(account.flagged ? "btn-warning":"btn-outline-secondary") btn-sm" @onclick="()=>{ FlaggEntry();}" data-toggle="tooltip"  title="Flag this entry"><span class="oi oi-flag"></span></button>
 			  </div>
 				 <div class="dropdown">
 			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
 				<span class="oi oi-delete"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-				<li><a class="dropdown-item" @onclick="DeleteClicked">Delete</a></li>
+				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="DeleteClicked">Delete Entry</a></li>
 			  </ul>
 			</div>
 			</div>			 
@@ -85,7 +86,7 @@
 				<div class="col-6">        
 				<div class="input-group">
   <span class="input-group-text">Comment</span>
-  <InputText  @bind-Value="account.comment" class="form-control">               
+  <InputText  @bind-Value="account.comment" class="form-control" disabled="@isDisabled">               
                 </InputText>
 
 </div>
@@ -112,6 +113,7 @@
 	public EventCallback OnEntryEdit { get; set; }
 
 	private bool showComments=false;
+	private bool isDisabled=false;
 
 	private EditContext EditContext;
 	protected override async Task OnInitializedAsync()
@@ -119,6 +121,8 @@
 		//Initial Edit Context
 		EditContext = new EditContext(account);
 		EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+		//set the disabled flag for submitted and approved
+		if (account.entry_status_id>0) { isDisabled = true; }
 	}
 
 	private async void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
@@ -128,41 +132,60 @@
 		//Check to see if figures were changed so that we update
 		if (EditContext.Validate())
 		{
-			//Update row
-			try
+			//save successfully.  Reset form
+			if (await SaveAccount())
 			{
-				account.modified_by = "woodmank";
-				account.last_modified = DateTime.Now;
-				int affectedRows=  await _rdb.UpdateRecEntry(account);      
-					//save successfully.  Reset form
-					if (affectedRows!=0)
-					{
-						//refresh list
-							if (e.FieldIdentifier.FieldName == "year0_amount"||
-								e.FieldIdentifier.FieldName == "year1_amount"||
-								e.FieldIdentifier.FieldName == "year2_amount"||
-								e.FieldIdentifier.FieldName == "year3_amount")
-								{
-								//invoke update	
-								   await OnEntryEdit.InvokeAsync();
-								}	
-					} 
-
-				}
-				catch (Exception ex)
+				//refresh list
+				if (e.FieldIdentifier.FieldName == "year0_amount"||
+					e.FieldIdentifier.FieldName == "year1_amount"||
+					e.FieldIdentifier.FieldName == "year2_amount"||
+					e.FieldIdentifier.FieldName == "year3_amount")
 				{
-           
-				}
-				
+					//invoke update	
+					await OnEntryEdit.InvokeAsync();
+				}	
+			} 
+
+
 		}
 
 	}
 
-	
+
 	private async void DeleteClicked()
 	{
 		await OnEntryDeleted.InvokeAsync(account);
 	}
+
+	private async void FlaggEntry()
+	{
+		account.flagged=!account.flagged;
+		await SaveAccount();
+		await OnEntryEdit.InvokeAsync();
+
+	}
+
+	private async  Task<bool> SaveAccount()
+	{
+		try
+		{
+			account.modified_by = "woodmank";
+			account.last_modified = DateTime.Now;
+			int affectedRows=  await _rdb.UpdateRecEntry(account);      
+			//save successfully.  Reset form
+			if (affectedRows!=0)
+			{
+				return (true);
+			} 
+			return (false);
+		}
+		catch 
+		{
+			return (false);
+           
+		}
+	}
+
 
 
 }

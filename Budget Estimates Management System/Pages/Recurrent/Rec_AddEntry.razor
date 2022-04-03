@@ -3,7 +3,7 @@
 @using AutoMapper;
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
-
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
 <div class="modal fade" id="newEntry" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
