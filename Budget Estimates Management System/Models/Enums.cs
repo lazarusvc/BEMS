@@ -14,4 +14,12 @@
         Submitted = 1,
         Approved = 2
     }
+
+    enum OperationType
+    {
+        Submit = 0,
+        Reject = 1,
+        Approve = 2,
+        Unaprove =3,
+    }
 }

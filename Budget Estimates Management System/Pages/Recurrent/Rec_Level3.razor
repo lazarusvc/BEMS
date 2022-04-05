@@ -1,6 +1,8 @@
 ﻿@page "/recurrent/{year:int}/{ministry}/{program}"
+@using Budget_Estimates_Management_System.Models;
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
+@inject IJSRuntime JsRuntime
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 @inject NavigationManager NavigationManager
@@ -40,27 +42,27 @@ else {
                     <tr> 
                         <td style="width: 13%">
                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"  title="Submit Budget"
-               disabled="@(item.status==0?false:true)">
+               disabled="@(item.status==(int)EntryStatus.Unsubmitted?false:true)">
 				<span class="oi oi-task"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-				<li><a href="javascript:void(0)" class="dropdown-item">Submit</a></li>
+				<li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(item.itemName,EntryStatus.Submitted, OperationType.Submit);}">Submit</a></li>
 			  </ul>
               <AuthorizeView  Roles="Administrator, BudgetStaff"> 
              <button class="btn btn-outline-warning btn-sm dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false"  title="Send Back to Ministry"
-             disabled="@(item.status==1?false:true)"
+             disabled="@(item.status==(int)EntryStatus.Submitted?false:true)"
              >
 				<span class="oi oi-loop"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-				<li><a href="javascript:void(0)" class="dropdown-item">Send Back</a></li>
+				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="()=>{SetSubProgramStatus(item.itemName,EntryStatus.Unsubmitted, OperationType.Reject);}">Send Back</a></li>
 			  </ul>
              <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Approve Budget"
-             disabled="@(item.status==1?false:true)">
+             disabled="@(item.status==(int)EntryStatus.Submitted?false:true)">
 				<span class="oi oi-check"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-				<li><a href="javascript:void(0)" class="dropdown-item">Approve Budget</a></li>
+				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="()=>{SetSubProgramStatus(item.itemName,EntryStatus.Approved, OperationType.Approve);}">Approve Budget</a></li>
 			  </ul>
               </AuthorizeView> 
               </td>
@@ -135,4 +137,40 @@ else {
          subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
           base.StateHasChanged();
     }
+
+    
+    private async void SetSubProgramStatus(string subprogram,EntryStatus entryStatus, OperationType operationType)
+    {
+        //operationType
+        int success = await _rdb.SetRecEntryStatus(year,subprogram,(int)entryStatus);
+        //if we got an error return
+        if (success==0)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "ERROR Occured"); // Alert
+            return;
+        }
+        switch(operationType) 
+            {
+              case OperationType.Approve:
+                await JsRuntime.InvokeVoidAsync("alert", "Success! Budget Approved"); // Alert
+                break;
+              case OperationType.Reject:
+                await JsRuntime.InvokeVoidAsync("alert", "Success! Budget Sent Back to Ministry"); // Alert
+                //TODO: Email User
+                break;
+              case OperationType.Submit:
+                await JsRuntime.InvokeVoidAsync("alert", "Success! Budget Submitted Successfully"); // Alert
+                //TODO: Email Budget User
+                break;
+              case OperationType.Unaprove:
+                await JsRuntime.InvokeVoidAsync("alert", "Success!"); // Alert
+                break;
+
+            }
+        RefreshList();
+
+    }
+
+
+
 }

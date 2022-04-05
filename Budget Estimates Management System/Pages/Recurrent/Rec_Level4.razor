@@ -64,35 +64,35 @@ else {
           <th scope="row"></th>
           <td colspan="5">
             <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"  title="Submit Budget"
-              disabled="@(status==0?false:true)">
+              disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)">
 				<span class="oi oi-task"></span> Submit Budget
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="SubmitSubProgram">Submit</a></li>
+				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="()=>{SetSubProgramStatus(EntryStatus.Submitted, OperationType.Submit);}">Submit</a></li>
 			  </ul>
                 <AuthorizeView  Roles="Administrator, BudgetStaff"> 
                  <button class="btn btn-outline-warning btn-sm dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false"  title="Send Back to Ministry"
-                 disabled="@(status==1?false:true)">
+                 disabled="@(status==(int)EntryStatus.Submitted?false:true)">
 				    <span class="oi oi-loop"></span> Send Back to Ministry
 			      </button>
 			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-				    <li><a href="javascript:void(0)" class="dropdown-item">Send Back</a></li>
+				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Unsubmitted, OperationType.Reject);}">Send Back</a></li>
 			      </ul>
                  <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Approve Budget"
-                 disabled="@(status==1?false:true)">
+                 disabled="@(status==(int)EntryStatus.Submitted?false:true)">
 				    <span class="oi oi-check"></span> Approve Budget
 			      </button>
 			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-				    <li><a href="javascript:void(0)" class="dropdown-item">Approve</a></li>
+				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Approved, OperationType.Approve);}">Approve</a></li>
 			      </ul>
              </AuthorizeView>
              <AuthorizeView  Roles="Administrator"> 
                   <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Un-Approve Budget"
-                  disabled="@(status==2?false:true)">
+                  disabled="@(status==(int)EntryStatus.Approved?false:true)">
 				    <span class="oi oi-action-undo"></span> Un-Approve Budget
 			      </button>
 			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-				    <li><a href="javascript:void(0)" class="dropdown-item">Un-Approve</a></li>
+				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Unsubmitted, OperationType.Unaprove);}">Un-Approve</a></li>
 			      </ul>
              </AuthorizeView>
           </td>
@@ -132,7 +132,6 @@ else {
         try { programName = await _db.GetProgramName(program); } catch{}
         try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
         try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
-        //TODO:GET STATUS
         accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
         year0T = accountTypeGroup.Sum(x=>x.year0);
         year1T = accountTypeGroup.Sum(x=>x.year1);
@@ -165,16 +164,37 @@ else {
         base.StateHasChanged();
     }
 
-    private async void SubmitSubProgram()
+    private async void SetSubProgramStatus(EntryStatus entryStatus, OperationType operationType)
     {
-        int success = await _rdb.SetRecEntryStatus(year,subprogram,(int) EntryStatus.Submitted);
-        //Show pop up when saved 
-        if (success>0)
+        //operationType
+        int success = await _rdb.SetRecEntryStatus(year,subprogram,(int)entryStatus);
+        //if we got an error return
+        if (success==0)
         {
-            await JsRuntime.InvokeVoidAsync("alert", "Success!"); // Alert
-  
+            status = (int)entryStatus;
+            await JsRuntime.InvokeVoidAsync("alert", "ERROR Occured"); // Alert
+            return;
         }
+        switch(operationType) 
+            {
+              case OperationType.Approve:
+                await JsRuntime.InvokeVoidAsync("alert", "Success! Budget Approved"); // Alert
+                break;
+              case OperationType.Reject:
+                await JsRuntime.InvokeVoidAsync("alert", "Success! Budget Sent Back to Ministry"); // Alert
+                //TODO: Email User
+                break;
+              case OperationType.Submit:
+                await JsRuntime.InvokeVoidAsync("alert", "Success! Budget Submitted Successfully"); // Alert
+                //TODO: Email Budget User
+                break;
+              case OperationType.Unaprove:
+                await JsRuntime.InvokeVoidAsync("alert", "Success!"); // Alert
+                break;
 
+            }
+        //RefreshList();
 
     }
+
 }
