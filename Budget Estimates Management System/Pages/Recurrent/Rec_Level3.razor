@@ -46,7 +46,7 @@ else {
 				<span class="oi oi-task"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-				<li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(item.itemName,EntryStatus.Submitted, OperationType.Submit);}">Submit</a></li>
+				<li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(item,EntryStatus.Submitted, OperationType.Submit);}">Submit</a></li>
 			  </ul>
               <AuthorizeView  Roles="Administrator, BudgetStaff"> 
              <button class="btn btn-outline-warning btn-sm dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false"  title="Send Back to Ministry"
@@ -55,14 +55,14 @@ else {
 				<span class="oi oi-loop"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="()=>{SetSubProgramStatus(item.itemName,EntryStatus.Unsubmitted, OperationType.Reject);}">Send Back</a></li>
+				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="()=>{SetSubProgramStatus(item,EntryStatus.Unsubmitted, OperationType.Reject);}">Send Back</a></li>
 			  </ul>
              <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Approve Budget"
              disabled="@(item.status==(int)EntryStatus.Submitted?false:true)">
 				<span class="oi oi-check"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="()=>{SetSubProgramStatus(item.itemName,EntryStatus.Approved, OperationType.Approve);}">Approve Budget</a></li>
+				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="()=>{SetSubProgramStatus(item,EntryStatus.Approved, OperationType.Approve);}">Approve Budget</a></li>
 			  </ul>
               </AuthorizeView> 
               </td>
@@ -110,7 +110,7 @@ else {
         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
         subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
-            year0T = subprogramGroup.Sum(x=>x.year0);
+        year0T = subprogramGroup.Sum(x=>x.year0);
         year1T = subprogramGroup.Sum(x=>x.year1);
         year2T = subprogramGroup.Sum(x=>x.year2);
         year3T = subprogramGroup.Sum(x=>x.year3);
@@ -127,28 +127,29 @@ else {
         base.StateHasChanged();
     }
 
-      private void NavigateTo(int year, string ministry, string program, string subprogram)
+    private void NavigateTo(int year, string ministry, string program, string subprogram)
     {
-         NavigationManager.NavigateTo($"recurrent/{year}/{ministry}/{program}/{subprogram}", forceLoad: true);
-  
+        NavigationManager.NavigateTo($"recurrent/{year}/{ministry}/{program}/{subprogram}", forceLoad: true);
+
     }
     private async void RefreshList()
     {
-         subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
-          base.StateHasChanged();
+        subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
+        base.StateHasChanged();
     }
 
-    
-    private async void SetSubProgramStatus(string subprogram,EntryStatus entryStatus, OperationType operationType)
+
+    private async void SetSubProgramStatus(GroupingModel item,EntryStatus entryStatus, OperationType operationType)
     {
         //operationType
-        int success = await _rdb.SetRecEntryStatus(year,subprogram,(int)entryStatus);
+        int success = await _rdb.SetRecEntryStatus(year,item.item,(int)entryStatus);
         //if we got an error return
         if (success==0)
         {
             await JsRuntime.InvokeVoidAsync("alert", "ERROR Occured"); // Alert
             return;
         }
+        item.status = (int)entryStatus;
         switch(operationType) 
             {
               case OperationType.Approve:

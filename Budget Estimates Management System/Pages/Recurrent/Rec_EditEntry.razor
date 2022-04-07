@@ -69,7 +69,7 @@
 				<button type="button" class="btn @(account.flagged ? "btn-warning":"btn-outline-secondary") btn-sm" @onclick="()=>{ FlaggEntry();}" data-toggle="tooltip"  title="Flag this entry"><span class="oi oi-flag"></span></button>
 			  </div>
 				 <div class="dropdown">
-			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" disabled="@isDisabled">
 				<span class="oi oi-delete"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">

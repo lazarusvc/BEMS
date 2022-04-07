@@ -49,7 +49,7 @@
                            </tr>  
                     }  
                  <tr >
-                      <td colspan="7"><button type="button" class="btn btn-outline-success" @onclick="AddRow"><span class="oi oi-plus"></span> Add Row</button>
+                      <td colspan="7"><button type="button" class="btn btn-outline-success" @onclick="AddRow" disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)"><span class="oi oi-plus"></span> Add Row</button>
                           </td>
                  </tr>
 
@@ -70,29 +70,33 @@
     [Parameter]
     public string subprogram { get; set; }
     [Parameter]
-	public EventCallback OnEntryEdit { get; set; }
+    public EventCallback OnEntryEdit { get; set; }
 
     public bool Collapsed = true;
+    private int status;
 
     List<BudgetEstimatesModel> accounts;
 
     protected override async Task OnInitializedAsync()
     {        
         accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item);
-
+        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
     }
 
     protected override async void OnParametersSet()
     {
         accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item);
-
+        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
         base.StateHasChanged();
     }
+
 
 
     private async void AddRow()
     {
         //save new record.
+        //TODO:  Use user names
+        //TODO: FIx flag
         try
         {
             BudgetEstimatesModel mapped = new BudgetEstimatesModel();

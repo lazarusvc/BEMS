@@ -109,15 +109,14 @@ namespace DataAccessLibrary
                             mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
 							FROM dbo.Budget_Estimates be
                             LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on SUBSTRING(be.account,1,3) =mn.[NAME]							
-                            LEFT OUTER JOIN (SELECT SUBSTRING(account,1,3) as acc,count(*) as cc
+                            LEFT OUTER JOIN (SELECT account,count(*) as cc
                                                           FROM dbo.Budget_Estimates
                                                           WHERE  processing_year=@year
 														  AND ministry=@ministry
 														  AND program=@program
 														  AND subprog=@subprogram
-                                                          AND account like @accountType+'%'
 							                              AND flagged=1
-														  group by SUBSTRING(account,1,3)) as o on SUBSTRING(be.account,1,3) = o.acc
+														  group by account) as o on be.account = o.account
 						    WHERE  be.processing_year=@year
                             AND be.ministry=@ministry
                             AND be.program=@program

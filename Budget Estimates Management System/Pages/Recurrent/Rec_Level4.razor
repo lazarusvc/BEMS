@@ -92,7 +92,7 @@ else {
 				    <span class="oi oi-action-undo"></span> Un-Approve Budget
 			      </button>
 			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Unsubmitted, OperationType.Unaprove);}">Un-Approve</a></li>
+				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Submitted, OperationType.Unaprove);}">Un-Approve</a></li>
 			      </ul>
              </AuthorizeView>
           </td>
@@ -171,10 +171,11 @@ else {
         //if we got an error return
         if (success==0)
         {
-            status = (int)entryStatus;
             await JsRuntime.InvokeVoidAsync("alert", "ERROR Occured"); // Alert
             return;
         }
+        status = (int)entryStatus;
+        base.StateHasChanged();
         switch(operationType) 
             {
               case OperationType.Approve:
