@@ -1,6 +1,7 @@
 ﻿@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
+@inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
 
@@ -169,7 +170,8 @@
 	{
 		try
 		{
-			account.modified_by = "woodmank";
+			 var authState = await authStateProvider.GetAuthenticationStateAsync();
+			account.modified_by = authState.User.Identity.Name;
 			account.last_modified = DateTime.Now;
 			int affectedRows=  await _rdb.UpdateRecEntry(account);      
 			//save successfully.  Reset form

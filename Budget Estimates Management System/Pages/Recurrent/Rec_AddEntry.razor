@@ -3,6 +3,7 @@
 @using AutoMapper;
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
+@inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
 <div class="modal fade" id="newEntry" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -315,7 +316,8 @@
         //TODO: set user name
         //set required hidden fields
         entry.account = null;
-        entry.modified_by = "woodmank";
+         var authState = await authStateProvider.GetAuthenticationStateAsync();
+		entry.modified_by = authState.User.Identity.Name;
         entry.project="";
         entry.sector = "";
         entry.sof = "";
@@ -446,7 +448,8 @@
             if (accounts is null) { accounts = await _rdb.GetDependantAccounts(entry.ministry, entry.program, entry.subprog, accountType); }
         }
         entry.account =null;
-        entry.modified_by ="woodmank";
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+	    entry.modified_by = authState.User.Identity.Name;
         entry.project="";
         entry.sector = "";
         entry.sof = "";

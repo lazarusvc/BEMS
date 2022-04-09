@@ -2,6 +2,7 @@
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
+@inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
 <tr> 
@@ -119,7 +120,8 @@
             mapped.comment ="";
             mapped.flagged =false;
             mapped.flagged_comment ="";
-            mapped.modified_by ="woodmank";
+             var authState = await authStateProvider.GetAuthenticationStateAsync();
+			mapped.modified_by = authState.User.Identity.Name;
             mapped.last_modified =DateTime.Now;
             mapped.entry_status_id =1;
             int affectedRows=  await _rdb.AddNewRecEntry(mapped);      
