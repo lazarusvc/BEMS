@@ -6,6 +6,7 @@
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
 <Rec_Nav year=@year ministry=@ministry program=@program OnSaveEntry="RefreshList"></Rec_Nav>
@@ -97,6 +98,7 @@ else {
 
     private string ministryName;
     private string programName;
+    private string username;
 
     public int year0T = 0;
     public int year1T = 0;
@@ -107,9 +109,11 @@ else {
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
-        subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
+        subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program,username);
         year0T = subprogramGroup.Sum(x=>x.year0);
         year1T = subprogramGroup.Sum(x=>x.year1);
         year2T = subprogramGroup.Sum(x=>x.year2);
@@ -119,7 +123,7 @@ else {
     {
         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
-        subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
+        subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program,username);
         year0T = subprogramGroup.Sum(x=>x.year0);
         year1T = subprogramGroup.Sum(x=>x.year1);
         year2T = subprogramGroup.Sum(x=>x.year2);
@@ -134,7 +138,7 @@ else {
     }
     private async void RefreshList()
     {
-        subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program);
+        subprogramGroup= await _rdb.GetSubProgramDataForYear(year,ministry,program,username);
         base.StateHasChanged();
     }
 

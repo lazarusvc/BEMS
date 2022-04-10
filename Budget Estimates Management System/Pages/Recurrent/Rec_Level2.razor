@@ -4,6 +4,7 @@
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 @inject NavigationManager NavigationManager;
+@inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
 <Rec_Nav year=@year ministry=@ministry OnSaveEntry="RefreshList"></Rec_Nav>
@@ -58,24 +59,27 @@ else {
 }
 
 @code {
-	[Parameter]
-	public int year { get; set; }
-	[Parameter]
-	public string ministry { get; set; }
+    [Parameter]
+    public int year { get; set; }
+    [Parameter]
+    public string ministry { get; set; }
 
-	private string ministryName;
+    private string ministryName;
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
+    private string username;
 
 	private List<GroupingModel>? programGroup;
 
 	protected override async Task OnInitializedAsync()
     {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
 		try { ministryName= await _db.GetMinistryName(ministry); } catch{}
-        programGroup= await _rdb.GetProgramDataForYear(year,ministry);
+        programGroup= await _rdb.GetProgramDataForYear(year,ministry,username);
           year0T = programGroup.Sum(x=>x.year0);
         year1T = programGroup.Sum(x=>x.year1);
         year2T = programGroup.Sum(x=>x.year2);
@@ -85,7 +89,7 @@ else {
       protected override async void OnParametersSet()
     {
         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
-        programGroup= await _rdb.GetProgramDataForYear(year,ministry);
+        programGroup= await _rdb.GetProgramDataForYear(year,ministry,username);
         year0T = programGroup.Sum(x=>x.year0);
         year1T = programGroup.Sum(x=>x.year1);
         year2T = programGroup.Sum(x=>x.year2);
@@ -100,7 +104,7 @@ else {
     }
     private async void RefreshList()
     {
-          programGroup= await _rdb.GetProgramDataForYear(year,ministry);
+          programGroup= await _rdb.GetProgramDataForYear(year,ministry,username);
           base.StateHasChanged();
     }
 }

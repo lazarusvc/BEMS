@@ -5,6 +5,7 @@
 @inject IRecEstimateData _rdb;
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
+@inject AuthenticationStateProvider authStateProvider;
 
 <div class="modal fade" id="newEntry" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
@@ -264,6 +265,7 @@
     private bool progDisabled = false;
     private bool sprogDisabled = false;
     private bool accountTypeDisabled = false;
+    private string username;
 
     private string year0Desc;
     private string year1Desc;
@@ -277,7 +279,8 @@
         //Initial Edit Context
         EditContext = new EditContext(entry);
         EditContext.OnFieldChanged += EditContext_OnFieldChanged;
-
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
         //set up the drop lists
         years = await _db.GetYears();
 
@@ -293,30 +296,29 @@
             yearDisabled = true;
         }
         //Get the list data for ministry
-        ministries = await _rdb.GetDependantMinistries();
+        ministries = await _rdb.GetDependantMinistries(username);
         if (!String.IsNullOrWhiteSpace(ministry)) { 
             entry.ministry=ministry; 
-            programs = await _rdb.GetDependantPrograms(entry.ministry);
+            programs = await _rdb.GetDependantPrograms(entry.ministry,username);
             minDisabled = true;
         }
         if (!String.IsNullOrWhiteSpace(program)) { 
             entry.program=program;
-            subprograms = await _rdb.GetDependantSubPrograms(entry.ministry,entry.program);
+            subprograms = await _rdb.GetDependantSubPrograms(entry.ministry,entry.program,username);
             progDisabled = true;
         }
         if (!String.IsNullOrWhiteSpace(subprogram)) { 
             entry.subprog=subprogram; 
-            accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry,entry.program,entry.subprog);
+            accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry,entry.program,entry.subprog,username);
             sprogDisabled = true;
         }
         if (!String.IsNullOrWhiteSpace(accountType)) {
             accountTypeDisabled = true;
-            accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType);
+            accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType,username);
         }
         //set required hidden fields
-        entry.account = null;
-         var authState = await authStateProvider.GetAuthenticationStateAsync();
-		entry.modified_by = authState.User.Identity.Name;
+        entry.account = null;         
+		entry.modified_by = username;
         entry.project="";
         entry.sector = "";
         entry.sof = "";
@@ -363,7 +365,7 @@
         entry.subprog = null;
         entry.account =null;
         accountType = null;
-        programs = await _rdb.GetDependantPrograms(entry.ministry);
+        programs = await _rdb.GetDependantPrograms(entry.ministry,username);
         base.StateHasChanged();
     }
 
@@ -375,7 +377,7 @@
         entry.account = null;
         entry.subprog = null;
         accountType = null;
-        subprograms = await _rdb.GetDependantSubPrograms(entry.ministry,entry.program);
+        subprograms = await _rdb.GetDependantSubPrograms(entry.ministry,entry.program,username);
         base.StateHasChanged();
     }
 
@@ -384,7 +386,7 @@
         //need to clear all dependencies    
         entry.account =null;
         accountType = null;
-        accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry, entry.program,entry.subprog);
+        accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry, entry.program,entry.subprog,username);
         base.StateHasChanged();
     }
 
@@ -392,7 +394,7 @@
     {
         //need to clear all dependencies    
         entry.account = null;        
-        accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType);
+        accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType,username);
         base.StateHasChanged();
     }
 
@@ -425,30 +427,29 @@
             yearDisabled = true;
         }
         //Get the list data for ministry
-        if (ministries is null) { ministries = await _rdb.GetDependantMinistries(); }
+        if (ministries is null) { ministries = await _rdb.GetDependantMinistries(username); }
         if (!String.IsNullOrWhiteSpace(ministry)) { 
             entry.ministry=ministry;
-            if (programs is null) { programs = await _rdb.GetDependantPrograms(entry.ministry); }
+            if (programs is null) { programs = await _rdb.GetDependantPrograms(entry.ministry,username); }
             minDisabled = true;
         }
         if (!String.IsNullOrWhiteSpace(program)) { 
             entry.program=program;
-            if (subprograms is null) { subprograms = await _rdb.GetDependantSubPrograms(entry.ministry, entry.program); }
+            if (subprograms is null) { subprograms = await _rdb.GetDependantSubPrograms(entry.ministry, entry.program,username); }
             progDisabled = true;
         }
 
         if (!String.IsNullOrWhiteSpace(subprogram)) { 
             entry.subprog=subprogram;
-            if (accountTypes is null) { accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry, entry.program, entry.subprog); }
+            if (accountTypes is null) { accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry, entry.program, entry.subprog,username); }
             sprogDisabled = true;
         }
         if (!String.IsNullOrWhiteSpace(accountType)) {
             accountTypeDisabled = true;
-            if (accounts is null) { accounts = await _rdb.GetDependantAccounts(entry.ministry, entry.program, entry.subprog, accountType); }
+            if (accounts is null) { accounts = await _rdb.GetDependantAccounts(entry.ministry, entry.program, entry.subprog, accountType,username); }
         }
         entry.account =null;
-        var authState = await authStateProvider.GetAuthenticationStateAsync();
-	    entry.modified_by = authState.User.Identity.Name;
+	    entry.modified_by = username;
         entry.project="";
         entry.sector = "";
         entry.sof = "";

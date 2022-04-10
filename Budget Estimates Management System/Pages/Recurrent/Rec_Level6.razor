@@ -75,18 +75,21 @@
 
     public bool Collapsed = true;
     private int status;
+    private string username;
 
     List<BudgetEstimatesModel> accounts;
 
     protected override async Task OnInitializedAsync()
     {        
-        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item);
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
         try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
     }
 
     protected override async void OnParametersSet()
     {
-        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item);
+        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
         try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
         base.StateHasChanged();
     }
@@ -123,13 +126,13 @@
              var authState = await authStateProvider.GetAuthenticationStateAsync();
 			mapped.modified_by = authState.User.Identity.Name;
             mapped.last_modified =DateTime.Now;
-            mapped.entry_status_id =1;
+            mapped.entry_status_id =0;
             int affectedRows=  await _rdb.AddNewRecEntry(mapped);      
             //save successfully.  Reset form
             if (affectedRows!=0)
             {
                 //refresh list
-                accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item);
+                accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
                 base.StateHasChanged();
             } 
 

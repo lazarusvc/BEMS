@@ -117,15 +117,15 @@
         minGroup=  await _rdb.GetMinDataForYear(year,authState.User.Identity.Name);
         if (program is not null)
         {
-           progGroup=await _rdb.GetProgramDataForYear(year,ministry); 
+           progGroup=await _rdb.GetProgramDataForYear(year,ministry,authState.User.Identity.Name); 
         }
         if (subprogram is not null)
         {
-           subprogramGroup=await _rdb.GetSubProgramDataForYear(year,ministry,program); 
+           subprogramGroup=await _rdb.GetSubProgramDataForYear(year,ministry,program,authState.User.Identity.Name); 
         }
         if (account is not null)
         {
-           accountGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
+           accountGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram,authState.User.Identity.Name);
         }
     }
 

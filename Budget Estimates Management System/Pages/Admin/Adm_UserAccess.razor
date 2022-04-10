@@ -3,7 +3,7 @@
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 @attribute [Authorize(Roles = "Administrator")]
-
+@inject AuthenticationStateProvider authStateProvider;
 
 <div class="modal fade" id="userAccess" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg ">
@@ -108,12 +108,14 @@
     private List<ListItemModel> accessTo;
     public string[] optionHolder { get; set; } = new string[] { };
     public string[] userHolder { get; set; } = new string[] { };
-
+    private string username;
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
         //Get the list data for ministry
-        ministries = await _rdb.GetDependantMinistries();        
+        ministries = await _rdb.GetDependantMinistries(username);        
 
     }
 
@@ -137,7 +139,7 @@
             subprograms = null;
         } else
         {
-            subprograms = await _rdb.GetDependantSubPrograms(e.Value.ToString()); 
+            subprograms = await _rdb.GetDependantSubPrograms(e.Value.ToString(),username); 
             base.StateHasChanged();
         }
 

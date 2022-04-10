@@ -7,6 +7,7 @@
 @inject IRecEstimateData _rdb;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 @inject IJSRuntime JsRuntime
+@inject AuthenticationStateProvider authStateProvider;
 
 <Rec_Nav year=@year ministry=@ministry program=@program subprogram=@subprogram OnSaveEntry="RefreshList"></Rec_Nav>
 <h4><a href="/recurrent/@year/@ministry">@ministry - @ministryName</a></h4>
@@ -117,7 +118,7 @@ else {
     private string programName;
     private string subprogramName;
     private int status;
-
+    private string username;
 
     public int year0T = 0;
     public int year1T = 0;
@@ -128,11 +129,13 @@ else {
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
         try { ministryName= await _db.GetMinistryName(ministry); } catch{}
         try { programName = await _db.GetProgramName(program); } catch{}
         try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
         try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
-        accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
+        accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram,username);
         year0T = accountTypeGroup.Sum(x=>x.year0);
         year1T = accountTypeGroup.Sum(x=>x.year1);
         year2T = accountTypeGroup.Sum(x=>x.year2);
@@ -145,7 +148,7 @@ else {
         try { programName = await _db.GetProgramName(program); } catch{}
         try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
         try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
-        accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
+        accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram,username);
         year0T = accountTypeGroup.Sum(x=>x.year0);
         year1T = accountTypeGroup.Sum(x=>x.year1);
         year2T = accountTypeGroup.Sum(x=>x.year2);
@@ -160,7 +163,7 @@ else {
     }
     private async void RefreshList()
     {
-        accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram);
+        accountTypeGroup= await _rdb.GetAccountTypeDataForYear(year,ministry,program,subprogram,username);
         base.StateHasChanged();
     }
 
