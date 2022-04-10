@@ -80,12 +80,10 @@ SELECT [ldr_entity_id] COLLATE SQL_Latin1_General_CP1_CI_AS as ldr_entity_id
 
   
 CREATE VIEW vw_user_access as
-SELECT DISTINCT [User_Access].userName, 
-      [ministry]
-      ,[program]
-      ,[subprog]     
-  FROM [Budget_Estimates]
-  INNER JOIN [User_Access] ON [Budget_Estimates].subprog = [User_Access] .subprogram;
+SELECT DISTINCT dbo.User_Access.userName, dbo.Budget_Estimates.ministry, dbo.Budget_Estimates.program, dbo.Budget_Estimates.subprog, dbo.Users.userRole
+FROM            dbo.Budget_Estimates INNER JOIN
+                         dbo.User_Access ON dbo.Budget_Estimates.subprog = dbo.User_Access.subprogram INNER JOIN
+                         dbo.Users ON dbo.User_Access.userName = dbo.Users.userName
 
 
 CREATE VIEW vw_subprogram_submitted as

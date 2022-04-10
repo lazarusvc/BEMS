@@ -4,7 +4,7 @@ namespace DataAccessLibrary
 {
     public interface IRecEstimateData
     {
-        Task<List<GroupingModel>> GetMinDataForYear(int year);
+        Task<List<GroupingModel>> GetMinDataForYear(int year, string username);
         Task<List<GroupingModel>> GetProgramDataForYear(int year, string ministry);
         Task<List<GroupingModel>> GetSubProgramDataForYear(int year, string ministry, string program);
         Task<List<GroupingModel>> GetAccountTypeDataForYear(int year, string ministry, string program, string subprogram);
@@ -22,5 +22,6 @@ namespace DataAccessLibrary
         Task<int> UpdateRecEntry(BudgetEstimatesModel bem);
         Task<int> SetRecEntryStatus(int pyear, string subprog, int status);
         Task<int> GetSubProgramStatus(int pyear, string subprog);
+        Task<List<ListItemModel>> GetAllSubPrograms();
     }
 }

@@ -58,6 +58,8 @@
     <button type="button" class="btn btn-outline-primary" @onclick="AddSelectedToList" ><span class="oi oi-arrow-thick-right"></span></button>
     <p></p>
     <button type="button" class="btn btn-outline-danger" @onclick="RemoveSelectedToList"><span class="oi oi-arrow-thick-left"></span></button>
+    <p></p>
+    <button type="button" class="btn btn-outline-secondary" @onclick="AddAllToList"><span class="oi oi-arrow-circle-right"></span></button>
 </div>
 <div class="col-6">
     <label for="acess" class="form-label">Acess to...</label>
@@ -121,8 +123,8 @@
         //Load the list of permissions from the user
         if (parUser is not null)
         {
-             saveError = "";
-             saveSuccess = "";
+            saveError = "";
+            saveSuccess = "";
             accessTo = await _db.GetUserAccess(parUser.userName);
             base.StateHasChanged();
         }
@@ -156,6 +158,14 @@
             }
             accessTo.Sort((u1, u2) => u1.Name.CompareTo(u2.Name));
         }
+
+    }
+
+    private async void AddAllToList()
+    {
+        //clear the list
+        accessTo= await _rdb.GetAllSubPrograms(); 
+        base.StateHasChanged();
 
     }
 

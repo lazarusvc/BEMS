@@ -313,7 +313,6 @@
             accountTypeDisabled = true;
             accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType);
         }
-        //TODO: set user name
         //set required hidden fields
         entry.account = null;
          var authState = await authStateProvider.GetAuthenticationStateAsync();

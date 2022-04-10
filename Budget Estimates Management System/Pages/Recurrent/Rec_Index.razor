@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
+@inject AuthenticationStateProvider authStateProvider;
 @inject IDbData _db;
 
 <h1>Recurrent Expenditure Estimates</h1>
@@ -18,7 +19,7 @@
         {
        @foreach (var year in years)
             {
-                <option value=@year.year>@year.displayYear @(year.year_closed? "(Year Closed)":"")</option>
+                <option value=@year.year>@year.displayYear @(year.year_closed? "(Year Closed)":"") @(!year.ready_for_data_entry&&!year.year_closed? "(Not Open)":"")</option>
             }
         }
   </select>  
@@ -42,10 +43,10 @@
     {
         years = await _db.GetYears();
         //if dataentry then remove years which are not ready
-        /*if ()
-        {
-        years = years.FindAll(e => e.ready_for_data_entry == false);
-    }*/
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        if (!authState.User.IsInRole("MinistryStaff")) { return; }
+        years = years.FindAll(e => e.ready_for_data_entry == true);
+        
     }
    
 

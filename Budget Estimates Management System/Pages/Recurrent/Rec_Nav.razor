@@ -1,6 +1,7 @@
 ﻿@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
+@inject AuthenticationStateProvider authStateProvider;
 @inject NavigationManager NavigationManager
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
  
@@ -111,7 +112,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        minGroup=  await _rdb.GetMinDataForYear(year);
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+       
+        minGroup=  await _rdb.GetMinDataForYear(year,authState.User.Identity.Name);
         if (program is not null)
         {
            progGroup=await _rdb.GetProgramDataForYear(year,ministry); 

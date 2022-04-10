@@ -4,6 +4,7 @@
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
 @inject NavigationManager NavigationManager;
+@inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
 
 <h3>Ministry Estimates</h3>
@@ -64,6 +65,7 @@ else {
 @code {
     [Parameter]
     public int year { get; set; }
+    private string username;
 
     private List<GroupingModel> minGroup;
 
@@ -74,7 +76,9 @@ else {
 
     protected override async Task OnInitializedAsync()
     {
-        minGroup=  await _rdb.GetMinDataForYear(year);
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        minGroup=  await _rdb.GetMinDataForYear(year,username);
         year0T = minGroup.Sum(x=>x.year0);
         year1T = minGroup.Sum(x=>x.year1);
         year2T = minGroup.Sum(x=>x.year2);
@@ -83,7 +87,7 @@ else {
 
       protected override async void OnParametersSet()
     {
-        minGroup=  await _rdb.GetMinDataForYear(year);
+        minGroup=  await _rdb.GetMinDataForYear(year,username);
         year0T = minGroup.Sum(x=>x.year0);
         year1T = minGroup.Sum(x=>x.year1);
         year2T = minGroup.Sum(x=>x.year2);
@@ -99,7 +103,7 @@ else {
 
     private async void RefreshList()
     {
-       minGroup=  await _rdb.GetMinDataForYear(year);
+       minGroup=  await _rdb.GetMinDataForYear(year,username);
         base.StateHasChanged();
     }
 
