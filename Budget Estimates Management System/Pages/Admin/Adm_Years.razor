@@ -1,0 +1,96 @@
+﻿@attribute [Authorize(Roles = "Administrator")]
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject AuthenticationStateProvider authStateProvider;
+@inject IDbData _db;
+@inject IJSRuntime JS
+
+
+<div class="input-group mb-3">
+  <label class="input-group-text" for="inputGroupSelect01">Budgeting Year</label>
+  <select class="form-select" id="inputGroupSelect01"  @onchange="onYearChanged"  >
+    <option value="0" selected>Choose...</option>
+    @if (years is null)
+        {
+            <option selected>Loading...</option>
+        }
+    else 
+        {
+       @foreach (var year in years)
+            {
+                <option value=@year.year>@year.displayYear @(year.year_closed? "(Year Closed)":"") @(!year.ready_for_data_entry&&!year.year_closed? "(Not Open)":"")</option>
+            }
+        }
+  </select>  
+</div>
+
+<button type="button" class="btn btn-outline-success" disabled=@isOpenDisabled @onclick="OpenYear">Open a Budget Year: @(year_selected==0?"":year_selected)</button>
+<button type="button" class="btn btn-outline-dark" disabled=@isCloseDisabled>Close the Budget Year: @(year_selected==0?"":year_selected)</button>
+<button type="button" class="btn btn-outline-secondary" disabled=@isCreateDisabled>Create a New Budget Year</button>
+
+
+
+@code {
+    private List<ProcessingYearModel> years;
+    private int year_selected=0;
+    private bool isCloseDisabled = true;
+    private bool isCreateDisabled = true;
+    private bool isOpenDisabled = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        years = await _db.GetYears();
+        //Diable create year if there is a pending year
+        var y = years.FindAll(e => e.ready_for_data_entry == true);
+        if (y is null) { isCreateDisabled = false; }
+
+        //if dataentry then remove years which are not ready
+        /*var authState = await authStateProvider.GetAuthenticationStateAsync();
+        if (!authState.User.IsInRole("MinistryStaff")) { return; }
+        years = years.FindAll(e => e.ready_for_data_entry == true);*/
+
+
+    }
+
+    private void onYearChanged(ChangeEventArgs e)
+    {
+        year_selected =  Int16.Parse(e.Value.ToString());
+
+        //Button logic
+        if (year_selected == 0) { 
+            isCloseDisabled= true;
+            isOpenDisabled = true;
+            isCreateDisabled = true;
+        }
+        var y = years.Find(e => e.year == year_selected);
+        if (y is not null)
+        {       
+            if (y.year_closed ==true) {isCloseDisabled= true; }
+            if (y.ready_for_data_entry==false) {isCloseDisabled= true; }
+            if (y.year_closed==false && y.ready_for_data_entry==false) { isOpenDisabled = false; } else {isOpenDisabled = true;}
+        }
+    }
+
+    private async Task OpenYear()
+    {
+        if (year_selected==0) { return; }
+        //Is there a year opened already?
+        var y = years.FindAll(e => e.ready_for_data_entry == true);
+        if (y.Count!=0)
+        {
+            await JS.InvokeVoidAsync("alert","A year is already opened for data entry. Please close the year first.");
+            return;
+        }
+    }
+
+    private void CloseYear()
+    {
+
+    }
+
+    private void CreateYear()
+    {
+        
+    }
+
+}

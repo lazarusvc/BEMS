@@ -266,6 +266,7 @@
     private bool sprogDisabled = false;
     private bool accountTypeDisabled = false;
     private string username;
+    private bool isAdmin = false;
 
     private string year0Desc;
     private string year1Desc;
@@ -281,6 +282,7 @@
         EditContext.OnFieldChanged += EditContext_OnFieldChanged;
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         username = authState.User.Identity.Name;
+        if (authState.User.IsInRole("Administrator")) { isAdmin = true; }
         //set up the drop lists
         years = await _db.GetYears();
 
@@ -318,7 +320,7 @@
         }
         //set required hidden fields
         entry.account = null;         
-		entry.modified_by = username;
+        entry.modified_by = username;
         entry.project="";
         entry.sector = "";
         entry.sof = "";
@@ -415,6 +417,7 @@
     private async void SetFields()
     {
         if (year!=0) {
+            entry.processing_year = 0;
             if (years is null) { years = await _db.GetYears(); }
             if (years.Where(z => z.year == year&&!z.year_closed).Count() != 0)
             {
