@@ -1,7 +1,53 @@
 ﻿@page "/capital"
+@*@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]*@
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject AuthenticationStateProvider authStateProvider;
+@inject IDbData _db;
 
-<h3>Capital</h3>
+<h1>Capital Expenditure Estimates</h1>
+
+<div class="input-group mb-3">
+  <label class="input-group-text" for="inputGroupSelect01">Estimates for Year</label>
+  <select class="form-select" id="inputGroupSelect01"  @bind=year_selected >
+    <option value="0" selected>Choose...</option>
+    @if (years is null)
+        {
+            <option selected>Loading...</option>
+        }
+    else 
+        {
+       @foreach (var year in years)
+            {
+                <option value=@year.year>@year.displayYear @(year.year_closed? "(Year Closed)":"") @(!year.ready_for_data_entry&&!year.year_closed? "(Not Open)":"")</option>
+            }
+        }
+  </select>  
+</div>
+
+
+
+
+@if (@year_selected != 0)
+{
+    <Cap_AddIndex year=@year_selected></Cap_AddIndex>
+}
+
 
 @code {
+    private List<ProcessingYearModel> years;
+    private int year_selected = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        years = await _db.GetYears();
+        //if dataentry then remove years which are not ready
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        if (!authState.User.IsInRole("MinistryStaff")) { return; }
+        years = years.FindAll(e => e.ready_for_data_entry == true);
+        
+    }
+   
 
 }
