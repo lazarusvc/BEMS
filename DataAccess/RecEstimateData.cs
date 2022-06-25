@@ -363,5 +363,39 @@ namespace DataAccessLibrary
             return _db.GetListData<ListItemModel, dynamic>(sql,new { });
         }
 
+        public Task<List<GroupingModel>> GetSOCDataForYear(int year, string username)
+        {
+            username = username.ToLower();
+            string sql = @"SELECT SUBSTRING(be.account,1,3) as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on SUBSTRING(be.account,1,3)=mn.[NAME]
+                            WHERE  processing_year=@year
+                            AND (ministry in (select ministry from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))
+                            GROUP BY SUBSTRING(be.account,1,3), mn.[DESCRIPTION]
+                            ORDER BY SUBSTRING(be.account,1,3)";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, username });
+        }
+
+        public Task<List<GroupingModel>> GetSOCMinDataForYear(int year, string soc, string username)
+        {
+            username = username.ToLower();
+            string sql = @"SELECT be.ministry as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_ministry_name] mn on be.ministry=mn.[NAME]
+                            WHERE  processing_year=@year
+                            AND (ministry in (select ministry from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))
+                            AND SUBSTRING(be.account,1,3)=@soc
+                            GROUP BY be.ministry, mn.[DESCRIPTION]
+                            ORDER BY be.ministry";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, soc, username });
+        }
+
+
     }
 }

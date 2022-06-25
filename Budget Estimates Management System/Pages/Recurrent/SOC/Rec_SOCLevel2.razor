@@ -1,18 +1,16 @@
-﻿@page "/recurrent/{year:int}"
+﻿@page "/recurrent/soc/{year:int}/{soc}"
 
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
+@inject IDbData _db;
 @inject IRecEstimateData _rdb;
 @inject NavigationManager NavigationManager;
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
 
-<h3>Ministry Estimates - @year</h3>
+<h2>@soc- @socName</h2>
+<button type="button" class="btn btn-secondary" @onclick="() => NavigateTo(year)" >View By Ministry</button>
 
-<button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#newEntry">Add New Entry</button>
-<button type="button" class="btn btn-secondary" @onclick="() => NavigateTo(year)">View By SOC</button>
-<p />
-<Rec_AddEntry year=@year OnSaveEntry="RefreshList"></Rec_AddEntry>
 
 @if (minGroup is null )
 {
@@ -63,23 +61,30 @@ else {
     }
 }
 
-@code {
-    [Parameter]
-    public int year { get; set; }
-    private string username;
 
-    private List<GroupingModel> minGroup;
+@code {
+	[Parameter]
+    public int year { get; set; }
+    [Parameter]
+    public string soc { get; set; }
+
+    public string socName { get; set; }
+    private string username;
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
 
-    protected override async Task OnInitializedAsync()
+    private List<GroupingModel> minGroup;
+
+
+     protected override async Task OnInitializedAsync()
     {
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         username = authState.User.Identity.Name;
-        minGroup=  await _rdb.GetMinDataForYear(year,username);
+        try { socName= await _db.GetAccountName(soc); } catch{}
+        minGroup=  await _rdb.GetSOCMinDataForYear(year,soc,username);
         year0T = minGroup.Sum(x=>x.year0);
         year1T = minGroup.Sum(x=>x.year1);
         year2T = minGroup.Sum(x=>x.year2);
@@ -88,7 +93,7 @@ else {
 
       protected override async void OnParametersSet()
     {
-        minGroup=  await _rdb.GetMinDataForYear(year,username);
+        minGroup=  await _rdb.GetSOCMinDataForYear(year,soc,username);
         year0T = minGroup.Sum(x=>x.year0);
         year1T = minGroup.Sum(x=>x.year1);
         year2T = minGroup.Sum(x=>x.year2);
@@ -96,21 +101,14 @@ else {
         base.StateHasChanged();
     }
 
-    private void NavigateTo(int year, string ministry)
+    private void NavigateTo(int year)
     {
-         NavigationManager.NavigateTo($"recurrent/{year}/{ministry}", forceLoad: true);
+         NavigationManager.NavigateTo($"recurrent/{year}", forceLoad: true);
   
     }
 
-    private void NavigateTo(int year)
+    private void NavigateTo(int year, string ministry)
     {
-         NavigationManager.NavigateTo($"recurrent/soc/{year}", forceLoad: true);
+         NavigationManager.NavigateTo($"recurrent/soc/{year}/{soc}/{ministry}", forceLoad: true);
     }
-
-    private async void RefreshList()
-    {
-       minGroup=  await _rdb.GetMinDataForYear(year,username);
-        base.StateHasChanged();
-    }
-
 }

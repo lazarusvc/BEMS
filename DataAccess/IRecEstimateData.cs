@@ -23,5 +23,7 @@ namespace DataAccessLibrary
         Task<int> SetRecEntryStatus(int pyear, string subprog, int status);
         Task<int> GetSubProgramStatus(int pyear, string subprog);
         Task<List<ListItemModel>> GetAllSubPrograms();
+        Task<List<GroupingModel>> GetSOCDataForYear(int year, string username);
+        Task<List<GroupingModel>> GetSOCMinDataForYear(int year, string soc, string username);
     }
 }

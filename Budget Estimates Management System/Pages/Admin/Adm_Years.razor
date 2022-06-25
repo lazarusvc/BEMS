@@ -25,8 +25,8 @@
 </div>
 
 <button type="button" class="btn btn-outline-success" disabled=@isOpenDisabled @onclick="OpenYear">Open a Budget Year: @(year_selected==0?"":year_selected)</button>
-<button type="button" class="btn btn-outline-dark" disabled=@isCloseDisabled>Close the Budget Year: @(year_selected==0?"":year_selected)</button>
-<button type="button" class="btn btn-outline-secondary" disabled=@isCreateDisabled>Create a New Budget Year</button>
+<button type="button" class="btn btn-outline-dark" disabled=@isCloseDisabled @onclick="CloseYear">Close the Budget Year: @(year_selected==0?"":year_selected)</button>
+<button type="button" class="btn btn-outline-secondary" disabled=@isCreateDisabled @onclick="CreateYear">Create a New Budget Year</button>
 
 
 
@@ -81,6 +81,7 @@
             await JS.InvokeVoidAsync("alert","A year is already opened for data entry. Please close the year first.");
             return;
         }
+        //Open the year
     }
 
     private void CloseYear()
