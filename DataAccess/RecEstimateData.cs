@@ -396,6 +396,46 @@ namespace DataAccessLibrary
             return _db.GetListData<GroupingModel, dynamic>(sql, new { year, soc, username });
         }
 
+        public Task<List<GroupingModel>> GetSOCProgramDataForYear(int year, string soc,string ministry, string username)
+        {
+            username = username.ToLower();
+            string sql = @"SELECT be.program as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_program_name] mn on be.program=mn.[NAME]
+                            WHERE  processing_year=@year
+                            AND be.ministry=@ministry
+                            AND (ministry in (select ministry from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))
+                            AND SUBSTRING(be.account,1,3)=@soc
+                            GROUP BY be.program, mn.[DESCRIPTION]
+                            ORDER BY be.program";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, soc, ministry, username });
+        }
+
+        public Task<List<GroupingModel>> GetSOCSubProgramDataForYear(int year, string soc, string ministry, string program, string username)
+        {
+            username = username.ToLower();
+            string sql = @"SELECT be.subprog as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName, max([vw_subprogram_sub_apv].status) as status
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_subprog_name] mn on be.subprog=mn.[NAME]
+                        	LEFT OUTER JOIN [vw_subprogram_sub_apv] on  [vw_subprogram_sub_apv].processing_year=@year
+                            AND [vw_subprogram_sub_apv].ministry=@ministry
+                            AND [vw_subprogram_sub_apv].program=@program
+                            AND [vw_subprogram_sub_apv].subprog=be.subprog
+                            WHERE  be.processing_year=@year
+                            AND be.ministry=@ministry
+                            AND be.program=@program
+                            AND (be.program in (select program from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))
+                            AND SUBSTRING(be.account,1,3)=@soc
+                            GROUP BY be.subprog, mn.[DESCRIPTION]
+                            ORDER BY be.subprog";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, soc, ministry, program, username });
+        }
 
     }
 }

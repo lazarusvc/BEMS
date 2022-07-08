@@ -79,6 +79,10 @@ else {
 			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
 				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Unsubmitted, OperationType.Reject);}">Send Back</a></li>
 			      </ul>
+                   <button class="btn btn-outline-secondary btn-sm " type="button"  aria-expanded="false"  title="Budget Adjustment"
+                 disabled="@(status==(int)EntryStatus.Submitted?false:true)">
+				    <span class="oi oi-pie-chart"></span> Budget Adjustment
+			      </button>                 
                  <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Approve Budget"
                  disabled="@(status==(int)EntryStatus.Submitted?false:true)">
 				    <span class="oi oi-check"></span> Approve Budget

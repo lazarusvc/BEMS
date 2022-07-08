@@ -8,8 +8,10 @@
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
 
-<h2>@soc- @socName</h2>
+<h3><a href="/recurrent/soc/@year">Estimates By SOC - @year</a></h3>
+<h2>@soc - @socName</h2>
 <button type="button" class="btn btn-secondary" @onclick="() => NavigateTo(year)" >View By Ministry</button>
+<p />
 
 
 @if (minGroup is null )
@@ -21,6 +23,7 @@ else {
     {
             <p>No entries found for @year - @(year+1)</p>
     }
+
     else
     {
         <table class="table table-hover">
@@ -39,8 +42,8 @@ else {
             @foreach (var item in minGroup)
             {
                     <tr> 
-          <th scope="row" @onclick="() => NavigateTo(year,item.item)" style="cursor:pointer;">@item.item</th>
-          <td @onclick="() => NavigateTo(year,item.item)" style="cursor:pointer;">@item.itemName</td>
+          <th scope="row" @onclick="() => NavigateTo(year,soc,item.item)" style="cursor:pointer;">@item.item</th>
+          <td @onclick="() => NavigateTo(year,soc,item.item)" style="cursor:pointer;">@item.itemName</td>
           <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
           <td class="text-end"><b>@item.year1.ToString("C")</b></td>
           <td class="text-end">@item.year2.ToString("C")</td>
@@ -107,7 +110,7 @@ else {
   
     }
 
-    private void NavigateTo(int year, string ministry)
+    private void NavigateTo(int year, string soc, string ministry)
     {
          NavigationManager.NavigateTo($"recurrent/soc/{year}/{soc}/{ministry}", forceLoad: true);
     }

@@ -1,0 +1,69 @@
+﻿@page "/recurrent/soc/{year:int}/{soc}/{ministry}/{program}/{subprogram}"
+
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@inject IRecEstimateData _rdb;
+@inject NavigationManager NavigationManager;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
+
+<h6><a href="/recurrent/soc/@year">Estimates By SOC - @year</a></h6>
+<h5><a href="/recurrent/soc/@year/@soc">@soc - @socName</a></h5>
+<h4><a href="/recurrent/soc/@year/@soc/@ministry">@ministry - @ministryName</a></h4>
+<h4><a href="/recurrent/soc/@year/@soc/@ministry/@program">@program - @programName</a></h4>
+<h2>@subprogram - @subprogramName</h2>
+<button type="button" class="btn btn-secondary" @onclick="() => NavigateTo(year)" >View By Ministry</button>
+<p />
+
+@code {
+	[Parameter]
+    public int year { get; set; }
+    [Parameter]
+    public string ministry { get; set; }
+    [Parameter]
+    public string soc { get; set; }
+    [Parameter]
+    public string program { get; set; }
+    [Parameter]
+    public string subprogram { get; set; }
+
+    public string subprogramName { get; set; }
+    public string programName { get; set; }
+    public string socName { get; set; }
+    public string ministryName { get; set; }
+    private string username;
+
+    public int year0T = 0;
+    public int year1T = 0;
+    public int year2T = 0;
+    public int year3T = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        try { socName= await _db.GetAccountName(soc); } catch{}
+		try { ministryName= await _db.GetMinistryName(ministry); } catch{}
+        try { programName = await _db.GetProgramName(program); } catch{}
+        try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
+        
+    }
+
+      protected override async void OnParametersSet()
+    {
+        try { socName= await _db.GetAccountName(soc); } catch{}
+        try { ministryName= await _db.GetMinistryName(ministry); } catch{}
+        try { programName = await _db.GetProgramName(program); } catch{}
+        try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
+
+        base.StateHasChanged();
+    }
+
+    private void NavigateTo(int year)
+    {
+         NavigationManager.NavigateTo($"recurrent/{year}", forceLoad: true);
+    }
+
+
+}
