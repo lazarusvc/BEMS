@@ -27,5 +27,6 @@ namespace DataAccessLibrary
         Task<List<GroupingModel>> GetSOCMinDataForYear(int year, string soc, string username);
         Task<List<GroupingModel>> GetSOCProgramDataForYear(int year, string soc, string ministry, string username);
         Task<List<GroupingModel>> GetSOCSubProgramDataForYear(int year, string soc, string ministry, string program, string username);
+        Task<List<GroupingModel>> GetSOCAccountDataForYear(int year, string ministry, string program, string subprogram, string accountType, string username);
     }
 }

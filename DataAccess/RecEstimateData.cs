@@ -437,5 +437,34 @@ namespace DataAccessLibrary
             return _db.GetListData<GroupingModel, dynamic>(sql, new { year, soc, ministry, program, username });
         }
 
+
+        public Task<List<GroupingModel>> GetSOCAccountDataForYear(int year, string ministry, string program, string subprogram, string accountType, string username)
+        {
+            username = username.ToLower();
+            string sql = @"SELECT be.account as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on be.account =mn.[NAME]							
+                            LEFT OUTER JOIN (SELECT account,count(*) as cc
+                                                          FROM dbo.Budget_Estimates
+                                                          WHERE  processing_year=@year
+														  AND ministry=@ministry
+														  AND program=@program
+														  AND subprog=@subprogram
+							                              AND flagged=1
+														  group by account) as o on be.account = o.account
+						    WHERE  be.processing_year=@year
+                            AND be.ministry=@ministry
+                            AND be.program=@program
+                            AND be.subprog=@subprogram
+                            AND be.account like @accountType+'%'
+                            AND (be.subprog in (select subprog from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))                          
+                            GROUP BY be.account , mn.[DESCRIPTION]
+                            ORDER BY be.account;
+                             ";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program, subprogram, accountType, username });
+        }
     }
 }

@@ -1,0 +1,176 @@
+﻿@using Budget_Estimates_Management_System.Models;
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IRecEstimateData _rdb;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
+
+<tr> 
+          <td @onclick="e => this.Collapsed = !this.Collapsed"  style="cursor:pointer;width: 1%;">@if (item.flagged>0) {<span class="oi oi-flag"></span> }</td>
+          <th @onclick="e => this.Collapsed = !this.Collapsed" style="cursor:pointer;"> <span class= "@(this.Collapsed ? "oi oi-caret-bottom" : "oi oi-caret-top")" aria-hidden="true" style="@(this.Collapsed ? "color:black" : "color:blue")"></span> @item.item</th>
+          <td @onclick="e => this.Collapsed = !this.Collapsed" style="cursor:pointer;">@item.itemName</td>
+          <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
+          <td class="text-end"><b>@item.year1.ToString("C")</b></td>
+          <td class="text-end">@item.year2.ToString("C")</td>
+          <td class="text-end">@item.year3.ToString("C")</td>
+        </tr>
+        @if (!Collapsed)
+        {
+             @if  (accounts is null)
+                {
+                    <tr>
+                        <td colspan="6">
+                                No entries found for @year - @(year+1)
+                        </td>
+                    </tr>   
+                      
+                }
+                else
+                { <tr>
+                            <td colspan="7">
+                      <div class="row g-2" style="background-color:lightcyan;" >
+                          <div class="col-1"><b><br>By Law</b></div>
+                          <div class="col-3"><b><br>Description</b></div>
+                          <div class="col-1"><b><br>Qty</b></div>
+                          <div class="col-md"><b>Estimates <br> @(year-1)/@(year)</b></div>
+                          <div class="col-md"><b>Estimates <br> @year/@(year+1)</b> </div>
+                          <div class="col-md"><b>Estimates <br> @(year+1)/@(year+2)</b> </div>
+                          <div class="col-md"><b>Estimates <br> @(year+2)/@(year+3)</b></div>
+                          <div class="col-1"></div>
+                      </div>
+                      </td>
+              </tr>
+              
+                    @foreach (var account in accounts)
+                    {
+                       <tr>
+                           <td colspan="7">
+                                  <Rec_EditEntry account=account  OnEntryDeleted = "DeleteRow" OnEntryEdit="OnEntryEdit"></Rec_EditEntry>  
+                                  </td>
+                           </tr>  
+                    }  
+                 <tr >
+                      <td colspan="7"><button type="button" class="btn btn-outline-success" @onclick="AddRow" disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)"><span class="oi oi-plus"></span> Add Row</button>
+                          </td>
+                 </tr>
+
+                  
+                }
+        }
+
+
+@code {
+    [Parameter]
+    public GroupingModel item { get; set; }
+    [Parameter]
+    public int year { get; set; }    
+    [Parameter]
+    public int soc { get; set; }
+    [Parameter]
+    public string ministry { get; set; }
+    [Parameter]
+    public string program { get; set; }
+    [Parameter]
+    public string subprogram { get; set; }
+    
+    [Parameter]
+    public EventCallback OnEntryEdit { get; set; }
+
+    public bool Collapsed = true;
+    private int status;
+    private string username;
+
+    List<BudgetEstimatesModel> accounts;
+
+    protected override async Task OnInitializedAsync()
+    {        
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
+        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
+    }
+
+    protected override async void OnParametersSet()
+    {
+        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
+        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
+        base.StateHasChanged();
+    }
+
+
+
+    private async void AddRow()
+    {
+        //save new record.
+        //TODO:  Use user names
+        //TODO: FIx flag
+        try
+        {
+            BudgetEstimatesModel mapped = new BudgetEstimatesModel();
+            mapped.processing_year =year;
+            mapped.ministry =ministry;
+            mapped.program =program;
+            mapped.subprog =subprogram;
+            mapped.account =item.item;
+            mapped.project ="";
+            mapped.sof ="";
+            mapped.sector ="";
+            mapped.lastcode ="";
+            mapped.label ="";
+            mapped.quantity =0;
+            mapped.year0_amount =0;
+            mapped.year1_amount =0;
+            mapped.year2_amount =0;
+            mapped.year3_amount =0;
+            mapped.is_by_law =false;
+            mapped.comment ="";
+            mapped.flagged =false;
+            mapped.flagged_comment ="";
+             var authState = await authStateProvider.GetAuthenticationStateAsync();
+			mapped.modified_by = authState.User.Identity.Name;
+            mapped.last_modified =DateTime.Now;
+            mapped.entry_status_id =0;
+            int affectedRows=  await _rdb.AddNewRecEntry(mapped);      
+            //save successfully.  Reset form
+            if (affectedRows!=0)
+            {
+                //refresh list
+                accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
+                base.StateHasChanged();
+            } 
+
+        }
+        catch
+        {
+
+        }
+
+
+    }
+
+
+    private async void DeleteRow(BudgetEstimatesModel delRec)
+    {
+        //save new record.
+        try
+        {
+            int affectedRows=  await _rdb.RemoveRecEntry(delRec.id);      
+            //save successfully.  Reset form
+            if (affectedRows!=0)
+            {
+                //refresh list
+                accounts.Remove(delRec);
+                //invoke refresh
+                await OnEntryEdit.InvokeAsync();
+                 base.StateHasChanged();
+            } 
+
+        }
+        catch (Exception e)
+        {
+           
+        }
+    }        
+
+    
+}
