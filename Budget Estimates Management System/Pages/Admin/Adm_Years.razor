@@ -65,8 +65,8 @@
         var y = years.Find(e => e.year == year_selected);
         if (y is not null)
         {       
-            if (y.year_closed ==true) {isCloseDisabled= true; }
-            if (y.ready_for_data_entry==false) {isCloseDisabled= true; }
+            if (y.year_closed ==true) {isCloseDisabled= true; }else {isCloseDisabled= false;  }
+            if (y.ready_for_data_entry == true) { isCloseDisabled = false; } else { isCloseDisabled = true; }
             if (y.year_closed==false && y.ready_for_data_entry==false) { isOpenDisabled = false; } else {isOpenDisabled = true;}
         }
     }
