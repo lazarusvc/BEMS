@@ -141,5 +141,19 @@ namespace DataAccessLibrary
         }
 
 
+        public Task<List<ListItemModel>> GetUserPrograms(string username)
+        {
+
+            string sql = @"SELECT Distinct
+                               [program] as Name
+                               ,p.[DESCRIPTION] as Description
+                              FROM [BEMS].[dbo].[vw_user_access]
+                              LEFT JOIN vw_ss_program_name p on p.[NAME]=[program]
+                            WHERE userName=@username
+                            group by program,p.DESCRIPTION";
+
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { username });
+        }
+
     }
 }

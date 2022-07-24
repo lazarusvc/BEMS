@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWebUI", "Budget Estim
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLibrary", "DataAccess\DataAccessLibrary.csproj", "{D6906DE4-9413-4C26-B750-F67D2717919B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageCenterLibrary", "MessageCenter\MessageCenterLibrary.csproj", "{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotificationCenterLibrary", "MessageCenter\NotificationCenterLibrary.csproj", "{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
