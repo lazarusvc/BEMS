@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorWebUI", "Budget Estim
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLibrary", "DataAccess\DataAccessLibrary.csproj", "{D6906DE4-9413-4C26-B750-F67D2717919B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotificationCenterLibrary", "MessageCenter\NotificationCenterLibrary.csproj", "{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{D6906DE4-9413-4C26-B750-F67D2717919B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6906DE4-9413-4C26-B750-F67D2717919B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6906DE4-9413-4C26-B750-F67D2717919B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6D562C0D-A6EB-4752-AE2A-1A4703B47E6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
