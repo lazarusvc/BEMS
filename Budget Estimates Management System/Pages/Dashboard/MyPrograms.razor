@@ -1,10 +1,9 @@
 ﻿@inject AuthenticationStateProvider authStateProvider;
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
-@inject NavigationManager NavigationManager;
 @inject IDbData _db;
 
-<div class="card" style="width: 18rem;">
+<div class="card">
     <div class="card-body">
       <div class="card-header">
     <h5 class="card-title">My Programs</h5>
@@ -19,7 +18,7 @@
         else {
              @foreach (var item in accessTo)
             {
-                <li class="list-group-item"><b>@item.Name</b> @item.Description</li>
+                <li class="list-group-item"><a href="/recurrent/@year/@item.Id/@item.Name"><b>@item.Name</b></a> @item.Description</li>
             }
         }
       </ul>
@@ -30,21 +29,17 @@
     [Parameter]
     public int year { get; set; }
 
-    private List<ListItemModel> accessTo;
+    private List<ListItemModel2> accessTo;
     private string username;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         username = authState.User.Identity.Name;
-        accessTo =  await _db.GetUserPrograms(username);
+        accessTo =  await _db.GetUserMinPrograms(username);
     }
 
-    
-	private void NavigateTo(int year)
-    {
-         NavigationManager.NavigateTo($"recurrent/{year}", forceLoad: true);
-  
-    }
+
+
 
 }

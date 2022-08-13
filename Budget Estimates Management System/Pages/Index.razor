@@ -15,8 +15,11 @@
         }
 		<div class="container">
           <div class="row">
-            <div class="col-4">
-              <MyPrograms></MyPrograms>
+            <div class="col-6">
+                 @if (year is not null)
+                    {
+                          <MyPrograms year="@year.year"></MyPrograms>
+                    }
             </div>
             <div class="col-4">
              <Notifications></Notifications>

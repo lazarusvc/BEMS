@@ -149,18 +149,18 @@ namespace DataAccessLibrary
         }
 
 
-        public Task<List<ListItemModel>> GetUserPrograms(string username)
+        public Task<List<ListItemModel2>> GetUserMinPrograms(string username)
         {
 
-            string sql = @"SELECT Distinct
+            string sql = @"SELECT Distinct ministry as Id,
                                [program] as Name
                                ,p.[DESCRIPTION] as Description
                               FROM [BEMS].[dbo].[vw_user_access]
                               LEFT JOIN vw_ss_program_name p on p.[NAME]=[program]
                             WHERE userName=@username
-                            group by program,p.DESCRIPTION";
+                            group by ministry,program,p.DESCRIPTION";
 
-            return _db.GetListData<ListItemModel, dynamic>(sql, new { username });
+            return _db.GetListData<ListItemModel2, dynamic>(sql, new { username });
         }
 
     }
