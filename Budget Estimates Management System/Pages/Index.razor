@@ -1,33 +1,39 @@
 ﻿@page "/"
 @using Budget_Estimates_Management_System.Pages.Dashboard
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
 
-<PageTitle>Budget Estimates Management System</PageTitle>
+<PageTitle>Budget Estimates Management System - Dashboard </PageTitle>
 
 <AuthorizeView>
 	<Authorized>
-		<h1>DashBoard</h1>
-		<h2>Hi @context.User.Identity.Name</h2>
-
+		<h1>Hi @context.User.Identity.Name</h1>
+        @if (year is not null)
+        {
+        <h3>Current Budget Period : @year.displayYear</h3>
+        }
 		<div class="container">
           <div class="row">
-            <div class="col-3">
+            <div class="col-4">
               <MyPrograms></MyPrograms>
             </div>
-            <div class="col-3">
+            <div class="col-4">
              <Notifications></Notifications>
             </div>
           </div>
-          <div class="row">
-            <div class="col">
-              1 of 3
-            </div>
-            <div class="col">
-              2 of 3
-            </div>
-            <div class="col">
-              3 of 3
-            </div>
-          </div>
+          <br>
+            @if (@context.User.IsInRole("Administrator"))
+            {
+                <div class="row">
+                    <div class="col-4">
+                        Programs for approval
+                    </div>
+                    <div class="col-4">
+                        Programs Pending Submission
+                    </div>                    
+                </div>
+            }
         </div>
 	</Authorized>
 	<NotAuthorized>
@@ -37,7 +43,14 @@
 </AuthorizeView>
 
 @code {
-	[CascadingParameter]
-	private Task<AuthenticationState> authenticationState { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    private ProcessingYearModel year;    
+
+    protected override async Task OnInitializedAsync()
+    {        
+        year =  await _db.GetCurrentProcessingYear();
+    }
 
 }

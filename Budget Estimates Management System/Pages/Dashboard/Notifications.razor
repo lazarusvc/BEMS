@@ -1,16 +1,52 @@
-﻿<div class="card" style="width: 18rem;">
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject INotificationData _ndb;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
+
+<div class="card" style="width: 18rem;">
     <div class="card-body">
-        <div class="card-header">
-    <h5 class="card-title">Notifications</h5>
+        <div class="card-header" style="background-color:lightcyan">
+    <h5 class="card-title" >Notifications</h5>
   </div>
     
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">An item</li>
-        <li class="list-group-item">A second item</li>
-        <li class="list-group-item">A third item</li>
-      </ul>
+          @if (notifications is null )
+            {
+                <li class="list-group-item">No News is good news</li>
+            }
+            else
+            {
+                 @foreach (var item in notifications)
+                {
+                    @if (item.featured)
+                    {
+                        <li class="list-group-item"><b>@item.message</b></li>
+                    } else
+                    {
+                        <li class="list-group-item">@item.message</li>
+                    }
+                    
+                }
+            }        
+            </ul>
   </div>
 </div>
+
 @code {
+
+    public List<NotificationModel> notifications;
+
+ 
+    private string username;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        notifications =  await _ndb.GetNotifications(username);
+        
+    }
+
 
 }

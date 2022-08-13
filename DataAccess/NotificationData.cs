@@ -16,7 +16,7 @@ namespace DataAccessLibrary
         {
 
             string sql = @"SELECT *
-                            FROM dbo.Notifications                                                     
+                            FROM dbo.Notifications  ;                                                   
                            ";
 
             return _db.GetListData<NotificationModel, dynamic>(sql, new { });
@@ -27,32 +27,42 @@ namespace DataAccessLibrary
 
             string sql = @"SELECT *
                             FROM dbo.Notifications  
-                            WHERe id=@id
+                            WHERe id=@id;
                            ";
 
             return _db.GetSingleRowData<NotificationModel, dynamic>(sql, new { id });
         }
 
 
-        public Task<List<ListItemModel>> GetNotifications(string subprogram)
+        public Task<List<NotificationModel>> GetNotifications(string username)
         {
             //todo:link the names to the query
 
             string sql = @"SELECT featured,message
                             FROM dbo.Notifications                         
-                            WHERE (subprogram=@subprogram
+                            WHERE (subprogram in (Select subprogram from vw_user_access where username=@username)
                                     or subprogram is null)
-                            AND expiryDate >= GETDATE()
+                            AND expiryDate >= GETDATE();
                            ";
 
-            return _db.GetListData<ListItemModel, dynamic>(sql, new { subprogram });
+            return _db.GetListData<NotificationModel, dynamic>(sql, new { username });
         }
 
         public Task<int> AddNewNotification(NotificationModel notification)
         {
 
-            string sql = @"INSERT INTO NOTIFICATIONS()
-                        VALUES()";
+            string sql = @"INSERT INTO NOTIFICATIONS([subprogram]
+                                                      ,[message]
+                                                      ,[expiryDate]
+                                                      ,[dateEntered]
+                                                      ,[enteredby]
+                                                      ,[featured])
+                        VALUES(@subprogram
+                            ,@message
+                            ,@expiryDate
+                            ,@dateEntered
+                            ,@enteredby
+                            ,@featured);";
 
             return _db.ExecuteSql<NotificationModel>(sql, notification);
         }

@@ -1,6 +1,7 @@
 ﻿@inject AuthenticationStateProvider authStateProvider;
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
+@inject NavigationManager NavigationManager;
 @inject IDbData _db;
 
 <div class="card" style="width: 18rem;">
@@ -26,6 +27,8 @@
 </div>
 
 @code {
+    [Parameter]
+    public int year { get; set; }
 
     private List<ListItemModel> accessTo;
     private string username;
@@ -35,6 +38,13 @@
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         username = authState.User.Identity.Name;
         accessTo =  await _db.GetUserPrograms(username);
+    }
+
+    
+	private void NavigateTo(int year)
+    {
+         NavigationManager.NavigateTo($"recurrent/{year}", forceLoad: true);
+  
     }
 
 }

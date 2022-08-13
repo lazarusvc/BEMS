@@ -14,8 +14,16 @@ namespace DataAccessLibrary
 
         public Task<List<ProcessingYearModel>> GetYears()
         {
-            string sql = "select year,ready_for_data_entry,year_closed from dbo.Processing_Year ORder by year desc;";
+            string sql = "select year,ready_for_data_entry,year_closed from dbo.Processing_Year Order by year desc;";
             return _db.GetListData<ProcessingYearModel, dynamic>(sql, new { });
+        }
+
+        public Task<ProcessingYearModel> GetCurrentProcessingYear()
+        {
+            string sql = "select year,ready_for_data_entry,year_closed " +
+                "from dbo.Processing_Year  WHERE ready_for_data_entry=1 " +
+                "Order by year desc;";
+            return _db.GetSingleRowData<ProcessingYearModel, dynamic>(sql, new { });
         }
 
 
