@@ -21,19 +21,26 @@
                           <MyPrograms year="@year.year"></MyPrograms>
                     }
             </div>
-            <div class="col-4">
+            <div class="col-6">
              <Notifications></Notifications>
             </div>
           </div>
           <br>
-            @if (@context.User.IsInRole("Administrator"))
+            @if (@context.User.IsInRole("Administrator")||@context.User.IsInRole("BudgetStaff"))
             {
                 <div class="row">
-                    <div class="col-4">
-                        Programs for approval
+                    <div class="col-6">
+                         @if (year is not null)
+                        {
+                            <SubmittedPrograms year="@year.year"></SubmittedPrograms>
+                        }
+                        
                     </div>
-                    <div class="col-4">
-                        Programs Pending Submission
+                    <div class="col-6">
+                         @if (year is not null)
+                        {
+                            <UnSubmittedPrograms year="@year.year"></UnSubmittedPrograms>
+                        }
                     </div>                    
                 </div>
             }

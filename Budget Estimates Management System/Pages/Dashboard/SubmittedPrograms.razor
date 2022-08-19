@@ -1,18 +1,17 @@
-﻿@inject AuthenticationStateProvider authStateProvider;
-@using DataAccessLibrary.Models;
+﻿@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IDbData _db;
 
 <div class="card">
-      <div class="card-header">
-    <h5 class="card-title">My Programs</h5>
+      <div class="card-header" style="background-color:lightgreen">
+    <h5 class="card-title">Submitted Programs Pending Approval</h5>
   </div>
-    <div class="overflow-auto"  style="height: 200px;">
-    <div class="list-group">
+  <div class="overflow-auto"  style="height: 200px;">
+        <div class="list-group">
           
         @if (accessTo is null || accessTo.Count==0)
         {
-           <li class="list-group-item">None assigned yet</li>
+           <li class="list-group-item">No submissions yet</li>
         }
         else {
              @foreach (var item in accessTo)
@@ -36,13 +35,10 @@
     public int year { get; set; }
 
     private List<ListItemModel2> accessTo;
-    private string username;
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await authStateProvider.GetAuthenticationStateAsync();
-        username = authState.User.Identity.Name;
-        accessTo =  await _db.GetUserMinPrograms(username);
+        accessTo =  await _db.GetSubmittedPrograms(year);
     }
 
 

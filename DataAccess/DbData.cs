@@ -163,5 +163,34 @@ namespace DataAccessLibrary
             return _db.GetListData<ListItemModel2, dynamic>(sql, new { username });
         }
 
+        public Task<List<ListItemModel2>> GetSubmittedPrograms(int year)
+        {
+
+            string sql = @"SELECT Distinct ministry as Id,
+                               [program] as Name
+                               ,p.[DESCRIPTION] as Description
+                            FROM [BEMS].[dbo].[vw_subprogram_submitted]
+                            LEFT JOIN vw_ss_program_name p on p.[NAME]=[program]
+                            WHERE [processing_year]=@year
+                            group by ministry,program,p.DESCRIPTION
+                            Order by ministry,program";
+
+            return _db.GetListData<ListItemModel2, dynamic>(sql, new { year });
+        }
+
+        public Task<List<ListItemModel2>> GetUnSubmittedPrograms(int year)
+        {
+
+            string sql = @"SELECT Distinct ministry as Id,
+                               [program] as Name
+                               ,p.[DESCRIPTION] as Description
+                            FROM [BEMS].[dbo].[vw_subprogram_unsubmitted]
+                            LEFT JOIN vw_ss_program_name p on p.[NAME]=[program]
+                            WHERE [processing_year]=@year
+                            group by ministry,program,p.DESCRIPTION
+                            Order by ministry,program";
+
+            return _db.GetListData<ListItemModel2, dynamic>(sql, new { year });
+        }
     }
 }

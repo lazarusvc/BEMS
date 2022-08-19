@@ -19,5 +19,7 @@ namespace DataAccessLibrary
         Task<int> MergeUserAccess(List<UserAccessModel> uam);
         Task<string> GetUserRole(string user);
         Task<List<ListItemModel2>> GetUserMinPrograms(string username);
+        Task<List<ListItemModel2>> GetSubmittedPrograms(int year);
+        Task<List<ListItemModel2>> GetUnSubmittedPrograms(int year);
     }
 }

@@ -111,3 +111,11 @@ SELECT  processing_year, subprog, ministry, program, max(entry_status_id) as sta
 FROM            dbo.Budget_Estimates
 WHERE        entry_status_id in (1,2)
 GROUP BY processing_year, subprog, ministry, program
+
+
+CREATE VIEW [dbo].[vw_subprogram_unsubmitted]
+AS
+SELECT DISTINCT processing_year, subprog, ministry, program
+FROM            dbo.Budget_Estimates
+WHERE        (entry_status_id = 0)
+GO
