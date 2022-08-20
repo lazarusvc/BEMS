@@ -100,6 +100,7 @@ CREATE TYPE [User_Access] AS TABLE(
  CREATE TABLE [dbo].[Notifications](
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[subprogram] [nvarchar](5) NULL,
+	[message] [nvarchar](30) NULL,
 	[message] [nvarchar](500) NOT NULL,
 	[expiryDate] [date] NULL,
 	[dateEntered] [datetime] NOT NULL,

@@ -10,5 +10,6 @@ namespace DataAccessLibrary
         Task<NotificationModel> GetNotification(int id);
         Task<int> RemoveNotification(int id);
         Task<int> UpdateNotification(NotificationModel notification);
+        Task<int> RemoveExpiredNotifications();
     }
 }

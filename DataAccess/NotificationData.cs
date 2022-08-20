@@ -38,11 +38,12 @@ namespace DataAccessLibrary
         {
             //todo:link the names to the query
 
-            string sql = @"SELECT featured,message
+            string sql = @"SELECT *
                             FROM dbo.Notifications                         
                             WHERE (subprogram in (Select subprogram from vw_user_access where username=@username)
                                     or subprogram is null)
-                            AND expiryDate >= GETDATE();
+                            AND expiryDate >= GETDATE()
+                            Order by expiryDate,subprogram;
                            ";
 
             return _db.GetListData<NotificationModel, dynamic>(sql, new { username });
@@ -76,6 +77,14 @@ namespace DataAccessLibrary
             return _db.ExecuteSql(sql, new { id });
         }
 
+        public Task<int> RemoveExpiredNotifications()
+        {
+
+            string sql = @"DELETE FROM NOTIFICATIONS
+                           WHERE expired<GETDATE();";
+
+            return _db.ExecuteSql(sql, new {  });
+        }
 
         public Task<int> UpdateNotification(NotificationModel notification)
         {

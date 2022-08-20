@@ -5,33 +5,43 @@
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
 
 <div class="card">
-    <div class="card-body">
         <div class="card-header" style="background-color:lightcyan">
     <h5 class="card-title" >Notifications</h5>
   </div>
-    <div class="overflow-auto"  style="height: 170px;">
-      <ul class="list-group list-group-flush">
-          @if (notifications is null )
+   <div class="overflow-auto"  style="height: 250px;">
+      <div class="list-group">
+          
+         @if (notifications is null )
             {
                 <li class="list-group-item">No News is good news</li>
             }
-            else
-            {
+          else{
                  @foreach (var item in notifications)
                 {
                     @if (item.featured)
-                    {
-                        <li class="list-group-item"><b>@item.message</b></li>
+                    { <div class="list-group-item list-group-item-action">
+                         <div class="d-flex w-100 justify-content-between" style="background-color:lightgoldenrodyellow">
+                          <h5 class="mb-1"><b>@item.header</b> </h5>
+                        </div>
+                        <p class="mb-1">@item.message</p>
+                        </div>
+
                     } else
                     {
-                        <li class="list-group-item">@item.message</li>
+                        <div class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                          <h5 class="mb-1"><b>@item.header</b> </h5>
+                        </div>
+                        <p class="mb-1">@item.message</p>
+                        </div>
+   
                     }
                     
                 }
-            }        
-            </ul>
-  </div>
-</div>
+            }          
+      </div>
+   </div>                      
+   
 </div>
 
 @code {
