@@ -16,7 +16,8 @@ namespace DataAccessLibrary
         {
 
             string sql = @"SELECT *
-                            FROM dbo.Notifications  ;                                                   
+                            FROM dbo.Notifications 
+                            Order by expiryDate desc,subprogram;;                                                   
                            ";
 
             return _db.GetListData<NotificationModel, dynamic>(sql, new { });
@@ -43,13 +44,13 @@ namespace DataAccessLibrary
                             WHERE (subprogram in (Select subprogram from vw_user_access where username=@username)
                                     or subprogram is null)
                             AND expiryDate >= GETDATE()
-                            Order by expiryDate,subprogram;
+                            Order by expiryDate desc,subprogram;
                            ";
 
             return _db.GetListData<NotificationModel, dynamic>(sql, new { username });
         }
 
-        public Task<int> AddNewNotification(NotificationModel notification)
+        public Task<int> AddNotification(NotificationModel notification)
         {
 
             string sql = @"INSERT INTO NOTIFICATIONS([subprogram]
@@ -57,13 +58,15 @@ namespace DataAccessLibrary
                                                       ,[expiryDate]
                                                       ,[dateEntered]
                                                       ,[enteredby]
-                                                      ,[featured])
+                                                      ,[featured]
+                                                      ,[header])
                         VALUES(@subprogram
                             ,@message
                             ,@expiryDate
-                            ,@dateEntered
+                            ,GETDATE()
                             ,@enteredby
-                            ,@featured);";
+                            ,@featured
+                            ,@header);";
 
             return _db.ExecuteSql<NotificationModel>(sql, notification);
         }
@@ -81,7 +84,7 @@ namespace DataAccessLibrary
         {
 
             string sql = @"DELETE FROM NOTIFICATIONS
-                           WHERE expired<GETDATE();";
+                           WHERE expiryDate<GETDATE();";
 
             return _db.ExecuteSql(sql, new {  });
         }

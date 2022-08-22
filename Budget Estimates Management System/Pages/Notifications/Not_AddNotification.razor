@@ -1,0 +1,168 @@
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject INotificationData _ndb;
+@inject IRecEstimateData _rdb;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator,BudgetStaff")]
+
+
+<div class="modal fade" id="newNotification" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-l">
+   <EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Add Notification</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+ 
+     <DataAnnotationsValidator />
+    
+  
+    <div class="form-floating">
+           <InputDate  @bind-Value="notification.expiryDate" class="form-control" placeholder="Expiry Date">               
+                </InputDate>
+        <label for="label" >
+            Expiry Date
+        </label>
+    </div>    
+
+    <div class="form-floating" style="padding-bottom:5px">
+            <InputSelect id="subprogram" placeholder="Subprogram" class="form-select"
+                    @bind-Value="@notification.subprogram">
+                    @if (subprograms is null)
+                    {
+                        <option selected>Loading...</option>
+                    }
+                else 
+                    {
+                        <option value="" selected>Choose...</option>
+                    @foreach (var item in subprograms)
+                        {
+                            <option value=@item.Name>@item.Name - @item.Description</option>
+                        }
+    }
+            </InputSelect>
+        <label for="userRole" >
+           Subprogram
+        </label>
+
+    </div> 
+      <div class="form-floating" style="padding-bottom:5px">
+        <InputText @bind-Value="notification.header" class="form-control" placeholder="Expiry Date"></InputText>
+         <label for="header" >
+           Message Header
+        </label>
+    </div> 
+      <div class="form-floating" style="padding-bottom:5px">
+        <InputTextArea  @bind-Value="notification.message" class="form-control" placeholder="Expiry Date" ></InputTextArea>
+           
+        <label for="message" >
+           Message
+        </label>
+    </div> 
+     <div class="form-control" >
+           <InputCheckbox  @bind-Value="notification.featured" >               
+                </InputCheckbox>
+        <label for="featured" >
+            Highlight Notification
+        </label>
+        </div>
+   <div style="color: red">
+        @saveError
+      </div>
+         <div style="color: green">
+        @saveSuccess
+      </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+         <button type="submit" class="btn btn-success">Save</button>
+      </div>
+    </div>
+    </EditForm>
+  </div>
+  </div>
+
+
+@code {
+    [Parameter]
+    public EventCallback OnSaveNotification { get; set; }
+
+
+    private EditContext EditContext;
+
+    private NotificationModel notification = new NotificationModel();
+    private List<ListItemModel> subprograms;
+
+    private string saveError;
+    private string saveSuccess;
+    private string user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Initial Edit Context
+        EditContext = new EditContext(notification);        
+        subprograms = await _rdb.GetAllSubPrograms();
+        //Get the user
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        notification.enteredby = authState.User.Identity.Name;
+        user= authState.User.Identity.Name;
+        notification.expiryDate = DateTime.Now.AddDays(7);;
+    }
+
+    private async void  HandleValidSubmit()
+    {     
+        saveError = "";
+        saveSuccess = "";
+        try
+        {
+            int affectedRows=  await _ndb.AddNotification(notification);      
+            //save successfully.  Reset form
+            if (affectedRows==0)
+            {
+                saveError = "Something happened.  Record was not saved";
+                base.StateHasChanged();
+            } else
+            {
+                notification=new NotificationModel();
+                EditContext = new EditContext(notification);
+                //set default values
+                notification.enteredby = user;
+                notification.expiryDate = DateTime.Now.AddDays(7);
+                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+                saveSuccess = "Record Successfully Saved.";
+                base.StateHasChanged();
+                //run the parent procedure
+                await OnSaveNotification.InvokeAsync();
+            }
+           
+        }
+        catch(Exception e)
+        {
+            if (e.Message.Contains("PK_Users"))
+            {
+                saveError = "User already entered";
+            }
+            else { saveError = e.Message; }
+            base.StateHasChanged();
+        }
+        
+    }
+
+    private  void  HandleInvalidSubmit()
+    {     
+        saveSuccess = "";
+        saveError = "Please enter the required fields. Thank you.";
+        base.StateHasChanged();                
+    }
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        //clear any save messages because we entering new stull
+        saveSuccess = "";
+        saveError = "";
+    }
+
+}

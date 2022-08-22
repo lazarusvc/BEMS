@@ -5,22 +5,17 @@
 @attribute [Authorize(Roles = "Administrator,BudgetStaff")]
 
 <h3>Notifications</h3>
-
+ 
     <div class="col-12" >
 
-        <div class="btn-group" role="group">
-        <div class="btn-group me-2" role="group">
-        <button type="button" class="btn btn-outline-danger" @onclick="()=>{ClearExpired();}"  title="Clear Expired Notifications">Clear Expired Notifications <span class="oi oi-timer"></span></button>                
-        </div>
-        <div class="btn-group me-2" role="group">
+        <button type="button" class="btn btn-outline-danger" @onclick="()=>{ClearExpired();}"  title="Clear Expired Notifications">Clear Expired Notifications <span class="oi oi-timer"></span></button>                        
         <button type="button" class="btn btn-outline-success " data-bs-toggle="modal" data-bs-target="#newNotification"  title="Add Notification">New Notification <span class="oi oi-plus"></span></button>                              
-        </div>            
-    </div>
-    <table class="table table-hover ">
+     </div>
+ <table class="table table-hover ">
   <thead>
     <tr>
         <th scope="col">Sub-Program</th>
-      <th scope="col">Expiry Date & Time</th>
+      <th scope="col">Expiry Date</th>
       <th scope="col">Message Header</th>
       <th scope="col">Message</th>
       <th scope="col">Featured</th>
@@ -34,7 +29,7 @@
         {
                   <tr style="background-color: @(notification.expiryDate<@DateTime.Now ? "lightgrey":"")">
           <td>@notification.subprogram</td>
-           <td>@notification.expiryDate</td>
+           <td>@notification.expiryDate.ToShortDateString()</td>
            <td>@notification.header</td>
             <td>@notification.message</td>
              <td>@notification.featured</td>
@@ -73,7 +68,9 @@
         </tr>
       </tfoot>    
 </table>
-</div>
+
+
+<Not_AddNotification OnSaveNotification="RefreshList"></Not_AddNotification>
 
 @code {
 
@@ -133,5 +130,11 @@
         {
 
         }
+    }
+
+    private async void RefreshList()
+    {
+         notifications = await _ndb.GetAllNotifications();
+        base.StateHasChanged();
     }
 }

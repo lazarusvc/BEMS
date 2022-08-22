@@ -4,7 +4,7 @@ namespace DataAccessLibrary
 {
     public interface INotificationData
     {
-        Task<int> AddNewNotification(NotificationModel notification);
+        Task<int> AddNotification(NotificationModel notification);
         Task<List<NotificationModel>> GetNotifications(string username);
         Task<List<NotificationModel>> GetAllNotifications();
         Task<NotificationModel> GetNotification(int id);
