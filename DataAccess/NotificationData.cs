@@ -86,21 +86,28 @@ namespace DataAccessLibrary
             string sql = @"DELETE FROM NOTIFICATIONS
                            WHERE expiryDate<GETDATE();";
 
-            return _db.ExecuteSql(sql, new {  });
+            return _db.ExecuteSql(sql, new { });
         }
 
         public Task<int> UpdateNotification(NotificationModel notification)
         {
-
-            string sql = @"UPDATE Notification
-                        SET 
-                      
-                         WHERE id=@id";
+            string sql = @"UPDATE Notifications
+                        SET [subprogram]=@subprogram
+                          ,[message]=@message
+                          ,[expiryDate]=@expiryDate
+                          ,[dateModified]=GETDATE()
+                          ,[modifiedBy]=@modifiedBy
+                          ,[featured]=@featured
+                          ,[header] =@header
+                       WHERE id=@id";
 
             return _db.ExecuteSql<NotificationModel>(sql, notification);
         }
-
-
-
+        public int EmailUsersNotification(NotificationModel notification)
+        {
+            //TODO: Implement emailing
+            return 0;
+        }
     }
+
 }

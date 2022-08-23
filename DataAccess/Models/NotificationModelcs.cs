@@ -18,5 +18,7 @@ namespace DataAccessLibrary.Models
         public string enteredby { get; set; }
         [Required]
         public bool featured { get; set; }
+        public DateTime dateModified { get; set; }
+        public string modifiedBy { get; set; }
     }
 }

@@ -101,6 +101,7 @@
 
     private async void RefreshList()
     {
+        selectedUser = null;
         users = await _db.GetUsers();
         base.StateHasChanged();
     }

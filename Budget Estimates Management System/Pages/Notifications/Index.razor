@@ -71,6 +71,7 @@
 
 
 <Not_AddNotification OnSaveNotification="RefreshList"></Not_AddNotification>
+<Not_EditNotification parNotification="selectedNotification" OnSaveNotification="RefreshList"></Not_EditNotification>
 
 @code {
 
@@ -84,7 +85,7 @@
         notifications = await _ndb.GetAllNotifications();
     }
 
-    
+
     private async void DeleteClicked(NotificationModel notification)
     {
         //save new record.
@@ -96,10 +97,10 @@
             {
                 //refresh list
                 notifications.Remove(notification);
-              //invoke refresh
+                //invoke refresh
                 base.StateHasChanged();
             } 
-              
+
 
         }
         catch (Exception e)
@@ -109,7 +110,7 @@
     }
 
 
-     private async void ClearExpired()
+    private async void ClearExpired()
     {
         //save new record.
         try
@@ -120,10 +121,10 @@
             {
                 //refresh list
                 notifications.RemoveAll(x=>x.expiryDate<DateTime.Now);
-              //invoke refresh
+                //invoke refresh
                 base.StateHasChanged();
             } 
-              
+
 
         }
         catch (Exception e)
@@ -134,7 +135,8 @@
 
     private async void RefreshList()
     {
-         notifications = await _ndb.GetAllNotifications();
+        selectedNotification = null;
+        notifications = await _ndb.GetAllNotifications();
         base.StateHasChanged();
     }
 }

@@ -6,7 +6,7 @@
 @attribute [Authorize(Roles = "Administrator,BudgetStaff")]
 
 
-<div class="modal fade" id="newNotification" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="editNotification" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-l">
    <EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
     <div class="modal-content">
@@ -91,7 +91,8 @@
 @code {
     [Parameter]
     public EventCallback OnSaveNotification { get; set; }
-
+    [Parameter]
+    public NotificationModel parNotification { get; set; }
 
     private EditContext EditContext;
 
@@ -104,7 +105,6 @@
 
     private bool emailUsers = false;
 
-
     protected override async Task OnInitializedAsync()
     {
         //Initial Edit Context
@@ -112,9 +112,8 @@
         subprograms = await _rdb.GetAllSubPrograms();
         //Get the user
         var authState = await authStateProvider.GetAuthenticationStateAsync();
-        notification.enteredby = authState.User.Identity.Name;
-        user= authState.User.Identity.Name;
-        notification.expiryDate = DateTime.Now.AddDays(7);
+        notification.modifiedBy = authState.User.Identity.Name;
+        user= authState.User.Identity.Name;        
     }
 
     private async void  HandleValidSubmit()
@@ -123,7 +122,7 @@
         saveSuccess = "";
         try
         {
-            int affectedRows=  await _ndb.AddNotification(notification);      
+            int affectedRows=  await _ndb.UpdateNotification(notification);      
             //save successfully.  Reset form
             if (affectedRows==0)
             {
@@ -136,26 +135,19 @@
                 {
                     _ndb.EmailUsersNotification(notification);
                 }
-                notification=new NotificationModel();
-                EditContext = new EditContext(notification);
-                //set default values
-                notification.enteredby = user;
-                notification.expiryDate = DateTime.Now.AddDays(7);
-                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
-                saveSuccess = "Record Successfully Saved.";
+                saveSuccess = "Record Successfully Updated.";
                 emailUsers = false;
-                base.StateHasChanged();
                 //run the parent procedure
                 await OnSaveNotification.InvokeAsync();
             }
-           
+
         }
         catch(Exception e)
         {
             saveError = e.Message; 
             base.StateHasChanged();
         }
-        
+
     }
 
     private  void  HandleInvalidSubmit()
@@ -164,12 +156,34 @@
         saveError = "Please enter the required fields. Thank you.";
         base.StateHasChanged();                
     }
+
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
         //clear any save messages because we entering new stull
         saveSuccess = "";
         saveError = "";
         emailUsers = false;
+    }
+
+    protected override async void OnParametersSet()
+    {
+        if (parNotification is not null)
+        {
+            notification.dateEntered = parNotification.dateEntered;
+            notification.enteredby = parNotification.enteredby;
+            notification.expiryDate = parNotification.expiryDate;
+            notification.featured = parNotification.featured;
+            notification.header = parNotification.header;
+            notification.id = parNotification.id;
+            notification.message = parNotification.message;
+            notification.modifiedBy = user;     
+            //clear any save messages because we entering new stull
+            saveSuccess = "";
+            saveError = "";
+            emailUsers = false;
+        }
+        
+        base.StateHasChanged();
     }
 
 }

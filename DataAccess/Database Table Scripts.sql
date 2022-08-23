@@ -106,6 +106,8 @@ CREATE TYPE [User_Access] AS TABLE(
 	[dateEntered] [datetime] NOT NULL,
 	[enteredby] [nvarchar](50) NOT NULL,
 	[featured] [bit] NOT NULL,
+	[dateModified] [datetime] NOT NULL,
+	[modifiedBy] [nvarchar](50) NOT NULL
  CONSTRAINT [PK_Notifications] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC

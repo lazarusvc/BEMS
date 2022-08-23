@@ -2,6 +2,7 @@
 @using DataAccessLibrary;
 @inject IDbData _db;
 @attribute [Authorize(Roles = "Administrator")]
+@inject IJSRuntime JS
 
 
 <div class="modal fade" id="editUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -93,8 +94,10 @@
         {
             user.userName = parUser.userName;
             user.userRole = parUser.userRole;
+             saveSuccess = "";
+            saveError = "";
         }
-        
+
         base.StateHasChanged();
     }
 
@@ -112,14 +115,9 @@
                 base.StateHasChanged();
             } else
             {
-                user=new UserModel();
-                EditContext = new EditContext(user);
-                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
                 saveSuccess = "Record Successfully Saved.";
-                base.StateHasChanged();
                 //run the parent procedure
-                await OnSaveUser.InvokeAsync();
-                
+                await OnSaveUser.InvokeAsync();               
             }
            
         }
