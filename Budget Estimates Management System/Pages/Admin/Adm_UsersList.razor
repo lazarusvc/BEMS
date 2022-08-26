@@ -32,7 +32,7 @@
 
        @if (users is not null)
         {
-          @foreach (var user in users.Where(x=>x.userName.Contains(searchfilter)||String.IsNullOrWhiteSpace(searchfilter)).Take(10))
+          @foreach (var user in users.Where(x=>x.userName.Contains(searchfilter)||String.IsNullOrWhiteSpace(searchfilter)))
         {
                   <tr>
           <td>@user.userName</td>

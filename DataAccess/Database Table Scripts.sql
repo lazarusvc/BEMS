@@ -115,3 +115,26 @@ CREATE TYPE [User_Access] AS TABLE(
 ) ON [PRIMARY]
 GO
 
+--Structure Change for when mergers happen
+CREATE TABLE [dbo].[Structure_Change](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[proc_year] [int] NOT NULL,
+	[ministry] [nvarchar](50) NOT NULL,
+	[program] [nvarchar](50) NOT NULL,
+	[subprogram] [nvarchar](50) NOT NULL,
+	[soc] [nvarchar](50) NULL,
+	[account] [nvarchar](50) NULL,
+	[to_ministry] [nvarchar](50) NOT NULL,
+	[to_program] [nvarchar](50) NOT NULL,
+	[to_subprogram] [nvarchar](50) NOT NULL,
+	[to_soc] [nvarchar](50) NULL,
+	[to_account] [nvarchar](50) NULL,
+	[descp] [nvarchar](150) NULL,
+ CONSTRAINT [PK_structure_change] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+

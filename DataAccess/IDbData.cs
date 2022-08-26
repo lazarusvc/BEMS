@@ -21,5 +21,10 @@ namespace DataAccessLibrary
         Task<List<ListItemModel2>> GetUserMinPrograms(string username);
         Task<List<ListItemModel2>> GetSubmittedPrograms(int year);
         Task<List<ListItemModel2>> GetUnSubmittedPrograms(int year);
+        Task<List<StructureChangeModel>> GetAllStructureChanges();
+        Task<StructureChangeModel> GetStructureChange(int id);
+        Task<int> AddStructureChange(StructureChangeModel structureChange);
+        Task<int> RemoveStructureChange(int id);
+        Task<int> UpdateStructureChange(StructureChangeModel structureChange);
     }
 }

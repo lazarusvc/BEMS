@@ -1,0 +1,136 @@
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@attribute [Authorize(Roles = "Administrator")]
+    <p />
+ <div class="input-group mb-3">
+  <label class="input-group-text" for="inputGroupSelect01">Filter by year</label>
+  <select class="form-select" id="inputGroupSelect01"  @onchange="onYearChanged"  >
+    <option value="0" selected>Choose...</option>
+    @if (years is null)
+        {
+            <option selected>Loading...</option>
+        }
+    else 
+        {
+       @foreach (var year in years)
+            {
+                <option value=@year.year>@year.year</option>
+            }
+        }
+  </select>  
+</div>
+<table class="table table-hover ">
+  <thead>
+    <tr>
+        <th scope="col">Year</th>
+      <th scope="col">Description</th>
+      <th scope="col">Ministry</th>
+      <th scope="col">Program</th>
+      <th scope="col">Subprogram</th>
+      <th scope="col">Soc</th>
+      <th scope="col">Account</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>      
+       @if (structureChanges is not null)
+        {
+          @foreach (var sc in structureChanges.Where(x=>x.proc_year==year_selected||year_selected==0))
+        {
+                  <tr>
+          <td>@sc.proc_year</td>
+           <td>@sc.descp</td>
+           <td>@sc.ministry <br><img src="/curved-arrow.png" style="width:25px;height:25px;"> @sc.to_ministry</td>
+            <td>@sc.program <br><img src="/curved-arrow.png" style="width:25px;height:25px;">  @sc.to_program</td>
+             <td>@sc.subprogram <br><img src="/curved-arrow.png" style="width:25px;height:25px;"> @sc.to_subprogram</td>
+            <td>@sc.soc @if (!String.IsNullOrWhiteSpace(sc.to_soc)) {<br><img src="/curved-arrow.png" style="width:25px;height:25px;">  }  @sc.to_soc</td>
+            <td>@sc.account @if (!String.IsNullOrWhiteSpace(sc.to_account)) {<br><img src="/curved-arrow.png" style="width:25px;height:25px;">  }  @sc.to_account</td>
+                <td>
+              <div class="btn-group" role="group">
+               <div class="btn-group me-2" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm" @onclick="()=>{selectedSC=sc;}" data-bs-toggle="modal" data-bs-target="#editNotification" data-toggle="tooltip"  title="Change Notification"><span class="oi oi-pencil"></span></button>                
+              </div>
+
+              <div class="btn-group me-2" role="group" >
+                 <div class="dropdown">
+			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" data-toggle="tooltip"  title="Delete Structure Change">
+				<span class="oi oi-delete"></span>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+				<li><a class="dropdown-item" href="javascript:void(0)" @onclick="()=>{DeleteClicked(sc);}">Delete</a></li>
+			  </ul>
+			</div>
+              </div>            
+            </div>
+
+          </td>
+        </tr> 
+        }
+    }
+  </tbody>
+        <tfoot>
+          <tr>
+              @if (structureChanges is not null)
+                {<td colspan="8" >No Records:  <b>@structureChanges.Where(x=>x.proc_year==year_selected||year_selected==0).Count() </b>  </td>
+                } 
+                else
+                {
+                  <td colspan="8" >No Data Found</td>
+                }
+        </tr>
+      </tfoot>    
+</table>
+
+
+@code {
+
+    private List<StructureChangeModel> structureChanges;
+
+    private StructureChangeModel selectedSC;
+
+    private List<ProcessingYearModel> years;
+    private int year_selected=0;
+
+     protected override async Task OnInitializedAsync()
+    {
+        //Initial Edit Context
+        structureChanges = await _db.GetAllStructureChanges();
+        years = await _db.GetYears();
+    }
+
+     private void onYearChanged(ChangeEventArgs e)
+    {
+        year_selected =  Int16.Parse(e.Value.ToString());
+    }
+    
+    private async void DeleteClicked(StructureChangeModel sc)
+    {
+        //save new record.
+        try
+        {
+            int affectedRows= await _db.RemoveStructureChange(sc.id);          
+            //save successfully.  Reset form
+            if (affectedRows!=0)
+            {
+                //refresh list
+                structureChanges.Remove(sc);
+                //invoke refresh
+                base.StateHasChanged();
+            } 
+
+
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
+
+        private async void RefreshList()
+    {
+        selectedSC = null;
+        structureChanges = await _db.GetAllStructureChanges();
+        base.StateHasChanged();
+    }
+}

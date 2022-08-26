@@ -192,5 +192,86 @@ namespace DataAccessLibrary
 
             return _db.GetListData<ListItemModel2, dynamic>(sql, new { year });
         }
+
+
+        public Task<List<StructureChangeModel>> GetAllStructureChanges()
+        {
+
+            string sql = @"SELECT *
+                            FROM dbo.Structure_Change 
+                            Order by proc_year desc,ministry,program,subprogram,account;                                                   
+                           ";
+
+            return _db.GetListData<StructureChangeModel, dynamic>(sql, new { });
+        }
+
+        public Task<StructureChangeModel> GetStructureChange(int id)
+        {
+
+            string sql = @"SELECT *
+                            FROM dbo.Structure_Change  
+                            WHERe id=@id;
+                           ";
+
+            return _db.GetSingleRowData<StructureChangeModel, dynamic>(sql, new { id });
+        }
+        public Task<int> AddStructureChange(StructureChangeModel structureChange)
+        {
+
+            string sql = @"INSERT INTO Structure_Change([proc_year],
+	                                                    [ministry],
+	                                                    [program],
+	                                                    [subprogram],
+	                                                    [soc],
+	                                                    [account],
+	                                                    [to_ministry],
+	                                                    [to_program],
+	                                                    [to_subprogram],
+	                                                    [to_soc],
+	                                                    [to_account],
+	                                                    [descp])
+                        VALUES(@proc_year,
+	                            @ministry,
+	                            @program,
+	                            @subprogram,
+	                            @soc,
+	                            @account,
+	                            @to_ministry,
+	                            @to_program,
+	                            @to_subprogram,
+	                            @to_soc,
+	                           @to_account,
+	                            @descp);";
+
+            return _db.ExecuteSql<StructureChangeModel>(sql, structureChange);
+        }
+
+        public Task<int> RemoveStructureChange(int id)
+        {
+
+            string sql = @"DELETE FROM Structure_Change
+                           WHERE id=@id;";
+
+            return _db.ExecuteSql(sql, new { id });
+        }
+        public Task<int> UpdateStructureChange(StructureChangeModel structureChange)
+        {
+            string sql = @"UPDATE Structure_Change
+                        SET proc_year=@proc_year,
+	                        ministry= @ministry,
+	                        program= @program,
+	                        subprogram=@subprogram,
+	                        soc= @soc,
+	                        account=@account,
+	                        to_ministry= @to_ministry,
+	                        to_program= @to_program,
+	                        to_subprogram= @to_subprogram,
+	                        to_soc= @to_soc,
+	                        to_account= @to_account,
+	                        descp=  @descp
+                       WHERE id=@id";
+
+            return _db.ExecuteSql<StructureChangeModel>(sql, structureChange);
+        }
     }
 }
