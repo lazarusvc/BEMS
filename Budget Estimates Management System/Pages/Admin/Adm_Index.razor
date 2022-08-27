@@ -13,6 +13,9 @@
 	<li class="nav-item">
 		<a class="nav-link @(whichPage==3?"active":"")" @onclick="()=>{whichPage=3;}" style="cursor:pointer;">Structure Changes</a>
 	</li>
+	<li class="nav-item">
+		<a class="nav-link @(whichPage==4?"active":"")" @onclick="()=>{whichPage=4;}" style="cursor:pointer;">Report Configuration</a>
+	</li>
 </ul>
 @if (whichPage == 1)
 {
@@ -26,6 +29,10 @@ else if (whichPage == 2)
 else if (whichPage == 3)
 {
 	<Adm_StructureChange></Adm_StructureChange>
+}
+else if (whichPage == 4)
+{
+	<p>Reports Configuration</p>
 }
 else
 {
