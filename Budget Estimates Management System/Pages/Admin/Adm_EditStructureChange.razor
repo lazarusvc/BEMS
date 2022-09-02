@@ -5,12 +5,12 @@
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator")]
 
-<div class="modal fade" id="newSC" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="editSC" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
    <EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Add Structure Change</h5>
+        <h5 class="modal-title" id="staticBackdropLabel">Edit Structure Change</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -285,6 +285,8 @@
 
 @code {
     [Parameter]
+    public StructureChangeModel parSC { get; set; }
+    [Parameter]
     public EventCallback OnSaveSC { get; set; }
 
     private EditContext EditContext;
@@ -345,41 +347,27 @@
         saveSuccess = "";
         try
         {
-            int affectedRows=  await _db.AddStructureChange(structureChange);      
+            int affectedRows=  await _db.UpdateStructureChange(structureChange);      
             //save successfully.  Reset form
             if (affectedRows==0)
             {
                 saveError = "Something happened.  Record was not saved";
                 base.StateHasChanged();
             } else
-            {
-                structureChange=new StructureChangeModel();
-                EditContext = new EditContext(structureChange);
-                //set default values
-                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+            {                
                 saveSuccess = "Record Successfully Saved.";
-                //Clear dependant fields
-                programs=null;
-                subprograms=null;
-                accounts=null;
-                accountTypes=null;
-
-                programs2=null;
-                subprograms2=null;
-                accounts2=null;
-                accountTypes2=null;
                 base.StateHasChanged();
                 //run the parent procedure
                 await OnSaveSC.InvokeAsync();
             }
-           
+
         }
         catch(Exception e)
         {
             saveError = e.Message; 
             base.StateHasChanged();
         }
-        
+
     }
 
     private  void  HandleInvalidSubmit()
@@ -410,7 +398,7 @@
         {
             AccountTypeChanged();
         }
-        
+
         if (e.FieldIdentifier.FieldName == "to_ministry")
         {
             MinistryChanged2();
@@ -429,7 +417,7 @@
         }
     }
 
-    
+
     private async void MinistryChanged()
     {
         //need to clear all dependencies        
@@ -473,7 +461,7 @@
         base.StateHasChanged();
     }
 
-      private async void MinistryChanged2()
+    private async void MinistryChanged2()
     {
         //need to clear all dependencies        
         subprograms2=null;
@@ -516,5 +504,50 @@
         base.StateHasChanged();
     }
 
+
+    protected override async void OnParametersSet()
+    {
+        if (parSC is not null)
+        {
+            Reflection.CopyPropertyValues(parSC, structureChange);
+            //Set the drop downs
+			if (structureChange.program is not null)
+			{
+				programs = await _rdb.GetDependantPrograms(structureChange.ministry, username);
+			}
+			if (structureChange.to_program is not null)
+			{
+				programs2 = await _rdb.GetDependantPrograms(structureChange.to_ministry, username);
+			}
+			if (structureChange.subprogram is not null)
+			{
+				subprograms = await _rdb.GetDependantSubPrograms(structureChange.ministry, structureChange.program, username);
+			}
+			if (structureChange.to_subprogram is not null)
+			{
+				subprograms2 = await _rdb.GetDependantSubPrograms(structureChange.to_ministry, structureChange.to_program, username);
+			}
+			if (structureChange.soc is not null)
+			{
+				accountTypes = await _rdb.GetDependantAccountTypes(structureChange.ministry, structureChange.program, structureChange.subprogram, username);
+			}
+			if (structureChange.to_soc is not null)
+			{
+				accountTypes2 = await _rdb.GetDependantAccountTypes(structureChange.to_ministry, structureChange.to_program, structureChange.to_subprogram, username);
+			}
+			if (structureChange.account is not null)
+			{
+				accounts = await _rdb.GetDependantAccounts(structureChange.ministry, structureChange.program, structureChange.subprogram, structureChange.soc, username);
+			}
+			if (structureChange.to_account is not null)
+			{
+				accounts2 = await _rdb.GetDependantAccounts(structureChange.to_ministry, structureChange.to_program, structureChange.to_subprogram, structureChange.to_soc, username);
+			}
+            saveSuccess = "";
+            saveError = "";
+        }
+
+        base.StateHasChanged();
+    }
 
 }

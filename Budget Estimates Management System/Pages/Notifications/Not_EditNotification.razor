@@ -169,14 +169,7 @@
     {
         if (parNotification is not null)
         {
-            notification.dateEntered = parNotification.dateEntered;
-            notification.enteredby = parNotification.enteredby;
-            notification.expiryDate = parNotification.expiryDate;
-            notification.featured = parNotification.featured;
-            notification.header = parNotification.header;
-            notification.id = parNotification.id;
-            notification.message = parNotification.message;
-            notification.modifiedBy = user;     
+            Reflection.CopyPropertyValues(parNotification, notification);
             //clear any save messages because we entering new stull
             saveSuccess = "";
             saveError = "";

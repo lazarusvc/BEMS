@@ -92,8 +92,9 @@
     {
         if (parUser is not null)
         {
-            user.userName = parUser.userName;
-            user.userRole = parUser.userRole;
+            Reflection.CopyPropertyValues(parUser, user);
+            //user.userName = parUser.userName;
+            //user.userRole = parUser.userRole;
              saveSuccess = "";
             saveError = "";
         }
