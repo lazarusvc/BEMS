@@ -3,23 +3,30 @@
 @inject IDbData _db;
 @attribute [Authorize(Roles = "Administrator")]
 <br />
- <div class="input-group mb-3">
-  <label class="input-group-text" for="inputGroupSelect01">Filter by year</label>
-  <select class="form-select" id="inputGroupSelect01"  @onchange="onYearChanged" >
-    <option value="0" selected>Choose...</option>
-    @if (years is null)
-        {
-            <option selected>Loading...</option>
-        }
-    else 
-        {
-       @foreach (var year in years)
-            {
-                <option value=@year.year selected=@(year.ready_for_data_entry? true:false)>@year.year</option>
-            }
-        }
-  </select>  
-  <button type="button" class="btn btn-outline-success " data-bs-toggle="modal" data-bs-target="#newSC"  title="Add Structure Change">New Structure Change <span class="oi oi-plus"></span></button>                              
+  <div class="row">
+	<div class="col-3">
+		<div class="input-group mb-3">
+			<label class="input-group-text" for="inputGroupSelect01">Filter by year</label>
+			<select class="form-select" id="inputGroupSelect01" @onchange="onYearChanged">
+				<option value="0" selected>Choose...</option>
+				@if (years is null)
+				{
+					<option selected>Loading...</option>
+				}
+				else
+				{
+					@foreach (var year in years)
+					{
+						<option value=@year.year selected=@(year.ready_for_data_entry? true:false)>@year.year</option>
+					}
+				}
+			</select>
+		</div>
+       
+	</div>
+    <div class="col-3">
+        <button type="button" class="btn btn-outline-success " data-bs-toggle="modal" data-bs-target="#newSC" title="Add Structure Change"><span class="oi oi-plus"></span> New Structure Change </button>
+    </div>
 </div>
 <table class="table table-hover ">
   <thead>

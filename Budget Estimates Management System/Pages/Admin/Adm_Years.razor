@@ -6,6 +6,8 @@
 @inject IJSRuntime JS
 
 <br />
+  <div class="row">
+        <div class="col-3">
 <div class="input-group mb-3">
   <label class="input-group-text" for="inputGroupSelect01">Budgeting Year</label>
   <select class="form-select" id="inputGroupSelect01"  @onchange="onYearChanged"  >
@@ -23,7 +25,8 @@
         }
   </select>  
 </div>
-
+</div>
+</div>
 <button type="button" class="btn btn-outline-success" disabled=@isOpenDisabled @onclick="OpenYear">Open a Budget Year: @(year_selected==0?"":year_selected)</button>
 <button type="button" class="btn btn-outline-dark" disabled=@isCloseDisabled @onclick="CloseYear">Close the Budget Year: @(year_selected==0?"":year_selected)</button>
 <button type="button" class="btn btn-outline-secondary" disabled=@isCreateDisabled @onclick="CreateYear">Create a New Budget Year</button>
