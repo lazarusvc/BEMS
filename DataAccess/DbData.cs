@@ -335,7 +335,7 @@ namespace DataAccessLibrary
                             ,[parSubprogram]=@parSubprogram
                             ,[parSOC]=@parSOC
                             ,[parAccount]=@parAccount
-                        WHERE id=@id;  ;";
+                        WHERE id=@id;";
 
             return _db.ExecuteSql<ReportConfigModel>(sql, reportConfig);
         }
