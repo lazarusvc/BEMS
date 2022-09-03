@@ -210,7 +210,7 @@ namespace DataAccessLibrary
 
             string sql = @"SELECT *
                             FROM dbo.Structure_Change  
-                            WHERe id=@id;
+                            WHERE id=@id;
                            ";
 
             return _db.GetSingleRowData<StructureChangeModel, dynamic>(sql, new { id });
@@ -272,6 +272,72 @@ namespace DataAccessLibrary
                        WHERE id=@id";
 
             return _db.ExecuteSql<StructureChangeModel>(sql, structureChange);
+        }
+
+        public Task<List<ReportConfigModel>> GetAllReportConfig()
+        {
+            string sql = @"SELECT *
+                            FROM dbo.Report_Config
+                            Order by reportDesc;                                                   
+                           ";
+
+            return _db.GetListData<ReportConfigModel, dynamic>(sql, new { });
+        }
+
+        public Task<ReportConfigModel> GetReportConfig(int id)
+        {
+            string sql = @"SELECT *
+                            FROM dbo.Report_Config
+                            WHERE id=@id;
+                           ";
+
+            return _db.GetSingleRowData<ReportConfigModel, dynamic>(sql, new { id });
+        }
+
+        public Task<int> AddReportConfig(ReportConfigModel reportConfig)
+        {
+            string sql = @"INSERT INTO Report_Config([reportId]
+                                                      ,[reportDesc]
+                                                      ,[parUser]
+                                                      ,[parMinistry]
+                                                      ,[parProgram]
+                                                      ,[parSubprogram]
+                                                      ,[parSOC]
+                                                      ,[parAccount])
+                            VALUES(@reportId
+                                  ,@reportDesc
+                                  ,@parUser
+                                  ,@parMinistry
+                                  ,@parProgram
+                                  ,@parSubprogram
+                                  ,@parSOC
+                                  ,@parAccount);";
+
+            return _db.ExecuteSql<ReportConfigModel>(sql, reportConfig);
+        }
+
+        public Task<int> RemoveReportConfig(int id)
+        {
+            string sql = @"DELETE FROM Report_Config
+                           WHERE id=@id;";
+
+            return _db.ExecuteSql(sql, new { id });
+        }
+
+        public Task<int> UpdateReportConfig(ReportConfigModel reportConfig)
+        {
+            string sql = @"UPDATE Report_Config
+                            set [reportId]=@reportId
+                            ,[reportDesc]=@reportDesc
+                            ,[parUser]=@parUser
+                            ,[parMinistry]=@parMinistry
+                            ,[parProgram]=@parProgram
+                            ,[parSubprogram]=@parSubprogram
+                            ,[parSOC]=@parSOC
+                            ,[parAccount]=@parAccount
+                        WHERE id=@id;  ;";
+
+            return _db.ExecuteSql<ReportConfigModel>(sql, reportConfig);
         }
     }
 }

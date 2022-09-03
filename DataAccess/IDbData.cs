@@ -26,5 +26,10 @@ namespace DataAccessLibrary
         Task<int> AddStructureChange(StructureChangeModel structureChange);
         Task<int> RemoveStructureChange(int id);
         Task<int> UpdateStructureChange(StructureChangeModel structureChange);
+        Task<List<ReportConfigModel>> GetAllReportConfig();
+        Task<ReportConfigModel> GetReportConfig(int id);
+        Task<int> AddReportConfig(ReportConfigModel reportConfig);
+        Task<int> RemoveReportConfig(int id);
+        Task<int> UpdateReportConfig(ReportConfigModel reportConfig);
     }
 }

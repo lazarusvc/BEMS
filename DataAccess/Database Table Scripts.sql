@@ -137,4 +137,19 @@ CREATE TABLE [dbo].[Structure_Change](
 ) ON [PRIMARY]
 GO
 
-
+--Report Configuration
+CREATE TABLE [dbo].[Report_Config](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[reportId] [varchar](50) NOT NULL,
+	[reportDesc] [varchar](50) NOT NULL,
+	[parUser] [bit] NOT NULL,
+	[parMinistry] [bit] NOT NULL,
+	[parProgram] [bit] NOT NULL,
+	[parSubprogram] [bit] NOT NULL,
+	[parSOC] [bit] NOT NULL,
+	[parAccount] [bit] NOT NULL,
+ CONSTRAINT [PK_Report_Config] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
