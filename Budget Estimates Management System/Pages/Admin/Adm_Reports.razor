@@ -36,7 +36,7 @@
 
        @if (reports is not null)
         {
-          @foreach (var item in reports.Where(x=>x.reportDesc.Contains(searchfilter)||String.IsNullOrWhiteSpace(searchfilter)))
+            @foreach (var item in reports.Where(x => x.reportDesc.ToLower().Contains(searchfilter.ToLower()) || String.IsNullOrWhiteSpace(searchfilter)))
         {
                   <tr>
           <td>@item.reportDesc</td>
@@ -52,7 +52,7 @@
                         <td>
               <div class="btn-group" role="group">
               <div class="btn-group me-2" role="group">
-                <button type="button" class="btn btn-outline-primary btn-sm" @onclick="()=>{selectedReport=item;}" data-bs-toggle="modal" data-bs-target="#editUser" data-toggle="tooltip"  title="Change Role"><span class="oi oi-pencil"></span></button>                
+                <button type="button" class="btn btn-outline-primary btn-sm" @onclick="()=>{selectedReport=item;}" data-bs-toggle="modal" data-bs-target="#editReport" data-toggle="tooltip"  title="Change Role"><span class="oi oi-pencil"></span></button>                
               </div>              
               <div class="btn-group me-2" role="group" >
                  <div class="dropdown">
@@ -70,6 +70,7 @@
         </tr> 
         }
     }
+        
 
   </tbody>
         <tfoot>
@@ -87,7 +88,8 @@
       </tfoot>    
 </table>
 
-
+<Adm_AddReport OnSaveReport="RefreshList"></Adm_AddReport>
+<Adm_EditReport OnSaveReport="RefreshList" parReport="selectedReport"></Adm_EditReport>
 
 @code {
 
