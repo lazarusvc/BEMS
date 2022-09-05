@@ -1,7 +1,84 @@
 ﻿@page "/reports"
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@inject AuthenticationStateProvider authStateProvider;
+
 
 <h1>Reports</h1>
 
-@code {
+<div class="row">
+<div class="col-3">
+		<div class="input-group mb-3">
+			<label class="input-group-text" for="inputGroupSelect01">Year</label>
+			<select class="form-select" id="inputGroupSelect01" @onchange="onYearChanged">
+				<option value="0" selected>Choose...</option>
+				@if (years is null)
+				{
+					<option selected>Loading...</option>
+				}
+				else
+				{
+					@foreach (var year in years)
+					{
+						<option value=@year.year>@year.displayYear @(year.year_closed ? "(Year Closed)" : "") @(!year.ready_for_data_entry && !year.year_closed ? "(Not Open)" : "")</option>
+					}
+				}
+			</select>
+		</div>
+       
+	</div>
 
+	<div class="col-3">
+		<div class="input-group mb-3">
+			<label class="input-group-text" for="inputGroupSelect01">Report</label>
+			<select class="form-select" id="inputGroupSelect01" @onchange="onReportChanged">
+				<option value="0" selected>Choose...</option>
+				@if (reports is null)
+				{
+					<option selected>Loading...</option>
+				}
+				else
+				{
+					@foreach (var report in reports)
+					{
+						<option value=@report.id>@report.reportDesc</option>
+					}
+				}
+			</select>
+		</div>
+
+	</div>
+</div>
+
+<div class="row">
+
+</div>
+
+@code {
+	private List<ProcessingYearModel> years;
+	private List<ReportConfigModel> reports;
+	private int year_selected = 0;
+	private ReportConfigModel report;
+
+	protected override async Task OnInitializedAsync()
+	{
+		//Initial Edit Context
+		years = await _db.GetYears();
+		year_selected = years.Where(y => y.ready_for_data_entry).FirstOrDefault().year;
+		var authState = await authStateProvider.GetAuthenticationStateAsync();
+		//get the reports
+		reports = await _db.GetAllReportConfig();
+		if (!authState.User.IsInRole("MinistryStaff")) { return; }
+		years = years.FindAll(e => e.ready_for_data_entry == true||e.year_closed==true);
+	}
+
+	private void onYearChanged(ChangeEventArgs e)
+	{
+		year_selected = Int16.Parse(e.Value.ToString());
+	}
+
+	private void onReportChanged(ChangeEventArgs e)
+	{
+	}
 }

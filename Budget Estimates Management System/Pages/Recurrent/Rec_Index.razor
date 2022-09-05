@@ -45,7 +45,7 @@
         //if dataentry then remove years which are not ready
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         if (!authState.User.IsInRole("MinistryStaff")) { return; }
-        years = years.FindAll(e => e.ready_for_data_entry == true);
+        years = years.FindAll(e => e.ready_for_data_entry == true||e.year_closed==true);
         
     }
    
