@@ -2,12 +2,13 @@
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IDbData _db;
+@inject IRecEstimateData _rdb;
 @inject AuthenticationStateProvider authStateProvider;
 
 
 <h1>Reports</h1>
 
-<div class="row">
+<div class="row" style="background-color:darkkhaki; padding-top:15px">
 <div class="col-3">
 		<div class="input-group mb-3">
 			<label class="input-group-text" for="inputGroupSelect01">Year</label>
@@ -21,7 +22,7 @@
 				{
 					@foreach (var year in years)
 					{
-						<option value=@year.year>@year.displayYear @(year.year_closed ? "(Year Closed)" : "") @(!year.ready_for_data_entry && !year.year_closed ? "(Not Open)" : "")</option>
+						<option value=@year.year selected=@(year.ready_for_data_entry? true:false)>@year.displayYear @(year.year_closed ? "(Year Closed)" : "") @(!year.ready_for_data_entry && !year.year_closed ? "(Not Open)" : "")</option>
 					}
 				}
 			</select>
@@ -51,15 +52,51 @@
 	</div>
 </div>
 
-<div class="row">
-
+@if (reportSelected is not null) {
+	<div class="row"style="background-color:lightgoldenrodyellow; padding-top:15px">
+		@if (reportSelected.parMinistry || reportSelected.parProgram)
+		{
+			<div class="col-3">
+			<div class="input-group mb-3">
+				<label class="input-group-text" for="inputGroupSelect01">Ministry</label>
+				<select class="form-select" id="parMinistry" @onchange="MinistryChanged">
+					@if (ministries is null)
+					{
+						<option selected>Loading...</option>
+					}
+					else
+					{
+						@foreach (var item in ministries)
+						{
+							<option value=@item.Name>@item.Name - @item.Description</option>
+						}
+					}
+				</select>
+			</div>
+		</div>
+	}
 </div>
+}
 
 @code {
 	private List<ProcessingYearModel> years;
 	private List<ReportConfigModel> reports;
 	private int year_selected = 0;
-	private ReportConfigModel report;
+	private ReportConfigModel reportSelected = new ReportConfigModel();
+
+	private string username;
+
+	private List<ListItemModel> ministries;
+	private List<ListItemModel> programs;
+	private List<ListItemModel> subprograms;
+	private List<ListItemModel> accountTypes;
+	private List<ListItemModel> accounts;
+
+	private string parMinistry;
+	private string parProgram;
+	private string parSubProg;
+	private string parSOC;
+	private string parAccount;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -67,10 +104,12 @@
 		years = await _db.GetYears();
 		year_selected = years.Where(y => y.ready_for_data_entry).FirstOrDefault().year;
 		var authState = await authStateProvider.GetAuthenticationStateAsync();
+		username = authState.User.Identity.Name;
 		//get the reports
 		reports = await _db.GetAllReportConfig();
 		if (!authState.User.IsInRole("MinistryStaff")) { return; }
 		years = years.FindAll(e => e.ready_for_data_entry == true||e.year_closed==true);
+
 	}
 
 	private void onYearChanged(ChangeEventArgs e)
@@ -78,7 +117,37 @@
 		year_selected = Int16.Parse(e.Value.ToString());
 	}
 
-	private void onReportChanged(ChangeEventArgs e)
+	private async void onReportChanged(ChangeEventArgs e)
 	{
+		try
+		{
+			reportSelected = reports.Where(x => x.id.ToString().Equals(e.Value.ToString())).FirstOrDefault();
+			if (reportSelected is not null && (reportSelected.parMinistry || reportSelected.parProgram))
+			{ ministries = await _rdb.GetDependantMinistries(username); 
+			}
+		}
+		catch (Exception)
+		{
+
+			reportSelected = null;
+		}
+
+
+
+	}
+
+	private async void MinistryChanged(ChangeEventArgs e)
+	{
+		parMinistry = e.Value.ToString();
+		//need to clear all dependencies
+		parProgram = null;
+		parSubProg = null;
+		parAccount = null;
+		parSOC = null;
+		if (reportSelected.parProgram)
+		{
+			programs = await _rdb.GetDependantPrograms(parMinistry, username);
+		}
+		base.StateHasChanged();
 	}
 }
