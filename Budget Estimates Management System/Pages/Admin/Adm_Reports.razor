@@ -23,12 +23,12 @@
     <tr>
       <th scope="col">Description</th>
       <th scope="col">Report Id</th>
-        <th scope="col">User</th>
-        <th scope="col">Mininistry</th>
-        <th scope="col">Program</th>
-        <th scope="col">Sub Program</th>
-        <th scope="col">SOC</th>
-        <th scope="col">Account</th>
+            <th style="text-align: center">User</th>
+            <th style="text-align: center">Mininistry</th>
+            <th style="text-align: center">Program</th>
+        <th  style="text-align: center">Sub Program</th>
+            <th style="text-align: center">SOC</th>
+            <th style="text-align: center">Account</th>
       <th scope="col"></th>
     </tr>
   </thead>
@@ -43,12 +43,12 @@
                         <td>
                             @item.reportId                     
                         </td>
-                    <td>@item.parUser</td>
-                    <td>@item.parMinistry</td>
-                    <td>@item.parProgram</td>
-                    <td>@item.parSubprogram</td>
-                    <td>@item.parSOC</td>
-                    <td>@item.parAccount</td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parUser" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parMinistry" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parProgram" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parSubprogram" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parSOC" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parAccount" onclick="return false;"></td>
                         <td>
               <div class="btn-group" role="group">
               <div class="btn-group me-2" role="group">

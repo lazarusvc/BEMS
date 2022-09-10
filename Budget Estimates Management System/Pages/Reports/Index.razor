@@ -49,6 +49,10 @@
 		</div>
 
 	</div>
+	<div class="col-3">
+		<button class="btn btn-outline-primary" @onclick="RunReport"><span class="oi oi-bar-chart"></span> Run Report</button>
+
+	</div>
 </div>
 
 @if (reportSelected is not null) {
@@ -214,6 +218,12 @@
 		try
 		{
 			reportSelected = reports.Where(x => x.id.ToString().Equals(e.Value.ToString())).FirstOrDefault();
+			//Reset drop lists
+			ministries=null;
+			programs=null;
+			subprograms=null;
+			accountTypes=null;
+			accounts = null;
 			if (reportSelected is not null && (reportSelected.parMinistry))
 			{ ministries = await _rdb.GetDependantMinistries(username); 
 			}
@@ -277,10 +287,11 @@
 		parSOC = e.Value.ToString();
 		//need to clear all dependencies
 		parAccount = null;
-		if (reportSelected.parSOC)
+		if (reportSelected.parMinistry||reportSelected.parSOC)
 		{
 			accounts = await _rdb.GetDependantAccounts(parMinistry,parProgram,parSubProg,parSOC,username);
 		}
+		accounts = await _rdb.GetDependantAccounts(parSOC);
 		base.StateHasChanged();
 	}
 
@@ -289,4 +300,7 @@
 		parAccount = e.Value.ToString();				
 	}
 
+	private void RunReport()
+	{ 
+	}
 }
