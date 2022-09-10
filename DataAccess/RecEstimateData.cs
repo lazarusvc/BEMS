@@ -212,6 +212,16 @@ namespace DataAccessLibrary
             return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram, username });
         }
 
+        public Task<List<ListItemModel>> GetAllAccountTypes()
+        {
+            string sql = @"SELECT distinct Name, Description 
+                            FROM [dbo].[vw_ss_account_name] a
+                            INNER JOIN  vw_ss_ledger_accounts b ON a.Name=LEFT(b.account,3)                            
+                            ORDER BY Name";
+
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { });
+        }
+
         public Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program, string subprogram, string acctype, string username)
         {
             username = username.ToLower();

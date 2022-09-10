@@ -13,7 +13,6 @@
 		<div class="input-group mb-3">
 			<label class="input-group-text" for="inputGroupSelect01">Year</label>
 			<select class="form-select" id="inputGroupSelect01" @onchange="onYearChanged">
-				<option value="0" selected>Choose...</option>
 				@if (years is null)
 				{
 					<option selected>Loading...</option>
@@ -33,14 +32,14 @@
 	<div class="col-3">
 		<div class="input-group mb-3">
 			<label class="input-group-text" for="inputGroupSelect01">Report</label>
-			<select class="form-select" id="inputGroupSelect01" @onchange="onReportChanged">
-				<option value="0" selected>Choose...</option>
+			<select class="form-select" id="inputGroupSelect01" @onchange="onReportChanged">				
 				@if (reports is null)
 				{
 					<option selected>Loading...</option>
 				}
 				else
 				{
+					<option value="0" selected>Choose...</option>
 					@foreach (var report in reports)
 					{
 						<option value=@report.id>@report.reportDesc</option>
@@ -53,10 +52,11 @@
 </div>
 
 @if (reportSelected is not null) {
-	<div class="row"style="background-color:lightgoldenrodyellow; padding-top:15px">
-		@if (reportSelected.parMinistry || reportSelected.parProgram)
+	<div class="row" style="background-color:lightgoldenrodyellow; padding-top:15px">
+		
+		@if (reportSelected.parMinistry)
 		{
-			<div class="col-3">
+			<div class="col-4">
 			<div class="input-group mb-3">
 				<label class="input-group-text" for="inputGroupSelect01">Ministry</label>
 				<select class="form-select" id="parMinistry" @onchange="MinistryChanged">
@@ -66,6 +66,7 @@
 					}
 					else
 					{
+							<option value="" selected>Choose...</option>
 						@foreach (var item in ministries)
 						{
 							<option value=@item.Name>@item.Name - @item.Description</option>
@@ -75,7 +76,98 @@
 			</div>
 		</div>
 	}
-</div>
+	@if (reportSelected.parProgram)
+		{
+			<div class="col-4">
+			<div class="input-group mb-3">
+				<label class="input-group-text" for="inputGroupSelect01">Program</label>
+				<select class="form-select" id="parProgram" @onchange="ProgramChanged">
+					@if (programs is null)
+					{
+						<option selected>Select Ministry First...</option>
+					}
+					else
+					{
+							<option value="" selected>Choose...</option>
+						@foreach (var item in programs)
+						{
+							<option value=@item.Name>@item.Name - @item.Description</option>
+						}
+					}
+				</select>
+			</div>
+		</div>
+	}
+		@if (reportSelected.parSubprogram)
+		{
+			<div class="col-4">
+				<div class="input-group mb-3">
+					<label class="input-group-text" for="inputGroupSelect01">Sub-Program</label>
+					<select class="form-select" id="parSubprogram" @onchange="SubProgramChanged">
+						@if (subprograms is null)
+						{
+							<option selected>Select Program First...</option>
+						}
+						else
+						{
+							<option value="" selected>Choose...</option>
+							@foreach (var item in subprograms)
+							{
+								<option value=@item.Name>@item.Name - @item.Description</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+		}
+	</div>
+
+	<div class="row" style="background-color:lightgoldenrodyellow; padding-top:15px">
+		@if (reportSelected.parSOC)
+		{
+			<div class="col-4">
+				<div class="input-group mb-3">
+					<label class="input-group-text" for="inputGroupSelect01">SOC</label>
+					<select class="form-select" id="parSOC" @onchange="AccountTypeChanged">
+						@if (accountTypes is null)
+						{
+							<option selected>Select Sub-Program First...</option>
+						}
+						else
+						{
+							<option value="" selected>Choose...</option>
+							@foreach (var item in accountTypes)
+							{
+								<option value=@item.Name>@item.Name - @item.Description</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+		}
+		@if (reportSelected.parAccount)
+		{
+			<div class="col-4">
+				<div class="input-group mb-3">
+					<label class="input-group-text" for="inputGroupSelect01">Account</label>
+					<select class="form-select" id="parAccount" @onchange="AccountChanged">
+						@if (accounts is null)
+						{
+							<option selected>Select SOC First...</option>
+						}
+						else
+						{
+							<option value="" selected>Choose...</option>
+							@foreach (var item in accounts)
+							{
+								<option value=@item.Name>@item.Name - @item.Description</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+		}
+	</div>
 }
 
 @code {
@@ -122,18 +214,20 @@
 		try
 		{
 			reportSelected = reports.Where(x => x.id.ToString().Equals(e.Value.ToString())).FirstOrDefault();
-			if (reportSelected is not null && (reportSelected.parMinistry || reportSelected.parProgram))
+			if (reportSelected is not null && (reportSelected.parMinistry))
 			{ ministries = await _rdb.GetDependantMinistries(username); 
 			}
+			if (reportSelected is not null && (!reportSelected.parMinistry&& reportSelected.parSOC))
+			{
+				accountTypes = await _rdb.GetAllAccountTypes();
+			}
+			base.StateHasChanged();
 		}
 		catch (Exception)
 		{
 
 			reportSelected = null;
 		}
-
-
-
 	}
 
 	private async void MinistryChanged(ChangeEventArgs e)
@@ -150,4 +244,49 @@
 		}
 		base.StateHasChanged();
 	}
+
+	private async void ProgramChanged(ChangeEventArgs e)
+	{
+		parProgram = e.Value.ToString();
+		//need to clear all dependencies
+		parSubProg = null;
+		parAccount = null;
+		parSOC = null;
+		if (reportSelected.parSubprogram)
+		{
+			subprograms = await _rdb.GetDependantSubPrograms(parMinistry, parProgram, username);
+		}
+		base.StateHasChanged();
+	}
+
+	private async void SubProgramChanged(ChangeEventArgs e)
+	{
+		parSubProg = e.Value.ToString();
+		//need to clear all dependencies
+		parAccount = null;
+		parSOC = null;
+		if (reportSelected.parSOC)
+		{
+			accountTypes = await _rdb.GetDependantAccountTypes(parMinistry, parProgram, parSubProg, username);
+		}
+		base.StateHasChanged();
+	}
+
+	private async void AccountTypeChanged(ChangeEventArgs e)
+	{
+		parSOC = e.Value.ToString();
+		//need to clear all dependencies
+		parAccount = null;
+		if (reportSelected.parSOC)
+		{
+			accounts = await _rdb.GetDependantAccounts(parMinistry,parProgram,parSubProg,parSOC,username);
+		}
+		base.StateHasChanged();
+	}
+
+	private async void AccountChanged(ChangeEventArgs e)
+	{
+		parAccount = e.Value.ToString();				
+	}
+
 }
