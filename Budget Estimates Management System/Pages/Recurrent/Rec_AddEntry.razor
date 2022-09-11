@@ -356,7 +356,7 @@
         }
     }
 
-    
+
     private async void MinistryChanged()
     {
         //need to clear all dependencies        
@@ -452,7 +452,7 @@
             if (accounts is null) { accounts = await _rdb.GetDependantAccounts(entry.ministry, entry.program, entry.subprog, accountType,username); }
         }
         entry.account =null;
-	    entry.modified_by = username;
+        entry.modified_by = username;
         entry.project="";
         entry.sector = "";
         entry.sof = "";
@@ -466,6 +466,8 @@
         try
         {
             entry.last_modified =DateTime.Now;
+            entry.is_adjustment = false;
+            entry.modified_by = username;
             int affectedRows=  await _rdb.AddNewRecEntry(entry);      
             //save successfully.  Reset form
             if (affectedRows==0)

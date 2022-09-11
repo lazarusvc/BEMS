@@ -30,6 +30,7 @@ is_by_law bit NOT NULL,
 comment nvarchar(150),
 flagged bit NOT NULL,
 flagged_comment nvarchar(150),
+is_adjustment bit NOT NULL,
 modified_by nvarchar(50),
 last_modified datetime,
 entry_status_id tinyint NOT NULL

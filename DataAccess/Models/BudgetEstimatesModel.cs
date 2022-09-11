@@ -47,6 +47,8 @@ namespace DataAccessLibrary.Models
         public bool is_by_law { get; set; }
         public string comment { get; set; }
         public bool flagged { get; set; }
+        [Required]
+        public bool is_adjustment { get; set; }
         public string flagged_comment { get; set; }
         public string modified_by { get; set; }
         public DateTime last_modified { get; set; }

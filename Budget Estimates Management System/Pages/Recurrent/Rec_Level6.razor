@@ -51,13 +51,16 @@
                     }  
                  <tr >
                       <td colspan="7"><button type="button" class="btn btn-outline-success" @onclick="AddRow" disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)"><span class="oi oi-plus"></span> Add Row</button>
+                          <AuthorizeView  Roles="Administrator, BudgetStaff">
+                    <button type="button" class="btn btn-outline-secondary" disabled="@(status==(int)EntryStatus.Unsubmitted?true:false)" data-bs-toggle="modal" data-bs-target="#newAdjustment"><span class="oi oi-pie-chart"></span> Budget Adjustment</button>
+                          </AuthorizeView>
                           </td>
                  </tr>
 
                   
                 }
         }
-
+<Rec_Adjustment year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@item.item.Substring(0,3) account=@item.item OnSaveEntry="OnSaveEntry"></Rec_Adjustment>
 
 @code {
     [Parameter]
@@ -99,8 +102,6 @@
     private async void AddRow()
     {
         //save new record.
-        //TODO:  Use user names
-        //TODO: FIx flag
         try
         {
             BudgetEstimatesModel mapped = new BudgetEstimatesModel();
@@ -169,5 +170,12 @@
         }
     }        
 
+
+    private async void OnSaveEntry()
+    {
+            //refresh list
+            accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
+            base.StateHasChanged();
+    }
     
 }

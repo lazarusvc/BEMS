@@ -33,6 +33,7 @@ namespace DataAccessLibrary
 
         public Task<List<GroupingModel>> GetMinDataForYear(int year, string username)
         {
+            if (username is null) { username="!"; }
             username=username.ToLower();
             string sql = @"SELECT be.ministry as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
@@ -49,6 +50,7 @@ namespace DataAccessLibrary
 
         public Task<List<GroupingModel>> GetProgramDataForYear(int year, string ministry, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT be.program as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
@@ -65,7 +67,10 @@ namespace DataAccessLibrary
         }
 
         public Task<List<GroupingModel>> GetSubProgramDataForYear(int year, string ministry, string program, string username)
-        {
+        {if (username is null)
+            {
+                username = "!";
+            }
             username = username.ToLower();
             string sql = @"SELECT be.subprog as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName, max([vw_subprogram_sub_apv].status) as status
@@ -87,7 +92,10 @@ namespace DataAccessLibrary
         }
 
         public Task<List<GroupingModel>> GetAccountTypeDataForYear(int year, string ministry, string program, string subprogram, string username)
-        {
+        {if (username is null)
+            {
+                username = "!";
+            }
             username = username.ToLower();
             string sql = @"SELECT SUBSTRING(be.account,1,3) as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
@@ -114,7 +122,10 @@ namespace DataAccessLibrary
         }
 
         public Task<List<GroupingModel>> GetAccountDataForYear(int year, string ministry, string program, string subprogram, string accountType, string username)
-        {
+        {if (username is null)
+            {
+                username = "!";
+            }
             username = username.ToLower();
             string sql = @"SELECT be.account as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
@@ -143,6 +154,7 @@ namespace DataAccessLibrary
         }
         public Task<List<ListItemModel>> GetDependantMinistries(string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT distinct Name , Description 
                             FROM [dbo].[vw_ss_ministry_name] a
@@ -155,6 +167,7 @@ namespace DataAccessLibrary
         }
         public Task<List<ListItemModel>> GetDependantPrograms(string ministry, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @" SELECT distinct Name, Description 
                             FROM [dbo].[vw_ss_program_name] a
@@ -168,6 +181,7 @@ namespace DataAccessLibrary
         }
         public Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string program, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT distinct Name, Description 
                             FROM [dbo].[vw_ss_subprog_name] a
@@ -183,6 +197,7 @@ namespace DataAccessLibrary
 
         public Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT distinct Name, Description 
                             FROM [dbo].[vw_ss_subprog_name] a
@@ -197,6 +212,7 @@ namespace DataAccessLibrary
         }
         public Task<List<ListItemModel>> GetDependantAccountTypes(string ministry, string program, string subprogram, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT distinct Name, Description 
                             FROM [dbo].[vw_ss_account_name] a
@@ -224,6 +240,7 @@ namespace DataAccessLibrary
 
         public Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program, string subprogram, string acctype, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT distinct Name, Description 
                             FROM [dbo].[vw_ss_account_name] a
@@ -287,6 +304,7 @@ namespace DataAccessLibrary
                             ,[comment]
                             ,[flagged]
                             ,[flagged_comment]
+                            ,[is_adjustment]
                             ,[modified_by]
                             ,[last_modified]
                             ,[entry_status_id]
@@ -309,6 +327,7 @@ namespace DataAccessLibrary
                             ,@comment
                             ,@flagged
                             ,@flagged_comment
+                            ,@is_adjustment
                             ,@modified_by
                             ,@last_modified
                             ,@entry_status_id
@@ -345,6 +364,7 @@ namespace DataAccessLibrary
                             ,last_modified=@last_modified
                             ,entry_status_id=@entry_status_id
                             ,label=@label
+                            ,is_adjustment=@is_adjustment
                          WHERE id=@id";
 
             return _db.ExecuteSql<BudgetEstimatesModel>(sql, bem);
@@ -401,7 +421,10 @@ namespace DataAccessLibrary
         }
 
         public Task<List<GroupingModel>> GetSOCMinDataForYear(int year, string soc, string username)
-        {
+        {if (username is null)
+            {
+                username = "!";
+            }
             username = username.ToLower();
             string sql = @"SELECT be.ministry as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
@@ -418,7 +441,10 @@ namespace DataAccessLibrary
         }
 
         public Task<List<GroupingModel>> GetSOCProgramDataForYear(int year, string soc,string ministry, string username)
-        {
+        {if (username is null)
+            {
+                username = "!";
+            }
             username = username.ToLower();
             string sql = @"SELECT be.program as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
@@ -437,6 +463,7 @@ namespace DataAccessLibrary
 
         public Task<List<GroupingModel>> GetSOCSubProgramDataForYear(int year, string soc, string ministry, string program, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT be.subprog as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName, max([vw_subprogram_sub_apv].status) as status
@@ -461,6 +488,7 @@ namespace DataAccessLibrary
 
         public Task<List<GroupingModel>> GetSOCAccountDataForYear(int year, string ministry, string program, string subprogram, string accountType, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT be.account as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
