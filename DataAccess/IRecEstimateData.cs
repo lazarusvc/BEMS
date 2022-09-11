@@ -14,9 +14,7 @@ namespace DataAccessLibrary
         Task<List<ListItemModel>> GetDependantPrograms(string ministry, string username);
         Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string program, string username);
         Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string username);
-        Task<List<ListItemModel>> GetDependantAccountTypes(string ministry, string program, string subprogram, string username);
-        Task<List<ListItemModel>> GetAllAccountTypes();
-        Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program, string subprogram, string acctype, string username);
+        Task<List<ListItemModel>> GetDependantAccountTypes();
         Task<List<ListItemModel>> GetDependantAccounts(string acctype);
         Task<List<ListItemModel>> GetEnteredAccounts(int year, string ministry, string program, string subprogram, string acctype);
         Task<int> AddNewRecEntry(BudgetEstimatesModel bem);

@@ -210,51 +210,14 @@ namespace DataAccessLibrary
 
             return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, username});
         }
-        public Task<List<ListItemModel>> GetDependantAccountTypes(string ministry, string program, string subprogram, string username)
-        {
-            if (username is null) { username = "!"; }
-            username = username.ToLower();
+        public Task<List<ListItemModel>> GetDependantAccountTypes()
+        {            
             string sql = @"SELECT distinct Name, Description 
-                            FROM [dbo].[vw_ss_account_name] a
-                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=LEFT(b.account,3)
-                            WHERE b.ministry=@ministry
-                            and b.program=@program
-                            and b.subprog=@subprogram
-                            AND (b.subprog in (select subprog from vw_user_access ua where LOWER(userName)=@username)
-                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))                          
-                           
-                            ORDER BY Name";
-
-            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram, username });
-        }
-
-        public Task<List<ListItemModel>> GetAllAccountTypes()
-        {
-            string sql = @"SELECT distinct Name, Description 
-                            FROM [dbo].[vw_ss_account_name] a
-                            INNER JOIN  vw_ss_ledger_accounts b ON a.Name=LEFT(b.account,3)                            
+                            FROM [dbo].[vw_ss_account_name] a                            
+                            WHERE LEN(a.Name)=3
                             ORDER BY Name";
 
             return _db.GetListData<ListItemModel, dynamic>(sql, new { });
-        }
-
-        public Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program, string subprogram, string acctype, string username)
-        {
-            if (username is null) { username = "!"; }
-            username = username.ToLower();
-            string sql = @"SELECT distinct Name, Description 
-                            FROM [dbo].[vw_ss_account_name] a
-                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.account
-                            WHERE b.ministry=@ministry
-                            and b.program=@program
-                            and b.subprog=@subprogram
-                            and b.account like @acctype+'%'
-                            AND (b.subprog in (select subprog from vw_user_access ua where LOWER(userName)=@username)
-                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))                          
-                           
-                            ORDER BY Name";
-
-            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram, acctype, username });
         }
 
         public Task<List<ListItemModel>> GetDependantAccounts(string acctype)

@@ -63,7 +63,7 @@ else {
         </tr>
                    <tr> 
           <th scope="row"></th>
-          <td colspan="5">
+          <td colspan="6">
             <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"  title="Submit Budget"
               disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)">
 				<span class="oi oi-task"></span> Submit Budget
@@ -80,7 +80,7 @@ else {
 				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Unsubmitted, OperationType.Reject);}">Send Back</a></li>
 			      </ul>
                    <button class="btn btn-outline-secondary btn-sm " type="button"  aria-expanded="false"  title="Budget Adjustment"
-                 disabled="@(status==(int)EntryStatus.Submitted?false:true)">
+                            disabled="@(status==(int)EntryStatus.Submitted?false:true)" data-bs-toggle="modal" data-bs-target="#newAdjustment">
 				    <span class="oi oi-pie-chart"></span> Budget Adjustment
 			      </button>                 
                  <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Approve Budget"
@@ -107,7 +107,7 @@ else {
        </table>
     }
 }
-
+<Rec_Adjustment year=@year ministry=@ministry program=@program subprogram=@subprogram OnSaveEntry="OnSaveEntry"></Rec_Adjustment>
 @code {
     [Parameter]
     public int year { get; set; }
@@ -204,5 +204,10 @@ else {
         //RefreshList();
 
     }
-
+    private async void OnSaveEntry()
+    {
+        //refresh list
+        RefreshList();
+        base.StateHasChanged();
+    }
 }

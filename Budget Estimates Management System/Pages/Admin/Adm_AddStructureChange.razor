@@ -461,7 +461,7 @@
         //need to clear all dependencies    
         structureChange.account =null;
         structureChange.soc = null;
-        accountTypes = await _rdb.GetDependantAccountTypes(structureChange.ministry, structureChange.program,structureChange.subprogram,username);
+        accountTypes = await _rdb.GetDependantAccountTypes();
         base.StateHasChanged();
     }
 
@@ -469,7 +469,7 @@
     {
         //need to clear all dependencies    
         structureChange.account = null;        
-        accounts = await _rdb.GetDependantAccounts(structureChange.ministry,structureChange.program,structureChange.subprogram,structureChange.soc,username);
+        accounts = await _rdb.GetDependantAccounts(structureChange.soc);
         base.StateHasChanged();
     }
 
@@ -504,7 +504,7 @@
         //need to clear all dependencies    
         structureChange.to_account =null;
         structureChange.to_soc = null;
-        accountTypes2 = await _rdb.GetDependantAccountTypes(structureChange.to_ministry, structureChange.to_program,structureChange.to_subprogram,username);
+        accountTypes2 = await _rdb.GetDependantAccountTypes();
         base.StateHasChanged();
     }
 
@@ -512,7 +512,7 @@
     {
         //need to clear all dependencies    
         structureChange.to_account = null;        
-        accounts2 = await _rdb.GetDependantAccounts(structureChange.to_ministry,structureChange.to_program,structureChange.to_subprogram,structureChange.to_soc,username);
+        accounts2 = await _rdb.GetDependantAccounts(structureChange.to_soc);
         base.StateHasChanged();
     }
 

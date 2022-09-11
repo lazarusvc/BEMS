@@ -65,7 +65,7 @@ else {
 			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
 				<li><a href="javascript:void(0)" class="dropdown-item" @onclick="()=>{SetSubProgramStatus(item,EntryStatus.Approved, OperationType.Approve);}">Approve Budget</a></li>
 			  </ul>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" disabled="@(item.status==(int)EntryStatus.Unsubmitted?true:false)" title="Budget Adjustment"><span class="oi oi-pie-chart"></span></button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" disabled="@(item.status==(int)EntryStatus.Unsubmitted?true:false)" title="Budget Adjustment" data-bs-toggle="modal" data-bs-target="#newAdjustment"><span class="oi oi-pie-chart"></span></button>
               </AuthorizeView> 
               </td>
           <th  @onclick="() => NavigateTo(year,ministry,program,item.item)" style="cursor:pointer;">@item.item</th>
@@ -88,7 +88,7 @@ else {
        </table>
     }
 }
-
+<Rec_Adjustment year=@year ministry=@ministry program=@program  OnSaveEntry="OnSaveEntry"></Rec_Adjustment>
 @code {
     [Parameter]
     public int year { get; set; }
@@ -177,6 +177,11 @@ else {
 
     }
 
-
+    private async void OnSaveEntry()
+    {
+        //refresh list
+        RefreshList();
+        base.StateHasChanged();
+    }
 
 }

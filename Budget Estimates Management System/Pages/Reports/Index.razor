@@ -229,7 +229,7 @@
 			}
 			if (reportSelected is not null && (!reportSelected.parMinistry&& reportSelected.parSOC))
 			{
-				accountTypes = await _rdb.GetAllAccountTypes();
+				accountTypes = await _rdb.GetDependantAccountTypes();
 			}
 			base.StateHasChanged();
 		}
@@ -277,7 +277,7 @@
 		parSOC = null;
 		if (reportSelected.parSOC)
 		{
-			accountTypes = await _rdb.GetDependantAccountTypes(parMinistry, parProgram, parSubProg, username);
+			accountTypes = await _rdb.GetDependantAccountTypes();
 		}
 		base.StateHasChanged();
 	}
@@ -287,10 +287,6 @@
 		parSOC = e.Value.ToString();
 		//need to clear all dependencies
 		parAccount = null;
-		if (reportSelected.parMinistry||reportSelected.parSOC)
-		{
-			accounts = await _rdb.GetDependantAccounts(parMinistry,parProgram,parSubProg,parSOC,username);
-		}
 		accounts = await _rdb.GetDependantAccounts(parSOC);
 		base.StateHasChanged();
 	}

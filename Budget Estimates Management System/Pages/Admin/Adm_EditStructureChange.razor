@@ -449,7 +449,7 @@
         //need to clear all dependencies    
         structureChange.account =null;
         structureChange.soc = null;
-        accountTypes = await _rdb.GetDependantAccountTypes(structureChange.ministry, structureChange.program,structureChange.subprogram,username);
+        accountTypes = await _rdb.GetDependantAccountTypes();
         base.StateHasChanged();
     }
 
@@ -457,7 +457,7 @@
     {
         //need to clear all dependencies    
         structureChange.account = null;        
-        accounts = await _rdb.GetDependantAccounts(structureChange.ministry,structureChange.program,structureChange.subprogram,structureChange.soc,username);
+        accounts = await _rdb.GetDependantAccounts(structureChange.soc);
         base.StateHasChanged();
     }
 
@@ -492,7 +492,7 @@
         //need to clear all dependencies    
         structureChange.to_account =null;
         structureChange.to_soc = null;
-        accountTypes2 = await _rdb.GetDependantAccountTypes(structureChange.to_ministry, structureChange.to_program,structureChange.to_subprogram,username);
+        accountTypes2 = await _rdb.GetDependantAccountTypes();
         base.StateHasChanged();
     }
 
@@ -500,7 +500,7 @@
     {
         //need to clear all dependencies    
         structureChange.to_account = null;        
-        accounts2 = await _rdb.GetDependantAccounts(structureChange.to_ministry,structureChange.to_program,structureChange.to_subprogram,structureChange.to_soc,username);
+        accounts2 = await _rdb.GetDependantAccounts(structureChange.to_soc);
         base.StateHasChanged();
     }
 
@@ -511,37 +511,37 @@
         {
             Reflection.CopyPropertyValues(parSC, structureChange);
             //Set the drop downs
-			if (structureChange.program is not null)
-			{
-				programs = await _rdb.GetDependantPrograms(structureChange.ministry, username);
-			}
-			if (structureChange.to_program is not null)
-			{
-				programs2 = await _rdb.GetDependantPrograms(structureChange.to_ministry, username);
-			}
-			if (structureChange.subprogram is not null)
-			{
-				subprograms = await _rdb.GetDependantSubPrograms(structureChange.ministry, structureChange.program, username);
-			}
-			if (structureChange.to_subprogram is not null)
-			{
-				subprograms2 = await _rdb.GetDependantSubPrograms(structureChange.to_ministry, structureChange.to_program, username);
-			}
-			if (structureChange.soc is not null)
-			{
-				accountTypes = await _rdb.GetDependantAccountTypes(structureChange.ministry, structureChange.program, structureChange.subprogram, username);
-			}
-			if (structureChange.to_soc is not null)
-			{
-				accountTypes2 = await _rdb.GetDependantAccountTypes(structureChange.to_ministry, structureChange.to_program, structureChange.to_subprogram, username);
-			}
+            if (structureChange.program is not null)
+            {
+                programs = await _rdb.GetDependantPrograms(structureChange.ministry, username);
+            }
+            if (structureChange.to_program is not null)
+            {
+                programs2 = await _rdb.GetDependantPrograms(structureChange.to_ministry, username);
+            }
+            if (structureChange.subprogram is not null)
+            {
+                subprograms = await _rdb.GetDependantSubPrograms(structureChange.ministry, structureChange.program, username);
+            }
+            if (structureChange.to_subprogram is not null)
+            {
+                subprograms2 = await _rdb.GetDependantSubPrograms(structureChange.to_ministry, structureChange.to_program, username);
+            }
+            if (structureChange.soc is not null)
+            {
+                accountTypes = await _rdb.GetDependantAccountTypes();
+            }
+            if (structureChange.to_soc is not null)
+            {
+                accountTypes2 = await _rdb.GetDependantAccountTypes();
+            }
 			if (structureChange.account is not null)
 			{
-				accounts = await _rdb.GetDependantAccounts(structureChange.ministry, structureChange.program, structureChange.subprogram, structureChange.soc, username);
+				accounts = await _rdb.GetDependantAccounts(structureChange.soc);
 			}
 			if (structureChange.to_account is not null)
 			{
-				accounts2 = await _rdb.GetDependantAccounts(structureChange.to_ministry, structureChange.to_program, structureChange.to_subprogram, structureChange.to_soc, username);
+				accounts2 = await _rdb.GetDependantAccounts(structureChange.to_soc);
 			}
             saveSuccess = "";
             saveError = "";
