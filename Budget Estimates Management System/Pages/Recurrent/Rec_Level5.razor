@@ -41,7 +41,7 @@ else {
       <tbody>
             @foreach (var item in accountGroup)
             {
-               <Rec_Level6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram OnEntryEdit="RefreshList"></Rec_Level6>
+                    <Rec_Level6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram OnEntryEdit="RefreshList" OnAccountChanged="@(e=>account=e.ToString())"></Rec_Level6>
             }
                    <tr  style="background-color:lightyellow"> 
           <th scope="row"></th>
@@ -56,6 +56,7 @@ else {
     }
 }
 
+<Rec_Adjustment year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@accountType account=@account  OnSaveEntry="OnSaveEntry"></Rec_Adjustment>
 
 @code {
     [Parameter]
@@ -68,6 +69,8 @@ else {
     public string subprogram { get; set; }
     [Parameter]
     public string accountType { get; set; }
+    
+    public string account { get; set; }
 
     public int year0T = 0;
     public int year1T = 0;
@@ -119,8 +122,16 @@ else {
 
     private async void RefreshList()
     {
-          accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram,accountType,username);
-          base.StateHasChanged();
+        accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram,accountType,username);
+        base.StateHasChanged();
     }
+
+    private async void OnSaveEntry()
+    {
+        //refresh list
+        RefreshList();
+        base.StateHasChanged();
+    }
+
 
 }

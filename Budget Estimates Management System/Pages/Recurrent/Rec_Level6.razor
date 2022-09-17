@@ -50,9 +50,14 @@
                            </tr>  
                     }  
                  <tr >
-                      <td colspan="7"><button type="button" class="btn btn-outline-success" @onclick="AddRow" disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)"><span class="oi oi-plus"></span> Add Row</button>
+                     
+                     <td colspan="7">
+                        @if (status == (int)EntryStatus.Unsubmitted)
+                        {
+                          <button type="button" class="btn btn-outline-success" @onclick="AddRow" disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)"><span class="oi oi-plus"></span> Add Row</button>
+                        }
                           <AuthorizeView  Roles="Administrator, BudgetStaff">
-                    <button type="button" class="btn btn-outline-secondary" disabled="@(status==(int)EntryStatus.Unsubmitted?true:false)" data-bs-toggle="modal" data-bs-target="#newAdjustment"><span class="oi oi-pie-chart"></span> Budget Adjustment</button>
+                      <span> </span> <button type="button" class="btn btn-outline-secondary" disabled="@(status==(int)EntryStatus.Unsubmitted?true:false)" data-bs-toggle="modal" data-bs-target="#newAdjustment" @onclick="()=>{SetAccount(item.item.Trim());}"><span class="oi oi-pie-chart"></span> Budget Adjustment</button>
                           </AuthorizeView>
                           </td>
                  </tr>
@@ -60,7 +65,7 @@
                   
                 }
         }
-<Rec_Adjustment year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@item.item.Substring(0,3) account=@item.item OnSaveEntry="OnSaveEntry"></Rec_Adjustment>
+
 
 @code {
     [Parameter]
@@ -75,29 +80,36 @@
     public string subprogram { get; set; }
     [Parameter]
     public EventCallback OnEntryEdit { get; set; }
+    [Parameter]
+    public EventCallback<string> OnAccountChanged { get; set; }
 
     public bool Collapsed = true;
     private int status;
     private string username;
 
+    public string accountSelected;
+
     List<BudgetEstimatesModel> accounts;
 
     protected override async Task OnInitializedAsync()
     {        
-        var authState = await authStateProvider.GetAuthenticationStateAsync();
-        username = authState.User.Identity.Name;
-        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
-        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
+    var authState = await authStateProvider.GetAuthenticationStateAsync();
+    username = authState.User.Identity.Name;
+    accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
+    try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
     }
 
     protected override async void OnParametersSet()
     {
-        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
-        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
-        base.StateHasChanged();
+    accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
+    try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
+    base.StateHasChanged();
     }
 
-
+    private async void SetAccount(string newaccount)
+    {
+            OnAccountChanged.InvokeAsync(newaccount);
+    }
 
     private async void AddRow()
     {

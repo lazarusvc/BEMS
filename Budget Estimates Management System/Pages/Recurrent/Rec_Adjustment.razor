@@ -144,20 +144,9 @@
                         </label>
 
                     </div>
-                    <div class="row" style="padding-bottom:5px">
-                        <div class="col-md">
-                            <div class="form-control">
-                                <InputCheckbox @bind-Value="entry.is_by_law">
-                                </InputCheckbox>
-                                <label for="isbylaw">
-                                    Provided By Law
-                                </label>
-                            </div>
-                        </div>
 
-                    </div>
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md">
                             <div class="form-floating">
                                 <InputText @bind-Value="entry.label" class="form-control" placeholder="Label">
                                 </InputText>
@@ -165,27 +154,7 @@
                                     Label
                                 </label>
                             </div>
-                        </div>
-                        <div class="col-md">
-                            <div class="form-floating" style="padding-bottom:5px">
-                                <InputNumber id="quantity" class="form-control"
-                                             @bind-Value="entry.quantity" placeholder="Quantity">
-                                </InputNumber>
-                                <label for="quantity">
-                                    Quantity
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md">
-                            <div class="form-floating" style="padding-bottom:5px">
-                                <InputNumber id="year0" class="form-control"
-                                             @bind-Value="@entry.year0_amount">
-                                </InputNumber>
-                                <label for="year0">
-                                    @year0Desc
-                                </label>
-                            </div>
-                        </div>
+                        </div>                        
                         <div class="col-md">
                             <div class="form-floating" style="padding-bottom:5px">
                                 <InputNumber id="year1" class="form-control"
@@ -193,26 +162,6 @@
                                 </InputNumber>
                                 <label for="year1">
                                     @year1Desc
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md">
-                            <div class="form-floating" style="padding-bottom:5px">
-                                <InputNumber id="year2" class="form-control"
-                                             @bind-Value="entry.year2_amount">
-                                </InputNumber>
-                                <label for="year2">
-                                    @year2Desc
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md">
-                            <div class="form-floating" style="padding-bottom:5px;">
-                                <InputNumber id="year3" class="form-control"
-                                             @bind-Value="entry.year3_amount">
-                                </InputNumber>
-                                <label for="year3">
-                                    @year3Desc
                                 </label>
                             </div>
                         </div>
@@ -237,6 +186,7 @@
 
 
 @code {
+    //TODO: Account not showing up.  Look into it.  Also look into removing old account types
     [Parameter]
     public int year { get; set; }
     [Parameter]
@@ -326,8 +276,12 @@
             accountTypeDisabled = true;
             accounts = await _rdb.GetDependantAccounts(accountType);
         }
+        if (!String.IsNullOrWhiteSpace(account))
+        {
+            accountDisabled = true;
+            entry.account = account;
+        }
         //set required hidden fields
-        entry.account = null;
         entry.modified_by = username;
         entry.project = "";
         entry.sector = "";
