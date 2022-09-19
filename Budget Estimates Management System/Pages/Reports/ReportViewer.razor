@@ -1,0 +1,37 @@
+﻿@using DataAccessLibrary.Models;
+
+@if (!String.IsNullOrEmpty(URL))
+{
+   <iframe id="reportViewer" style="width: 100%;" src="@(URL)"></iframe>
+}
+@code {
+
+	public string URL { get; set; } = String.Empty;
+
+	[CascadingParameter]
+	private string parMinistry { get; set; }
+	[CascadingParameter]
+	private string parProgram { get; set; }
+	[CascadingParameter]
+	private string parSubProg { get; set; }
+	[CascadingParameter]
+	private string parSOC { get; set; }
+	[CascadingParameter]
+	private string parAccount { get; set; }
+	[CascadingParameter]
+	private ReportConfigModel reportSelected { get; set; }
+
+	private readonly IConfiguration _config;
+	private string parameters = string.Empty;
+
+	protected override async void OnParametersSet()
+	{
+	
+		//TODO: Build the parameters for the report
+		URL = String.Format("{0}{1}{2}{3}", _config["ReportSettings:Server"],reportSelected.reportId,
+		_config["ReportSettings:Settings"], parameters);
+
+		base.StateHasChanged();
+	}
+
+}
