@@ -1,4 +1,4 @@
-﻿@page "/reports/{reportId}/{year_selected:int}/{parMinistry}/{parProgram}/{parSubProg}/{parSOC}/{parAccount}"
+﻿@page "/reports"
 
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
@@ -204,14 +204,19 @@
 	[Parameter]
 	public int year_selected { get; set; }=0;
 	[Parameter]
+	[SupplyParameterFromQuery(Name = "{parMinistry}")]
 	public string parMinistry { get; set; }
 	[Parameter]
+	[SupplyParameterFromQuery(Name = "{parProgram}")]
 	public string parProgram { get; set; }
 	[Parameter]
+	[SupplyParameterFromQuery(Name = "{parSubProg}")]
 	public string parSubProg { get; set; }
 	[Parameter]
+	[SupplyParameterFromQuery(Name = "{parSOC}")]
 	public string parSOC { get; set; }
 	[Parameter]
+	[SupplyParameterFromQuery(Name = "{parAccount}")]
 	public string parAccount { get; set; }
 
 	private string parMinistryValid=String.Empty;
