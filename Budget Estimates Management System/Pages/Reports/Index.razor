@@ -1,4 +1,5 @@
-﻿@page "/reports"
+﻿@page "/reports/{reportId}/{year_selected:int}/{parMinistry}/{parProgram}/{parSubProg}/{parSOC}/{parAccount}"
+
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IDbData _db;
@@ -187,7 +188,7 @@
 @code {
 	private List<ProcessingYearModel> years;
 	private List<ReportConfigModel> reports;
-	private int year_selected = 0;
+	
 	public ReportConfigModel reportSelected = new ReportConfigModel();
 
 	private string username;
@@ -197,12 +198,21 @@
 	private List<ListItemModel> subprograms;
 	private List<ListItemModel> accountTypes;
 	private List<ListItemModel> accounts;
-
-	public string parMinistry;
-	public string parProgram;
-	public string parSubProg;
-	public string parSOC;
-	public string parAccount;
+	
+	[Parameter]
+	public string reportID { get; set; }
+	[Parameter]
+	public int year_selected { get; set; }=0;
+	[Parameter]
+	public string parMinistry { get; set; }
+	[Parameter]
+	public string parProgram { get; set; }
+	[Parameter]
+	public string parSubProg { get; set; }
+	[Parameter]
+	public string parSOC { get; set; }
+	[Parameter]
+	public string parAccount { get; set; }
 
 	private string parMinistryValid=String.Empty;
 	private string parProgramValid = String.Empty;
@@ -223,6 +233,7 @@
 		username = authState.User.Identity.Name;
 		//get the reports
 		reports = await _db.GetAllReportConfig();
+		//TODO: Set the report variables if it is set by url
 		if (!authState.User.IsInRole("MinistryStaff")) { return; }
 		years = years.FindAll(e => e.ready_for_data_entry == true||e.year_closed==true);
 
