@@ -142,6 +142,7 @@ GO
 CREATE TABLE [dbo].[Report_Config](
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[reportId] [varchar](50) NOT NULL,
+	[storedProcedure] [varchar](50),
 	[reportDesc] [varchar](50) NOT NULL,
 	[parUser] [bit] NOT NULL,
 	[parMinistry] [bit] NOT NULL,

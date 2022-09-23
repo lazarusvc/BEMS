@@ -9,7 +9,7 @@
         <div class="col-3">
              <input @bind="searchfilter" @bind:event="oninput" class="form-control" placeholder="Search for report">
         </div>
-         <div class="col-2">
+         <div class="col-3">
         <button type="button" class="btn btn-outline-success " data-bs-toggle="modal" data-bs-target="#newReport"><span class="oi oi-plus"></span> Add New Report</button>
         </div>
 
@@ -23,10 +23,11 @@
     <tr>
       <th scope="col">Description</th>
       <th scope="col">Report Id</th>
+            <th scope="col">Stored Procedure</th>
             <th style="text-align: center">User</th>
-            <th style="text-align: center">Mininistry</th>
+            <th style="text-align: center">Ministry</th>
             <th style="text-align: center">Program</th>
-        <th  style="text-align: center">Sub Program</th>
+        <th  style="text-align: center">Sub-Program</th>
             <th style="text-align: center">SOC</th>
             <th style="text-align: center">Account</th>
       <th scope="col"></th>
@@ -43,6 +44,9 @@
                         <td>
                             @item.reportId                     
                         </td>
+                    <td>
+                        @item.storedProcedure
+                    </td>
                     <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parUser" onclick="return false;"></td>
                     <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parMinistry" onclick="return false;"></td>
                     <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parProgram" onclick="return false;"></td>
@@ -87,6 +91,7 @@
         </tr>
       </tfoot>    
 </table>
+
 
 <Adm_AddReport OnSaveReport="RefreshList"></Adm_AddReport>
 <Adm_EditReport OnSaveReport="RefreshList" parReport="selectedReport"></Adm_EditReport>

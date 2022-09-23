@@ -13,6 +13,7 @@ namespace DataAccessLibrary.Models
         public int id { get; set; }
         [Required]
         public string reportId { get; set; }
+        public string storedProcedure { get; set; }
         [Required]
         public string reportDesc { get; set; }
         [Required]
