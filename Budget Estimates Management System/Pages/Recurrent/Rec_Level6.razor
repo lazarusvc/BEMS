@@ -2,6 +2,7 @@
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
+@inject IDbData _db;
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
@@ -45,20 +46,22 @@
                     {
                        <tr>
                            <td colspan="7">
-                                  <Rec_EditEntry account=account  OnEntryDeleted = "DeleteRow" OnEntryEdit="OnEntryEdit"></Rec_EditEntry>  
+                                  <Rec_EditEntry yearClosed=yearClosed account=account  OnEntryDeleted = "DeleteRow" OnEntryEdit="OnEntryEdit"></Rec_EditEntry>  
                                   </td>
                            </tr>  
                     }  
                  <tr >
                      
                      <td colspan="7">
+                         @if (!yearClosed)
+                         {
                         @if (status == (int)EntryStatus.Unsubmitted)
                         {
                           <button type="button" class="btn btn-outline-success" @onclick="AddRow" disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)"><span class="oi oi-plus"></span> Add Row</button>
                         }
                           <AuthorizeView  Roles="Administrator, BudgetStaff">
                       <span> </span> <button type="button" class="btn btn-outline-secondary" disabled="@(status==(int)EntryStatus.Unsubmitted?true:false)" data-bs-toggle="modal" data-bs-target="#newAdjustment" @onclick="()=>{SetAccount(item.item.Trim());}"><span class="oi oi-pie-chart"></span> Budget Adjustment</button>
-                          </AuthorizeView>
+                          </AuthorizeView>}
                           </td>
                  </tr>
 
@@ -89,14 +92,21 @@
 
     public string accountSelected;
 
+    private bool yearClosed = true;
+
     List<BudgetEstimatesModel> accounts;
 
     protected override async Task OnInitializedAsync()
     {        
-    var authState = await authStateProvider.GetAuthenticationStateAsync();
-    username = authState.User.Identity.Name;
-    accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
-    try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
+        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
+        try
+        {
+            yearClosed = await _db.IsYearClosed(year);
+        }
+        catch { yearClosed = true; }
     }
 
     protected override async void OnParametersSet()

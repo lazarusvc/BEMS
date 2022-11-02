@@ -18,6 +18,12 @@ namespace DataAccessLibrary
             return _db.GetListData<ProcessingYearModel, dynamic>(sql, new { });
         }
 
+        public Task<bool> IsYearClosed(int year)
+        {
+            string sql = "select year_closed from dbo.Processing_Year where year=@year;";
+            return _db.GetSingleRowData<bool, dynamic>(sql, new { year=year});
+        }
+
         public Task<ProcessingYearModel> GetCurrentProcessingYear()
         {
             string sql = "select year,ready_for_data_entry,year_closed " +

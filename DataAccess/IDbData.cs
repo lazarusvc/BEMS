@@ -9,6 +9,7 @@ namespace DataAccessLibrary
         Task<string> GetSubProgramName(string program);
         Task<string> GetAccountName(string account);
         Task<List<ProcessingYearModel>> GetYears();
+        Task<bool> IsYearClosed(int year);
         Task<ProcessingYearModel> GetCurrentProcessingYear();
         Task<List<ListItemModel>> GetUserRoles();
         Task<int> AddNewUser(UserModel um);

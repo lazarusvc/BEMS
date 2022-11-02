@@ -64,6 +64,7 @@ else {
                    <tr> 
           <th scope="row"></th>
           <td colspan="6">
+              @if (!yearClosed) {
             <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"  title="Submit Budget"
               disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)">
 				<span class="oi oi-task"></span> Submit Budget
@@ -99,7 +100,7 @@ else {
 			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
 				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Submitted, OperationType.Unaprove);}">Un-Approve</a></li>
 			      </ul>
-             </AuthorizeView>
+             </AuthorizeView>}
           </td>
           
         </tr>
@@ -129,6 +130,8 @@ else {
     public int year2T = 0;
     public int year3T = 0;
 
+    private bool yearClosed=true;
+
     private List<GroupingModel> accountTypeGroup;
 
     protected override async Task OnInitializedAsync()
@@ -143,7 +146,13 @@ else {
         year0T = accountTypeGroup.Sum(x=>x.year0);
         year1T = accountTypeGroup.Sum(x=>x.year1);
         year2T = accountTypeGroup.Sum(x=>x.year2);
-        year3T = accountTypeGroup.Sum(x=>x.year3);     
+        year3T = accountTypeGroup.Sum(x=>x.year3);  
+        
+        try
+        {
+            yearClosed = await _db.IsYearClosed(year);
+        }
+        catch { yearClosed = true; }
     }
 
     protected override async void OnParametersSet()
