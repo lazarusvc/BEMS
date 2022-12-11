@@ -103,11 +103,16 @@ namespace DataAccessLibrary
 
             return _db.ExecuteSql<NotificationModel>(sql, notification);
         }
-        public int EmailUsersNotification(NotificationModel notification)
+
+        public Task<List<String>> GetUsersIn(string subprog)
         {
-            //TODO: Implement emailing
-            return 0;
+            string sql = @"select userName
+                            From dbo.vw_user_access
+                            Where (subprog = @subprog or @subprog=null)
+                            Order by userName;";
+            return _db.GetListData<String, dynamic>(sql, new { subprog });
         }
+
     }
 
 }

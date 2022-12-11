@@ -1,7 +1,10 @@
-﻿@using DataAccessLibrary.Models;
+﻿@using Budget_Estimates_Management_System.Services;
+@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject INotificationData _ndb;
 @inject IRecEstimateData _rdb;
+@inject IConfiguration _config;
+@inject IEmailService _email;
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,BudgetStaff")]
 
@@ -134,7 +137,12 @@
                 //If the user wants to email the users one time
                 if (emailUsers)
                 {
-                    _ndb.EmailUsersNotification(notification);
+
+                    List<String> users = await _ndb.GetUsersIn(notification.subprogram);
+                    foreach (var item in users)
+                    {
+                        _email.SendEmail(new Models.EmailDTO {To=item,Subject="Notification From Budget",Message=notification.message });
+                    }
                 }
                 notification=new NotificationModel();
                 EditContext = new EditContext(notification);

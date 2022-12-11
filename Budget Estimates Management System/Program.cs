@@ -3,6 +3,8 @@ using Budget_Estimates_Management_System.Models;
 using DataAccessLibrary;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Budget_Estimates_Management_System.Services;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +20,8 @@ builder.Services.AddTransient<INotificationData, NotificationData>();
 //Authentication
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-
+//Email Servies
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 //build app
 var app = builder.Build();
