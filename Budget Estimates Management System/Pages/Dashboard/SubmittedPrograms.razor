@@ -34,7 +34,7 @@
     [Parameter]
     public int year { get; set; }
 
-    private List<ListItemModel2> accessTo;
+    private List<ListItemModel2> accessTo = new List<ListItemModel2>();
 
     protected override async Task OnInitializedAsync()
     {

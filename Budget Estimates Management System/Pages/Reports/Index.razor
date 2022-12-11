@@ -186,38 +186,38 @@
 
 
 @code {
-	private List<ProcessingYearModel> years;
-	private List<ReportConfigModel> reports;
-	
+	private List<ProcessingYearModel>? years;
+	private List<ReportConfigModel>? reports;
+
 	public ReportConfigModel reportSelected = new ReportConfigModel();
 
-	private string username;
+	private string username = string.Empty;
 
-	private List<ListItemModel> ministries;
-	private List<ListItemModel> programs;
-	private List<ListItemModel> subprograms;
-	private List<ListItemModel> accountTypes;
-	private List<ListItemModel> accounts;
-	
+	private List<ListItemModel>? ministries;
+	private List<ListItemModel>? programs;
+	private List<ListItemModel>? subprograms;
+	private List<ListItemModel>? accountTypes;
+	private List<ListItemModel>? accounts;
+
 	[Parameter]
-	public string reportID { get; set; }
+	public string reportID { get; set; } = string.Empty;
 	[Parameter]
 	public int year_selected { get; set; }=0;
 	[Parameter]
 	[SupplyParameterFromQuery(Name = "{parMinistry}")]
-	public string parMinistry { get; set; }
+	public string parMinistry { get; set; } = string.Empty;
 	[Parameter]
 	[SupplyParameterFromQuery(Name = "{parProgram}")]
-	public string parProgram { get; set; }
+	public string parProgram { get; set; } = string.Empty;
 	[Parameter]
 	[SupplyParameterFromQuery(Name = "{parSubProg}")]
-	public string parSubProg { get; set; }
+	public string parSubProg { get; set; } = string.Empty;
 	[Parameter]
 	[SupplyParameterFromQuery(Name = "{parSOC}")]
-	public string parSOC { get; set; }
+	public string parSOC { get; set; } = string.Empty;
 	[Parameter]
 	[SupplyParameterFromQuery(Name = "{parAccount}")]
-	public string parAccount { get; set; }
+	public string parAccount { get; set; } = string.Empty;
 
 	private string parMinistryValid=String.Empty;
 	private string parProgramValid = String.Empty;
@@ -298,10 +298,10 @@
 		parMinistry = e.Value.ToString();
 		//need to clear all dependencies
 		parMinistryValid = String.Empty;
-		parProgram = null;
-		parSubProg = null;
-		parAccount = null;
-		parSOC = null;
+		parProgram = string.Empty;
+		parSubProg = string.Empty;
+		parAccount = string.Empty;
+		parSOC = string.Empty;
 		if (reportSelected.parProgram)
 		{
 			programs = await _rdb.GetDependantPrograms(parMinistry, username);
@@ -315,9 +315,9 @@
 		parProgram = e.Value.ToString();
 		//need to clear all dependencies
 		parProgramValid = String.Empty;
-		parSubProg = null;
-		parAccount = null;
-		parSOC = null;
+		parSubProg =  string.Empty;
+		parAccount =  string.Empty;
+		parSOC = string.Empty;
 		if (reportSelected.parSubprogram)
 		{
 			subprograms = await _rdb.GetDependantSubPrograms(parMinistry, parProgram, username);
@@ -331,8 +331,8 @@
 		parSubProg = e.Value.ToString();
 		parSubProgValid = String.Empty;
 		//need to clear all dependencies
-		parAccount = null;
-		parSOC = null;
+		parAccount = string.Empty;
+		parSOC = string.Empty;
 		if (reportSelected.parSOC)
 		{
 			accountTypes = await _rdb.GetDependantAccountTypes();
@@ -346,12 +346,12 @@
 		parSOC = e.Value.ToString();
 		parSOCValid	= String.Empty;
 		//need to clear all dependencies
-		parAccount = null;
+		parAccount = string.Empty;
 		accounts = await _rdb.GetDependantAccounts(parSOC);
 		base.StateHasChanged();
 	}
 
-	private async void AccountChanged(ChangeEventArgs e)
+	private  void AccountChanged(ChangeEventArgs e)
 	{
 		if (String.IsNullOrEmpty(e.Value.ToString()) || e.Value.ToString().Equals("0")) { return; }
 		parAccount = e.Value.ToString();	

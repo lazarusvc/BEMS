@@ -65,14 +65,14 @@ else {
     [Parameter]
     public int year { get; set; }
 
-    private List<GroupingModel> minGroup;
+    private List<GroupingModel>? minGroup;
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
  
-    private string username;
+    private string username = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {

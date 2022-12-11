@@ -98,17 +98,17 @@
 
 @code {
     [Parameter]
-    public UserModel parUser { get; set; }
+    public UserModel parUser { get; set; } 
 
-    private string saveError;
-    private string saveSuccess;
+    private string saveError = string.Empty;
+    private string saveSuccess = string.Empty;
 
-    private List<ListItemModel> ministries;
-    private List<ListItemModel> subprograms;
-    private List<ListItemModel> accessTo;
+    private List<ListItemModel>? ministries;
+    private List<ListItemModel>? subprograms;
+    private List<ListItemModel>? accessTo;
     public string[] optionHolder { get; set; } = new string[] { };
     public string[] userHolder { get; set; } = new string[] { };
-    private string username;
+    private string username = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -125,8 +125,8 @@
         //Load the list of permissions from the user
         if (parUser is not null)
         {
-            saveError = "";
-            saveSuccess = "";
+            saveError = string.Empty;
+            saveSuccess = string.Empty;
             accessTo = await _db.GetUserAccess(parUser.userName);
             base.StateHasChanged();
         }
@@ -145,7 +145,7 @@
 
     }
 
-    private async void AddSelectedToList()
+    private void AddSelectedToList()
     {
         //add to list if not empty
         if (optionHolder.Count()!=0 && !String.IsNullOrWhiteSpace(optionHolder[0]))
@@ -201,8 +201,8 @@
             usera.Add(new UserAccessModel {userName=parUser.userName,subprogram=item.Name });
         }
         //Merge to user access list
-        saveError = "";
-        saveSuccess = "";
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
         try
         {
             int affectedRows=  await _db.MergeUserAccess(usera);      

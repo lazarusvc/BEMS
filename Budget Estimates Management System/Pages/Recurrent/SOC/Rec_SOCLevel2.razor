@@ -72,17 +72,17 @@ else {
 	[Parameter]
     public int year { get; set; }
     [Parameter]
-    public string soc { get; set; }
+    public string soc { get; set; } = string.Empty;
 
-    public string socName { get; set; }
-    private string username;
+    public string socName { get; set; } = string.Empty;
+    private string username = string.Empty;
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
 
-    private List<GroupingModel> minGroup;
+    private List<GroupingModel>? minGroup;
 
 
      protected override async Task OnInitializedAsync()

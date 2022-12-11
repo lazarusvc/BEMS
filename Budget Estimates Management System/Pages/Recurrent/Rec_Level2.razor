@@ -62,15 +62,15 @@ else {
     [Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; } = string.Empty;
 
-    private string ministryName;
+    private string ministryName= string.Empty;
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
-    private string username;
+    private string username = string.Empty;
 
 	private List<GroupingModel>? programGroup;
 

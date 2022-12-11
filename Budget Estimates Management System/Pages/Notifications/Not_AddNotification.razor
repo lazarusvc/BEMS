@@ -99,11 +99,11 @@
     private EditContext EditContext;
 
     private NotificationModel notification = new NotificationModel();
-    private List<ListItemModel> subprograms;
+    private List<ListItemModel>? subprograms;
 
-    private string saveError;
-    private string saveSuccess;
-    private string user;
+    private string saveError = string.Empty;
+    private string saveSuccess = string.Empty;
+    private string user = string.Empty;
 
     private bool emailUsers = false;
 
@@ -122,8 +122,8 @@
 
     private async void  HandleValidSubmit()
     {     
-        saveError = "";
-        saveSuccess = "";
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
         try
         {
             int affectedRows=  await _ndb.AddNotification(notification);      
@@ -168,15 +168,15 @@
 
     private  void  HandleInvalidSubmit()
     {     
-        saveSuccess = "";
+        saveSuccess = string.Empty;
         saveError = "Please enter the required fields. Thank you.";
         base.StateHasChanged();                
     }
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
         //clear any save messages because we entering new stull
-        saveSuccess = "";
-        saveError = "";
+        saveSuccess = string.Empty;
+        saveError = string.Empty;
         emailUsers = false;
     }
 

@@ -56,7 +56,7 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
 
-    private ProcessingYearModel year;    
+    private ProcessingYearModel? year;    
 
     protected override async Task OnInitializedAsync()
     {        

@@ -35,8 +35,8 @@
     [Parameter]
     public int year { get; set; }
 
-    private List<ListItemModel2> accessTo;
-    private string username;
+    private List<ListItemModel2>? accessTo;
+    private string username =string.Empty;
 
     protected override async Task OnInitializedAsync()
     {

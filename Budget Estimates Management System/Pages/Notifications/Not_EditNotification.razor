@@ -1,7 +1,10 @@
 ﻿@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
+@using Budget_Estimates_Management_System.Services;
 @inject INotificationData _ndb;
 @inject IRecEstimateData _rdb;
+@inject IConfiguration _config;
+@inject IEmailService _email;
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,BudgetStaff")]
 
@@ -92,16 +95,16 @@
     [Parameter]
     public EventCallback OnSaveNotification { get; set; }
     [Parameter]
-    public NotificationModel parNotification { get; set; }
+    public NotificationModel? parNotification { get; set; }
 
     private EditContext EditContext;
 
     private NotificationModel notification = new NotificationModel();
-    private List<ListItemModel> subprograms;
+    private List<ListItemModel>? subprograms;
 
-    private string saveError;
-    private string saveSuccess;
-    private string user;
+    private string saveError = string.Empty;
+    private string saveSuccess = string.Empty;
+    private string user = string.Empty;
 
     private bool emailUsers = false;
 
@@ -118,8 +121,8 @@
 
     private async void  HandleValidSubmit()
     {     
-        saveError = "";
-        saveSuccess = "";
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
         try
         {
             int affectedRows=  await _ndb.UpdateNotification(notification);      
@@ -133,7 +136,11 @@
                 //If the user wants to email the users one time
                 if (emailUsers)
                 {
-                    _ndb.EmailUsersNotification(notification);
+                    List<String> users = await _ndb.GetUsersIn(notification.subprogram);
+                    foreach (var item in users)
+                    {
+                        _email.SendEmail(new Models.EmailDTO { To = item, Subject = "Notification From Budget", Message = notification.message });
+                    }
                 }
                 saveSuccess = "Record Successfully Updated.";
                 emailUsers = false;
@@ -152,7 +159,7 @@
 
     private  void  HandleInvalidSubmit()
     {     
-        saveSuccess = "";
+        saveSuccess = string.Empty;
         saveError = "Please enter the required fields. Thank you.";
         base.StateHasChanged();                
     }
@@ -160,19 +167,19 @@
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
         //clear any save messages because we entering new stull
-        saveSuccess = "";
-        saveError = "";
+        saveSuccess = string.Empty;
+        saveError = string.Empty;
         emailUsers = false;
     }
 
-    protected override async void OnParametersSet()
+    protected override void OnParametersSet()
     {
         if (parNotification is not null)
         {
             Reflection.CopyPropertyValues(parNotification, notification);
             //clear any save messages because we entering new stull
-            saveSuccess = "";
-            saveError = "";
+            saveSuccess = string.Empty;
+            saveError = string.Empty;
             emailUsers = false;
         }
         

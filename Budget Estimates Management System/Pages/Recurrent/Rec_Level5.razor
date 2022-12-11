@@ -62,28 +62,28 @@ else {
     [Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; }= string.Empty;
     [Parameter]
-    public string program { get; set; }
+    public string program { get; set; } = string.Empty;
     [Parameter]
-    public string subprogram { get; set; }
+    public string subprogram { get; set; } = string.Empty;
     [Parameter]
-    public string accountType { get; set; }
+    public string accountType { get; set; } = string.Empty;
     
-    public string account { get; set; }
+    public string account { get; set; } = string.Empty;
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
 
-    private string ministryName;
-    private string programName;
-    private string subprogramName;
-    private string accountTypeName;
-    private string username;
+    private string ministryName = string.Empty;
+    private string programName = string.Empty;
+    private string subprogramName = string.Empty;
+    private string accountTypeName= string.Empty;
+    private string username = string.Empty;
 
-    private List<GroupingModel> accountGroup;
+    private List<GroupingModel>? accountGroup;
 
     protected override async Task OnInitializedAsync()
     {
@@ -126,7 +126,7 @@ else {
         base.StateHasChanged();
     }
 
-    private async void OnSaveEntry()
+    private void OnSaveEntry()
     {
         //refresh list
         RefreshList();

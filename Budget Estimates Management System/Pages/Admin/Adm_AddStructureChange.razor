@@ -76,7 +76,7 @@
                        @bind-Value="@structureChange.program" >
                         @if (programs is null)
                         {
-                            <option selected>Select a Ministry first...</option>
+                            <option selected>@emptyProg</option>
                         }
                     else 
                         {
@@ -97,7 +97,7 @@
                        @bind-Value="@structureChange.subprogram">
                         @if (subprograms is null)
                         {
-                            <option selected>Select a Program first...</option>
+                                        <option selected>@emptySubProg</option>
                         }
                     else 
                         {
@@ -118,7 +118,7 @@
                        @bind-Value="structureChange.soc"  disabled="@accountTypeDisabled">
                         @if (accountTypes is null)
                         {
-                            <option selected>Select a Sub-Program first...</option>
+                                        <option selected>@emptySOC</option>
                         }
                     else 
                         {
@@ -139,7 +139,7 @@
                        @bind-Value="@structureChange.account" >
                         @if (accounts is null)
                         {
-                            <option selected>Select a Account Type first...</option>
+                            <option selected>@emptyAccount</option>
                         }
                     else 
                         {
@@ -185,7 +185,7 @@
                        @bind-Value="@structureChange.to_program" >
                         @if (programs2 is null)
                         {
-                            <option selected>Select a Ministry first...</option>
+                            <option selected>@emptyProg</option>
                         }
                     else 
                         {
@@ -206,7 +206,7 @@
                        @bind-Value="@structureChange.to_subprogram">
                         @if (subprograms2 is null)
                         {
-                            <option selected>Select a Program first...</option>
+                                        <option selected>@emptySubProg</option>
                         }
                     else 
                         {
@@ -227,7 +227,7 @@
                        @bind-Value="structureChange.to_soc"  disabled="@accountTypeDisabled">
                         @if (accountTypes2 is null)
                         {
-                            <option selected>Select a Sub-Program first...</option>
+                                        <option selected>@emptySOC</option>
                         }
                     else 
                         {
@@ -248,7 +248,7 @@
                        @bind-Value="@structureChange.to_account" >
                         @if (accounts2 is null)
                         {
-                            <option selected>Select a Account Type first...</option>
+                                        <option selected>@emptyAccount</option>
                         }
                     else 
                         {
@@ -291,32 +291,35 @@
 
     private StructureChangeModel structureChange = new StructureChangeModel();
 
-    private string saveError;
-    private string saveSuccess;
+    private string? saveError;
+    private string? saveSuccess;
 
-    private List<ProcessingYearModel> years;
+    private List<ProcessingYearModel>? years;
 
-    private List<ListItemModel> ministries;
-    private List<ListItemModel> programs;
-    private List<ListItemModel> subprograms;
-    private List<ListItemModel> accountTypes;
-    private List<ListItemModel> accounts;
+    private List<ListItemModel>? ministries;
+    private List<ListItemModel>? programs;
+    private List<ListItemModel>? subprograms;
+    private List<ListItemModel>? accountTypes;
+    private List<ListItemModel>? accounts;
 
     private bool progDisabled = false;
     private bool sprogDisabled = false;
     private bool accountTypeDisabled = false;
 
-    private List<ListItemModel> ministries2;
-    private List<ListItemModel> programs2;
-    private List<ListItemModel> subprograms2;
-    private List<ListItemModel> accountTypes2;
-    private List<ListItemModel> accounts2;
+    private List<ListItemModel>? ministries2;
+    private List<ListItemModel>? programs2;
+    private List<ListItemModel>? subprograms2;
+    private List<ListItemModel>? accountTypes2;
+    private List<ListItemModel>? accounts2;
 
-    private bool progDisabled2 = false;
-    private bool sprogDisabled2 = false;
-    private bool accountTypeDisabled2 = false;
+    const string emptySubProg = "Select a Program first...";
+    const string emptyProg = "Select a Ministry first...";
+    const string emptySOC = "Select a Sub-Program first...";
+    const string emptyAccount = "Select a Account Type first...";
 
-    private string username;
+
+
+    private string username = string.Empty;
 
 
     protected override async Task OnInitializedAsync()
@@ -341,8 +344,8 @@
             saveError = "Year must be selected";
             return;
         }
-        saveError = "";
-        saveSuccess = "";
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
         try
         {
             int affectedRows=  await _db.AddStructureChange(structureChange);      
@@ -372,27 +375,27 @@
                 //run the parent procedure
                 await OnSaveSC.InvokeAsync();
             }
-           
+
         }
         catch(Exception e)
         {
             saveError = e.Message; 
             base.StateHasChanged();
         }
-        
+
     }
 
     private  void  HandleInvalidSubmit()
     {     
-        saveSuccess = "";
+        saveSuccess = string.Empty;
         saveError = "Please enter the required fields. Thank you.";
         base.StateHasChanged();                
     }
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
         //clear any save messages because we entering new stull
-        saveSuccess = "";
-        saveError = "";
+        saveSuccess = string.Empty;
+        saveError = string.Empty;
 
         if (e.FieldIdentifier.FieldName == "ministry")
         {
@@ -410,7 +413,7 @@
         {
             AccountTypeChanged();
         }
-        
+
         if (e.FieldIdentifier.FieldName == "to_ministry")
         {
             MinistryChanged2();
@@ -429,17 +432,17 @@
         }
     }
 
-    
+
     private async void MinistryChanged()
     {
         //need to clear all dependencies        
         subprograms=null;
         accounts=null;
         accountTypes=null;
-        structureChange.program = null;
-        structureChange.subprogram = null;
-        structureChange.account =null;
-        structureChange.soc = null;
+        structureChange.program = emptyProg;
+        structureChange.subprogram = emptySubProg;
+        structureChange.account = emptyAccount;
+        structureChange.soc = emptySOC;
         programs = await _rdb.GetDependantPrograms(structureChange.ministry,username);
         base.StateHasChanged();
     }
@@ -449,9 +452,9 @@
         //need to clear all dependencies        
         accountTypes=null;
         accounts=null;
-        structureChange.account = null;
-        structureChange.subprogram = null;
-        structureChange.soc = null;
+        structureChange.account = emptyAccount;
+        structureChange.subprogram = emptySubProg;
+        structureChange.soc = emptySOC;
         subprograms = await _rdb.GetDependantSubPrograms(structureChange.ministry,structureChange.program,username);
         base.StateHasChanged();
     }
@@ -459,8 +462,8 @@
     private async void SubProgramChanged()
     {
         //need to clear all dependencies    
-        structureChange.account =null;
-        structureChange.soc = null;
+        structureChange.account = emptyAccount;
+        structureChange.soc = emptySOC;
         accountTypes = await _rdb.GetDependantAccountTypes();
         base.StateHasChanged();
     }
@@ -468,21 +471,21 @@
     private async void AccountTypeChanged()
     {
         //need to clear all dependencies    
-        structureChange.account = null;        
+        structureChange.account = emptyAccount;
         accounts = await _rdb.GetDependantAccounts(structureChange.soc);
         base.StateHasChanged();
     }
 
-      private async void MinistryChanged2()
+    private async void MinistryChanged2()
     {
         //need to clear all dependencies        
         subprograms2=null;
         accounts2=null;
         accountTypes2=null;
-        structureChange.to_program = null;
-        structureChange.to_subprogram = null;
-        structureChange.to_account =null;
-        structureChange.to_soc = null;
+        structureChange.to_program = emptyProg;
+        structureChange.to_subprogram = emptySubProg;
+        structureChange.to_account = emptyAccount;
+        structureChange.to_soc = emptySOC;
         programs2 = await _rdb.GetDependantPrograms(structureChange.to_ministry,username);
         base.StateHasChanged();
     }
@@ -492,9 +495,9 @@
         //need to clear all dependencies        
         accountTypes2=null;
         accounts2=null;
-        structureChange.to_account = null;
-        structureChange.to_subprogram = null;
-        structureChange.to_soc = null;
+        structureChange.to_account = emptyAccount;
+        structureChange.to_subprogram = emptySubProg;
+        structureChange.to_soc = emptySOC;
         subprograms2 = await _rdb.GetDependantSubPrograms(structureChange.to_ministry,structureChange.to_program,username);
         base.StateHasChanged();
     }
@@ -502,8 +505,8 @@
     private async void SubProgramChanged2()
     {
         //need to clear all dependencies    
-        structureChange.to_account =null;
-        structureChange.to_soc = null;
+        structureChange.to_account = emptyAccount;
+        structureChange.to_soc = emptySOC;
         accountTypes2 = await _rdb.GetDependantAccountTypes();
         base.StateHasChanged();
     }
@@ -511,7 +514,7 @@
     private async void AccountTypeChanged2()
     {
         //need to clear all dependencies    
-        structureChange.to_account = null;        
+        structureChange.to_account = emptyAccount;
         accounts2 = await _rdb.GetDependantAccounts(structureChange.to_soc);
         base.StateHasChanged();
     }

@@ -46,10 +46,10 @@
 
 @code {
 
-    public List<NotificationModel> notifications;
+    public List<NotificationModel>? notifications;
 
  
-    private string username;
+    private string username = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {

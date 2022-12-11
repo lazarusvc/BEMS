@@ -86,10 +86,10 @@
 
 @code {
 
-    private List<UserModel> users;
+    private List<UserModel>? users;
 
-    private UserModel selectedUser;
-    private List<ListItemModel> roles;
+    private UserModel? selectedUser;
+    private List<ListItemModel>? roles;
 
     private string searchfilter { get; set; } = String.Empty;
 
@@ -117,14 +117,14 @@
             if (affectedRows!=0)
             {
                 //refresh list
-                users.Remove(usr);
+                users?.Remove(usr);
               //invoke refresh
                 base.StateHasChanged();
             } 
               
 
         }
-        catch (Exception e)
+        catch (Exception)
         {
 
         }

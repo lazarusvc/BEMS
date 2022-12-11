@@ -113,17 +113,17 @@ else {
     [Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; } = string.Empty;
     [Parameter]
-    public string program { get; set; }
+    public string program { get; set; } = string.Empty;
     [Parameter]
-    public string subprogram { get; set; }
+    public string subprogram { get; set; } = string.Empty;
 
-    private string ministryName;
-    private string programName;
-    private string subprogramName;
+    private string ministryName = string.Empty;
+    private string programName = string.Empty;
+    private string subprogramName = string.Empty;
     private int status;
-    private string username;
+    private string username = string.Empty;
 
     public int year0T = 0;
     public int year1T = 0;
@@ -132,7 +132,7 @@ else {
 
     private bool yearClosed=true;
 
-    private List<GroupingModel> accountTypeGroup;
+    private List<GroupingModel>? accountTypeGroup;
 
     protected override async Task OnInitializedAsync()
     {
@@ -213,7 +213,7 @@ else {
         //RefreshList();
 
     }
-    private async void OnSaveEntry()
+    private void OnSaveEntry()
     {
         //refresh list
         RefreshList();

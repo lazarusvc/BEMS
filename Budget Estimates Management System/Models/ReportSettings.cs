@@ -2,7 +2,7 @@
 {
     public class ReportSettings
     {
-        public string Server { get; set; }
-        public string Settings { get; set; }
+        public string Server { get; set; } = string.Empty;
+        public string Settings { get; set; } = string.Empty;
     }
 }

@@ -14,17 +14,17 @@
 	[Parameter]
 	public int parYear { get; set; }
 	[Parameter]
-	public string parUsername { get; set; }
+	public string parUsername { get; set; } = String.Empty;
 	[Parameter]
-	public string parMinistry { get; set; } 
+	public string parMinistry { get; set; } = String.Empty;
 	[Parameter]
-	public string parProgram { get; set; }
+	public string parProgram { get; set; } = String.Empty;
 	[Parameter]
-	public string parSubProg { get; set; }
+	public string parSubProg { get; set; } = String.Empty;
 	[Parameter]
-	public string parSOC { get; set; }
+	public string parSOC { get; set; } = String.Empty;
 	[Parameter]
-	public string parAccount { get; set; }
+	public string parAccount { get; set; } = String.Empty;
 	[CascadingParameter]
 	public ReportConfigModel reportSelected { get; set; }
 	[CascadingParameter]
@@ -34,9 +34,9 @@
 
 
 
-	protected override async void OnParametersSet()
+	protected override void OnParametersSet()
 	{
-		parameters = "";
+		parameters = string.Empty;
 		if (runReport)
 		{
 			if (!String.IsNullOrWhiteSpace(parYear.ToString()))

@@ -72,15 +72,15 @@
 
 @code {
     [Parameter]
-    public GroupingModel item { get; set; }
+    public GroupingModel? item { get; set; }
     [Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; } = string.Empty;
     [Parameter]
-    public string program { get; set; }
+    public string program { get; set; }= string.Empty;
     [Parameter]
-    public string subprogram { get; set; }
+    public string subprogram { get; set; } = string.Empty;
     [Parameter]
     public EventCallback OnEntryEdit { get; set; }
     [Parameter]
@@ -88,13 +88,13 @@
 
     public bool Collapsed = true;
     private int status;
-    private string username;
+    private string username= string.Empty;
 
-    public string accountSelected;
+    public string accountSelected = string.Empty;
 
     private bool yearClosed = true;
 
-    List<BudgetEstimatesModel> accounts;
+    List<BudgetEstimatesModel>? accounts;
 
     protected override async Task OnInitializedAsync()
     {        
@@ -116,7 +116,7 @@
     base.StateHasChanged();
     }
 
-    private async void SetAccount(string newaccount)
+    private void SetAccount(string newaccount)
     {
             OnAccountChanged.InvokeAsync(newaccount);
     }
@@ -132,20 +132,20 @@
             mapped.program =program;
             mapped.subprog =subprogram;
             mapped.account =item.item;
-            mapped.project ="";
-            mapped.sof ="";
-            mapped.sector ="";
-            mapped.lastcode ="";
-            mapped.label ="";
+            mapped.project = string.Empty;
+            mapped.sof = string.Empty;
+            mapped.sector = string.Empty;
+            mapped.lastcode = string.Empty;
+            mapped.label = string.Empty;
             mapped.quantity =0;
             mapped.year0_amount =0;
             mapped.year1_amount =0;
             mapped.year2_amount =0;
             mapped.year3_amount =0;
             mapped.is_by_law =false;
-            mapped.comment ="";
+            mapped.comment = string.Empty;
             mapped.flagged =false;
-            mapped.flagged_comment ="";
+            mapped.flagged_comment = string.Empty;
              var authState = await authStateProvider.GetAuthenticationStateAsync();
 			mapped.modified_by = authState.User.Identity.Name;
             mapped.last_modified =DateTime.Now;
@@ -179,14 +179,14 @@
             if (affectedRows!=0)
             {
                 //refresh list
-                accounts.Remove(delRec);
+                accounts?.Remove(delRec);
                 //invoke refresh
                 await OnEntryEdit.InvokeAsync();
                  base.StateHasChanged();
             } 
 
         }
-        catch (Exception e)
+        catch (Exception)
         {
            
         }

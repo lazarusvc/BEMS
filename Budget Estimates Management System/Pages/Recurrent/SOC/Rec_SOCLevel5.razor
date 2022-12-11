@@ -64,26 +64,26 @@ else {
 	[Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; } = string.Empty;
     [Parameter]
-    public string soc { get; set; }
+    public string soc { get; set; } = string.Empty;
     [Parameter]
-    public string program { get; set; }
+    public string program { get; set; } = string.Empty;
     [Parameter]
-    public string subprogram { get; set; }
+    public string subprogram { get; set; } = string.Empty;
 
-    public string subprogramName { get; set; }
-    public string programName { get; set; }
-    public string socName { get; set; }
-    public string ministryName { get; set; }
-    private string username;
+    public string subprogramName { get; set; } = string.Empty;
+    public string programName { get; set; } = string.Empty;
+    public string socName { get; set; } = string.Empty;
+    public string ministryName { get; set; } = string.Empty;
+    private string username = string.Empty;
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
 
-    private List<GroupingModel> accountGroup;
+    private List<GroupingModel>? accountGroup;
 
     protected override async Task OnInitializedAsync()
     {

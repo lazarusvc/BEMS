@@ -75,9 +75,9 @@
 
 @code {
 
-    private List<NotificationModel> notifications;
+    private List<NotificationModel>? notifications;
 
-    private NotificationModel selectedNotification;
+    private NotificationModel? selectedNotification;
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,14 +96,14 @@
             if (affectedRows!=0)
             {
                 //refresh list
-                notifications.Remove(notification);
+                notifications?.Remove(notification);
                 //invoke refresh
                 base.StateHasChanged();
             } 
 
 
         }
-        catch (Exception e)
+        catch (Exception)
         {
 
         }
@@ -120,14 +120,14 @@
             if (affectedRows!=0)
             {
                 //refresh list
-                notifications.RemoveAll(x=>x.expiryDate<DateTime.Now);
+                notifications?.RemoveAll(x=>x.expiryDate<DateTime.Now);
                 //invoke refresh
                 base.StateHasChanged();
             } 
 
 
         }
-        catch (Exception e)
+        catch (Exception)
         {
 
         }
