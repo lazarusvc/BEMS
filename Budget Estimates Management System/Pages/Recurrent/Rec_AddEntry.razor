@@ -1,4 +1,5 @@
-﻿@using DataAccessLibrary.Models;
+﻿@using Budget_Estimates_Management_System.Models;
+@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @using AutoMapper;
 @inject IDbData _db;
@@ -465,34 +466,49 @@
     {     
         saveError = string.Empty;
         saveSuccess = string.Empty;
-        try
+        int status=0;
+        //Before we do anything, make sure we are allow only entries on unsubmitted items
+        try { status = await _rdb.GetSubProgramStatus(year, subprogram); } catch { }
+        if (status == (int)EntryStatus.Unsubmitted)
         {
-            entry.last_modified =DateTime.Now;
-            entry.is_adjustment = false;
-            entry.modified_by = username;
-            int affectedRows=  await _rdb.AddNewRecEntry(entry);      
-            //save successfully.  Reset form
-            if (affectedRows==0)
+            try
             {
-                saveError = "Something happened.  Record was not saved";
-                base.StateHasChanged();
-            } else
-            {
-                entry=new BudgetEstimatesModel();
-                EditContext = new EditContext(entry);
-                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
-                SetFields();
-                saveSuccess = "Record Successfully Saved.";
-                base.StateHasChanged();
-                //run the parent procedure
-                await OnSaveEntry.InvokeAsync();
+                entry.last_modified = DateTime.Now;
+                entry.is_adjustment = false;
+                entry.modified_by = username;
+                int affectedRows = await _rdb.AddNewRecEntry(entry);
+                //save successfully.  Reset form
+                if (affectedRows == 0)
+                {
+                    saveError = "Something happened.  Record was not saved";
+                    base.StateHasChanged();
+                }
+                else
+                {
+                    //set the defaults for another entry
+                    ministry = entry.ministry;
+                    program = entry.program;
+                    subprogram = entry.subprog;
+                    entry = new BudgetEstimatesModel();
+                    EditContext = new EditContext(entry);
+                    EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+                    SetFields();
+                    saveSuccess = "Record Successfully Saved.";
+                    base.StateHasChanged();
+                    //run the parent procedure
+                    await OnSaveEntry.InvokeAsync();
+                }
+
             }
+            catch (Exception e)
+            {
+                saveError = e.Message;
 
-        }
-        catch(Exception e)
+                base.StateHasChanged();
+            }
+        } else
         {
-            saveError = e.Message; 
-
+            saveError = "This account has been submitted already. You cannot submit additional items.";
             base.StateHasChanged();
         }
         
