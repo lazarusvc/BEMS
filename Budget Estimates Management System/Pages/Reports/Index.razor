@@ -172,6 +172,10 @@
 				</div>
 			</div>
 		}
+		@if (!String.IsNullOrWhiteSpace(errorString))
+		{			
+				<div class="col-12" style="color:darkred">@errorString</div>
+		}
 	</div>
 }
 
@@ -224,6 +228,7 @@
 	private string parSubProgValid = String.Empty;
 	private string parSOCValid = String.Empty;
 	private string parAccountValid = String.Empty;
+	private string errorString = String.Empty;
 
 
 	private bool runReport = false;
@@ -266,6 +271,7 @@
 			parSubProg = String.Empty;
 			parSOC = String.Empty;
 			parAccount = String.Empty;
+			errorString = String.Empty;
 
 			if (e.Value.ToString().Equals("0"))
 			{
@@ -358,9 +364,11 @@
 		parAccountValid = String.Empty;
 	}
 
-	private void RunReport()
+	
+
+	private async void RunReport()
 	{
-		if (reportSelected is null)	{ return;}
+		if (reportSelected is null)	{ return;}		
 		//Make sure the parameters are set
 		if (reportSelected.parMinistry && ( String.IsNullOrWhiteSpace(parMinistry) || parMinistry.Equals("0") )) { 
 			parMinistryValid = "invalid";
@@ -382,7 +390,39 @@
 		parSubProgValid = String.Empty;
 		parSOCValid = String.Empty;
 		parAccountValid = String.Empty;
-		runReport = true;
+		errorString = String.Empty;
+		//Build my parameter list
+		Dictionary<string, object> myParameters = new Dictionary<string, object>();
+		myParameters.Add("year", year_selected);
+		if (reportSelected.parUser)
+		{
+			myParameters.Add("user", username);
+			 }
+		if (reportSelected.parMinistry)
+		{
+			myParameters.Add("ministry", parMinistry);
+			 }
+		if (reportSelected.parProgram) { myParameters.Add("program", parProgram); }
+		if (reportSelected.parSubprogram) { myParameters.Add("subprog", parSubProg); }
+		if (reportSelected.parSOC) { myParameters.Add("soc", parSOC); }
+		if (reportSelected.parAccount) { myParameters.Add("account", parAccount); }
+		//Run stored procedure if needed
+		if (!String.IsNullOrWhiteSpace(reportSelected.storedProcedure))
+		{
+			try
+			{
+				await _db.RunProcedure(reportSelected.storedProcedure, myParameters);
+			}
+			catch (Exception e)
+			{
+				errorString = "An error occured while running the stored procedure: "+e.Message;
+				base.StateHasChanged();
+				return;
 
+			}
+
+		}		
+		runReport = true;
+		base.StateHasChanged();
 	}
 }

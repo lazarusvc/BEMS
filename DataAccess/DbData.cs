@@ -11,6 +11,10 @@ namespace DataAccessLibrary
         {
             _db = db;
         }
+        public Task RunProcedure(string spName, object parameters)
+        {            
+            return _db.ExecuteSP(spName, parameters);
+        }
 
         public Task<List<ProcessingYearModel>> GetYears()
         {
@@ -304,6 +308,7 @@ namespace DataAccessLibrary
         {
             string sql = @"INSERT INTO Report_Config([reportId]
                                                       ,[reportDesc]
+                                                      ,[storedProcedure]
                                                       ,[parUser]
                                                       ,[parMinistry]
                                                       ,[parProgram]
@@ -312,6 +317,7 @@ namespace DataAccessLibrary
                                                       ,[parAccount])
                             VALUES(@reportId
                                   ,@reportDesc
+                                  ,@storedProcedure
                                   ,@parUser
                                   ,@parMinistry
                                   ,@parProgram
@@ -335,6 +341,7 @@ namespace DataAccessLibrary
             string sql = @"UPDATE Report_Config
                             set [reportId]=@reportId
                             ,[reportDesc]=@reportDesc
+                            ,[storedProcedure]=@storedProcedure
                             ,[parUser]=@parUser
                             ,[parMinistry]=@parMinistry
                             ,[parProgram]=@parProgram

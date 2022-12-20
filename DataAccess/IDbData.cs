@@ -4,7 +4,8 @@ namespace DataAccessLibrary
 {
     public interface IDbData
     {
-        Task<string> GetMinistryName(string ministry);
+        Task RunProcedure(string spName, object parameters);
+		Task<string> GetMinistryName(string ministry);
         Task<string> GetProgramName(string program);
         Task<string> GetSubProgramName(string program);
         Task<string> GetAccountName(string account);
