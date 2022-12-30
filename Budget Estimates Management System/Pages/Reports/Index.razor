@@ -13,7 +13,8 @@
 <div class="col-3">
 		<div class="input-group mb-3">
 			<label class="input-group-text" for="inputGroupSelect01">Year</label>
-			<select class="form-select" id="inputGroupSelect01" @onchange="onYearChanged">
+			<select id="processingYear" placeholder="Year" class="form-select"
+                       @bind="year_selected" >
 				@if (years is null)
 				{
 					<option selected>Loading...</option>
@@ -25,7 +26,8 @@
 						<option value=@year.year selected=@(year.ready_for_data_entry? true:false)>@year.displayYear @(year.year_closed ? "(Year Closed)" : "") @(!year.ready_for_data_entry && !year.year_closed ? "(Not Open)" : "")</option>
 					}
 				}
-			</select>
+        }
+                </select>
 		</div>
        
 	</div>
@@ -33,7 +35,8 @@
 	<div class="col-3">
 		<div class="input-group mb-3">
 			<label class="input-group-text" for="inputGroupSelect01">Report</label>
-			<select class="form-select" id="inputGroupSelect01" @onchange="onReportChanged">				
+			<select id="reportSelected" placeholder="Choose Report" class="form-select"
+                       @bind="reportID" @bind:after="onReportChanged">
 				@if (reports is null)
 				{
 					<option selected>Loading...</option>
@@ -43,10 +46,11 @@
 					<option value="0" selected>Choose...</option>
 					@foreach (var report in reports)
 					{
-						<option value=@report.id>@report.reportDesc</option>
+						<option value=@report.reportId.ToLower()>@report.reportDesc</option>
 					}
 				}
 			</select>
+
 		</div>
 
 	</div>
@@ -193,7 +197,7 @@
 	private List<ProcessingYearModel>? years;
 	private List<ReportConfigModel>? reports;
 
-	public ReportConfigModel reportSelected = new ReportConfigModel();
+	public ReportConfigModel? reportSelected;
 
 	private string username = string.Empty;
 
@@ -204,24 +208,29 @@
 	private List<ListItemModel>? accounts;
 
 	[Parameter]
+	[SupplyParameterFromQuery(Name = "parReport")]
 	public string reportID { get; set; } = string.Empty;
 	[Parameter]
+	[SupplyParameterFromQuery(Name = "parYear")]
 	public int year_selected { get; set; }=0;
 	[Parameter]
-	[SupplyParameterFromQuery(Name = "{parMinistry}")]
+	[SupplyParameterFromQuery(Name = "parMinistry")]
 	public string parMinistry { get; set; } = string.Empty;
 	[Parameter]
-	[SupplyParameterFromQuery(Name = "{parProgram}")]
+	[SupplyParameterFromQuery(Name = "parProgram")]
 	public string parProgram { get; set; } = string.Empty;
 	[Parameter]
-	[SupplyParameterFromQuery(Name = "{parSubProg}")]
+	[SupplyParameterFromQuery(Name = "parSubProg")]
 	public string parSubProg { get; set; } = string.Empty;
 	[Parameter]
-	[SupplyParameterFromQuery(Name = "{parSOC}")]
+	[SupplyParameterFromQuery(Name = "parSOC")]
 	public string parSOC { get; set; } = string.Empty;
 	[Parameter]
-	[SupplyParameterFromQuery(Name = "{parAccount}")]
+	[SupplyParameterFromQuery(Name = "parAccount")]
 	public string parAccount { get; set; } = string.Empty;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "parRun")]
+	public string parRun { get; set; } = string.Empty;
 
 	private string parMinistryValid=String.Empty;
 	private string parProgramValid = String.Empty;
@@ -254,7 +263,7 @@
 		year_selected = Int16.Parse(e.Value.ToString());
 	}
 
-	private async void onReportChanged(ChangeEventArgs e)
+	private async Task onReportChanged()
 	{
 		try
 		{
@@ -273,14 +282,14 @@
 			parAccount = String.Empty;
 			errorString = String.Empty;
 
-			if (e.Value.ToString().Equals("0"))
+			if (reportID.ToLower().Equals("0"))
 			{
 				disableRunReport = true;
 				reportSelected = null;
 				return;
 			}
 			disableRunReport = false;
-			reportSelected = reports.Where(x => x.id.ToString().Equals(e.Value.ToString())).FirstOrDefault();
+			reportSelected = reports.Where(x => x.reportId.ToLower().Equals(reportID)).FirstOrDefault();
 
 			if (reportSelected is not null && (reportSelected.parMinistry))
 			{ ministries = await _rdb.GetDependantMinistries(username); 
@@ -289,7 +298,6 @@
 			{
 				accountTypes = await _rdb.GetDependantAccountTypes();
 			}
-			base.StateHasChanged();
 		}
 		catch (Exception)
 		{
@@ -364,7 +372,7 @@
 		parAccountValid = String.Empty;
 	}
 
-	
+
 
 	private async void RunReport()
 	{
@@ -397,11 +405,11 @@
 		if (reportSelected.parUser)
 		{
 			myParameters.Add("user", username);
-			 }
+		}
 		if (reportSelected.parMinistry)
 		{
 			myParameters.Add("ministry", parMinistry);
-			 }
+		}
 		if (reportSelected.parProgram) { myParameters.Add("program", parProgram); }
 		if (reportSelected.parSubprogram) { myParameters.Add("subprog", parSubProg); }
 		if (reportSelected.parSOC) { myParameters.Add("soc", parSOC); }
@@ -425,4 +433,18 @@
 		runReport = true;
 		base.StateHasChanged();
 	}
+
+	protected override async void OnParametersSet()
+	{
+		if (String.IsNullOrWhiteSpace(reportID))
+		{
+			reportID = "0";
+		}
+		reportID = reportID.ToLower();
+		await onReportChanged();
+		if (!String.IsNullOrWhiteSpace(parRun) && parRun.ToLower().Equals("y"))
+		{ RunReport(); }
+		base.StateHasChanged();
+	}
+
 }
