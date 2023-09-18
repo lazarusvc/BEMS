@@ -67,7 +67,8 @@ namespace DataAccessLibrary
         }
 
         public Task<List<GroupingModel>> GetSubProgramDataForYear(int year, string ministry, string program, string username)
-        {if (username is null)
+        {
+            if (username is null)
             {
                 username = "!";
             }
