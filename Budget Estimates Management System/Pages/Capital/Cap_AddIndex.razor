@@ -9,104 +9,9 @@
 
 <h3>Ministry Estimates</h3>
 
-<button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#newEntryCAP">Add New Entry</button>
+<button type="button" class="btn btn-info" @onclick='() => NavigateTo("capital", "add", null)'>Bulk Upload</button>
 <br />
 <br />
-
-<!-- MODAL -->
-<!-- ---------------------------------------------------------------------------------- -->
-<div class="modal fade" id="newEntryCAP" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-
-        <EditForm Model="@cmodel"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">Add Capital Entry</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    <div class="form-floating" style="padding-bottom:5px">
-                        <InputSelect id="processingYear" placeholder="Year" class="form-select" @bind-Value="@year" disabled=true>
-                                <option value=@year>@year</option>
-                        </InputSelect>
-
-                        <label for="processingYear">
-                            Processing Year
-                        </label>
-                    </div>
-
-                    <div class="form-floating" style="padding-bottom:5px">
-                        <InputSelect id="ministry" placeholder="Ministry" class="form-select" disabled=@minDisabled @bind-Value="@cmodel.ministry">
-                            @if (ministries is null)
-                            {
-                                <option selected>Select Processing Year first...</option>
-                            }
-                            else
-                            {
-                                <option value="" selected>Choose...</option>
-                                @foreach (var item in ministries)
-                                {
-                                    <option value=@item.Name>@item.Name - @item.Description</option>
-                                }
-                            }
-                        </InputSelect>
-                        <label for="ministry">
-                            Ministry
-                        </label>
-                    </div>
-
-                    <div class="form-floating" style="padding-bottom:5px">
-                        <InputSelect id="program" placeholder="Program" class="form-select" disabled=@progDisabled @bind-Value="@cmodel.program">
-                            @if (programs is null)
-                            {
-                                <option selected>Select a Ministry first...</option>
-                            }
-                            else
-                            {
-                                <option value="" selected>Choose...</option>
-                                @foreach (var item in programs)
-                                {
-                                    <option value=@item.Name>@item.Name - @item.Description</option>
-                                }
-                            }
-                        </InputSelect>
-                        <label for="program">
-                            Program
-                        </label>
-                    </div>
-
-                    <div class="form-floating" style="padding-bottom:5px">
-                        <InputSelect id="subprogram" placeholder="Sub-Program" class="form-select" disabled=@sprogDisabled @bind-Value="@cmodel.subprog">
-                            @if (subprograms is null)
-                            {
-                                <option selected>Select a Program first...</option>
-                            }
-                            else
-                            {
-                                <option value="" selected>Choose...</option>
-                                @foreach (var item in subprograms)
-                                {
-                                    <option value=@item.Name>@item.Name - @item.Description</option>
-                                }
-                            }
-                        </InputSelect>
-                        <label for="subprog">
-                            Sub-Program
-                        </label>
-                    </div>
-
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Save</button>
-                </div>
-            </div>
-        </EditForm>
-    </div>
-</div>
 
 <!-- TABLE -->
 <!-- ---------------------------------------------------------------------------------- -->
@@ -138,8 +43,8 @@ else
                 @foreach (var item in data)
                 {
                     <tr>
-                        <th scope="row" @onclick="() => NavigateTo(year,item.id)" style="cursor:pointer;">@item.id</th>
-                        <td @onclick="() => NavigateTo(year,item.id)" style="cursor:pointer;">@item.ldr_entity_id@item.ministry</td>
+                        <th scope="row" style="cursor:pointer;">@item.id</th>
+                        <td style="cursor:pointer;">@item.ldr_entity_id@item.ministry</td>
                         <td class="text-end" style="background-color:lightgray">@Convert.ToInt32(item.ldr_amt_1).ToString("C")</td>
                         <td class="text-end"><b>@item.program</b></td>
                         <td class="text-end"><b>@item.subprog</b></td>
@@ -375,10 +280,14 @@ else
         base.StateHasChanged();
     }
 
-    private void NavigateTo(int year, int id)
+    // NAVIGATION LOGIC
+    // *********************************************************
+    private void NavigateTo(string site, string route, int? id)
     {
-        NavigationManager.NavigateTo($"recurrent/{year}/{id}", forceLoad: true);
-
+        if (site.Equals("capital") && route.Equals("add"))
+        {
+            NavigationManager.NavigateTo($"{site}/{route}/{id}");
+        }       
     }
 
     private async void RefreshList()
