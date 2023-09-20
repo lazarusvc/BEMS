@@ -1,0 +1,63 @@
+﻿@using DataAccessLibrary.Models;
+@using Microsoft.Extensions.Configuration;
+@inject IConfiguration _config;
+
+@if (!String.IsNullOrEmpty(URL))
+{
+   <iframe id="reportViewer" style="width: 100%;" src="@(URL)"></iframe>
+}
+
+@code {
+
+	public string URL { get; set; } = String.Empty;
+
+	[Parameter]
+	public int parYear { get; set; }
+	[Parameter]
+	public string parUsername { get; set; } = String.Empty;
+	[Parameter]
+	public string parMinistry { get; set; } = String.Empty;
+	[Parameter]
+	public string parProgram { get; set; } = String.Empty;
+	[Parameter]
+	public string parSubProg { get; set; } = String.Empty;
+	[Parameter]
+	public string parSOC { get; set; } = String.Empty;
+	[Parameter]
+	public string parAccount { get; set; } = String.Empty;
+	[CascadingParameter]
+	public ReportConfigModel reportSelected { get; set; }
+	[CascadingParameter]
+	public bool runReport { get; set; }
+
+	private string parameters = string.Empty;
+
+
+
+	protected override void OnParametersSet()
+	{
+		parameters = string.Empty;
+		if (runReport)
+		{
+			if (!String.IsNullOrWhiteSpace(parYear.ToString()))
+			{ parameters = parameters + "&proc_year=" + parYear; }
+			if (reportSelected.parUser)
+			{ parameters = parameters + "&username=" + parUsername; }
+			if (!String.IsNullOrWhiteSpace(parMinistry))
+			{ parameters = parameters + "&ministry=" + parMinistry; }
+			if (!String.IsNullOrWhiteSpace(parProgram))
+			{ parameters = parameters + "&program=" + parProgram; }
+			if (!String.IsNullOrWhiteSpace(parSubProg))
+			{ parameters = parameters + "&subprog=" + parSubProg; }
+			if (!String.IsNullOrWhiteSpace(parSOC))
+			{ parameters = parameters + "&soc=" + parSOC; }
+			if (!String.IsNullOrWhiteSpace(parAccount))
+			{ parameters = parameters + "&account=" + parAccount; }
+			//TODO: Build the parameters for the report
+			URL = String.Format("{0}{1}{2}{3}", _config["ReportSettings:Server"], reportSelected.reportId,
+			_config["ReportSettings:Settings"], parameters);
+		}
+		base.StateHasChanged();
+	}
+
+}

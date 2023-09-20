@@ -1,7 +1,450 @@
 ﻿@page "/reports"
 
-<h3>Reports</h3>
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@inject IRecEstimateData _rdb;
+@inject AuthenticationStateProvider authStateProvider;
+
+
+<h1>Reports</h1>
+
+<div class="row" style="background-color:darkkhaki; padding-top:15px">
+<div class="col-3">
+		<div class="input-group mb-3">
+			<label class="input-group-text" for="inputGroupSelect01">Year</label>
+			<select id="processingYear" placeholder="Year" class="form-select"
+                       @bind="year_selected" >
+				@if (years is null)
+				{
+					<option selected>Loading...</option>
+				}
+				else
+				{
+					@foreach (var year in years)
+					{
+						<option value=@year.year selected=@(year.ready_for_data_entry? true:false)>@year.displayYear @(year.year_closed ? "(Year Closed)" : "") @(!year.ready_for_data_entry && !year.year_closed ? "(Not Open)" : "")</option>
+					}
+				}
+        }
+                </select>
+		</div>
+       
+	</div>
+
+	<div class="col-3">
+		<div class="input-group mb-3">
+			<label class="input-group-text" for="inputGroupSelect01">Report</label>
+			<select id="reportSelected" placeholder="Choose Report" class="form-select"
+                       @bind="reportID" @bind:after="onReportChanged">
+				@if (reports is null)
+				{
+					<option selected>Loading...</option>
+				}
+				else
+				{
+					<option value="0" selected>Choose...</option>
+					@foreach (var report in reports)
+					{
+						<option value=@report.reportId.ToLower()>@report.reportDesc</option>
+					}
+				}
+			</select>
+
+		</div>
+
+	</div>
+	<div class="col-3">
+		<button class="btn btn-outline-primary" @onclick="RunReport" disabled="@disableRunReport"><span class="oi oi-bar-chart"></span> Run Report</button>
+
+	</div>
+</div>
+
+@if (reportSelected is not null) {
+	<div class="row" style="background-color:lightgoldenrodyellow; padding-top:15px">
+		
+		@if (reportSelected.parMinistry)
+		{
+			<div class="col-4">
+			<div class="input-group mb-3">
+					<label class="input-group-text @parMinistryValid" for="inputGroupSelect01">Ministry</label>
+					<select class="form-select @parMinistryValid" id="parMinistry" @onchange="MinistryChanged">
+					@if (ministries is null)
+					{
+						<option selected>Loading...</option>
+					}
+					else
+					{
+							<option value="" selected>Choose...</option>
+						@foreach (var item in ministries)
+						{
+							<option value=@item.Name>@item.Name - @item.Description</option>
+						}
+					}
+				</select>
+			</div>
+		</div>
+	}
+	@if (reportSelected.parProgram)
+		{
+			<div class="col-4">
+			<div class="input-group mb-3">
+					<label class="input-group-text @parProgramValid" for="inputGroupSelect01">Program</label>
+					<select class="form-select @parProgramValid" id="parProgram" @onchange="ProgramChanged">
+					@if (programs is null)
+					{
+						<option selected>Select Ministry First...</option>
+					}
+					else
+					{
+							<option value="" selected>Choose...</option>
+						@foreach (var item in programs)
+						{
+							<option value=@item.Name>@item.Name - @item.Description</option>
+						}
+					}
+				</select>
+			</div>
+		</div>
+	}
+		@if (reportSelected.parSubprogram)
+		{
+			<div class="col-4">
+				<div class="input-group mb-3">
+					<label class="input-group-text @parSubProgValid " for="inputGroupSelect01">Sub-Program</label>
+					<select class="form-select @parSubProgValid " id="parSubprogram" @onchange="SubProgramChanged">
+						@if (subprograms is null)
+						{
+							<option selected>Select Program First...</option>
+						}
+						else
+						{
+							<option value="" selected>Choose...</option>
+							@foreach (var item in subprograms)
+							{
+								<option value=@item.Name>@item.Name - @item.Description</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+		}
+	</div>
+
+	<div class="row" style="background-color:lightgoldenrodyellow; padding-top:15px">
+		@if (reportSelected.parSOC)
+		{
+			<div class="col-4">
+				<div class="input-group mb-3">
+					<label class="input-group-text @parSOCValid" for="inputGroupSelect01">SOC</label>
+					<select class="form-select @parSOCValid" id="parSOC" @onchange="AccountTypeChanged">
+						@if (accountTypes is null)
+						{
+							<option selected>Select Sub-Program First...</option>
+						}
+						else
+						{
+							<option value="" selected>Choose...</option>
+							@foreach (var item in accountTypes)
+							{
+								<option value=@item.Name>@item.Name - @item.Description</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+		}
+		@if (reportSelected.parAccount)
+		{
+			<div class="col-4">
+				<div class="input-group mb-3">
+					<label class="input-group-text @parAccountValid" for="inputGroupSelect01">Account</label>
+					<select class="form-select @parAccountValid" id="parAccount" @onchange="AccountChanged">
+						@if (accounts is null)
+						{
+							<option selected>Select SOC First...</option>
+						}
+						else
+						{
+							<option value="" selected>Choose...</option>
+							@foreach (var item in accounts)
+							{
+								<option value=@item.Name>@item.Name - @item.Description</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+		}
+		@if (!String.IsNullOrWhiteSpace(errorString))
+		{			
+				<div class="col-12" style="color:darkred">@errorString</div>
+		}
+	</div>
+}
+
+@if (runReport) {
+	<CascadingValue Value="@reportSelected">
+		<CascadingValue Value="@runReport">
+		<ReportViewer parYear="@year_selected" parUsername="@username" parMinistry="@parMinistry" parProgram="@parProgram"
+	 parSubProg="@parSubProg" parSOC="@parSOC" parAccount="@parAccount"></ReportViewer>
+	</CascadingValue>
+	</CascadingValue>
+}
+
 
 @code {
+	private List<ProcessingYearModel>? years;
+	private List<ReportConfigModel>? reports;
+
+	public ReportConfigModel? reportSelected;
+
+	private string username = string.Empty;
+
+	private List<ListItemModel>? ministries;
+	private List<ListItemModel>? programs;
+	private List<ListItemModel>? subprograms;
+	private List<ListItemModel>? accountTypes;
+	private List<ListItemModel>? accounts;
+
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "parReport")]
+	public string reportID { get; set; } = string.Empty;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "parYear")]
+	public int year_selected { get; set; }=0;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "parMinistry")]
+	public string parMinistry { get; set; } = string.Empty;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "parProgram")]
+	public string parProgram { get; set; } = string.Empty;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "parSubProg")]
+	public string parSubProg { get; set; } = string.Empty;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "parSOC")]
+	public string parSOC { get; set; } = string.Empty;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "parAccount")]
+	public string parAccount { get; set; } = string.Empty;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "parRun")]
+	public string parRun { get; set; } = string.Empty;
+
+	private string parMinistryValid=String.Empty;
+	private string parProgramValid = String.Empty;
+	private string parSubProgValid = String.Empty;
+	private string parSOCValid = String.Empty;
+	private string parAccountValid = String.Empty;
+	private string errorString = String.Empty;
+
+
+	private bool runReport = false;
+	private bool disableRunReport = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		//Initial Edit Context
+		years = await _db.GetYears();
+		year_selected = years.Where(y => y.ready_for_data_entry).FirstOrDefault().year;
+		var authState = await authStateProvider.GetAuthenticationStateAsync();
+		username = authState.User.Identity.Name;
+		//get the reports
+		reports = await _db.GetAllReportConfig();
+		//TODO: Set the report variables if it is set by url
+		if (!authState.User.IsInRole("MinistryStaff")) { return; }
+		years = years.FindAll(e => e.ready_for_data_entry == true||e.year_closed==true);
+
+	}
+
+	private void onYearChanged(ChangeEventArgs e)
+	{
+		year_selected = Int16.Parse(e.Value.ToString());
+	}
+
+	private async Task onReportChanged()
+	{
+		try
+		{
+			ministries = null;
+			programs = null;
+			subprograms = null;
+			accountTypes = null;
+			accounts = null;
+			runReport = false;
+
+			//Also clear the parameter values
+			parMinistry = String.Empty;
+			parProgram = String.Empty;
+			parSubProg = String.Empty;
+			parSOC = String.Empty;
+			parAccount = String.Empty;
+			errorString = String.Empty;
+
+			if (reportID.ToLower().Equals("0"))
+			{
+				disableRunReport = true;
+				reportSelected = null;
+				return;
+			}
+			disableRunReport = false;
+			reportSelected = reports.Where(x => x.reportId.ToLower().Equals(reportID)).FirstOrDefault();
+
+			if (reportSelected is not null && (reportSelected.parMinistry))
+			{ ministries = await _rdb.GetDependantMinistries(username); 
+			}
+			if (reportSelected is not null && (!reportSelected.parMinistry&& reportSelected.parSOC))
+			{
+				accountTypes = await _rdb.GetDependantAccountTypes();
+			}
+		}
+		catch (Exception)
+		{
+
+			reportSelected = null;
+		}
+	}
+
+	private async void MinistryChanged(ChangeEventArgs e)
+	{
+		if (String.IsNullOrEmpty(e.Value.ToString()) || e.Value.ToString().Equals("0")) { return; }
+		parMinistry = e.Value.ToString();
+		//need to clear all dependencies
+		parMinistryValid = String.Empty;
+		parProgram = string.Empty;
+		parSubProg = string.Empty;
+		parAccount = string.Empty;
+		parSOC = string.Empty;
+		if (reportSelected.parProgram)
+		{
+			programs = await _rdb.GetDependantPrograms(parMinistry, username);
+		}
+		base.StateHasChanged();
+	}
+
+	private async void ProgramChanged(ChangeEventArgs e)
+	{
+		if (String.IsNullOrEmpty(e.Value.ToString()) || e.Value.ToString().Equals("0")) { return; }
+		parProgram = e.Value.ToString();
+		//need to clear all dependencies
+		parProgramValid = String.Empty;
+		parSubProg =  string.Empty;
+		parAccount =  string.Empty;
+		parSOC = string.Empty;
+		if (reportSelected.parSubprogram)
+		{
+			subprograms = await _rdb.GetDependantSubPrograms(parMinistry, parProgram, username);
+		}
+		base.StateHasChanged();
+	}
+
+	private async void SubProgramChanged(ChangeEventArgs e)
+	{
+		if (String.IsNullOrEmpty(e.Value.ToString()) || e.Value.ToString().Equals("0")) { return; }
+		parSubProg = e.Value.ToString();
+		parSubProgValid = String.Empty;
+		//need to clear all dependencies
+		parAccount = string.Empty;
+		parSOC = string.Empty;
+		if (reportSelected.parSOC)
+		{
+			accountTypes = await _rdb.GetDependantAccountTypes();
+		}
+		base.StateHasChanged();
+	}
+
+	private async void AccountTypeChanged(ChangeEventArgs e)
+	{
+		if (String.IsNullOrEmpty(e.Value.ToString()) || e.Value.ToString().Equals("0")) { return; }
+		parSOC = e.Value.ToString();
+		parSOCValid	= String.Empty;
+		//need to clear all dependencies
+		parAccount = string.Empty;
+		accounts = await _rdb.GetDependantAccounts(parSOC);
+		base.StateHasChanged();
+	}
+
+	private  void AccountChanged(ChangeEventArgs e)
+	{
+		if (String.IsNullOrEmpty(e.Value.ToString()) || e.Value.ToString().Equals("0")) { return; }
+		parAccount = e.Value.ToString();	
+		parAccountValid = String.Empty;
+	}
+
+
+
+	private async void RunReport()
+	{
+		if (reportSelected is null)	{ return;}		
+		//Make sure the parameters are set
+		if (reportSelected.parMinistry && ( String.IsNullOrWhiteSpace(parMinistry) || parMinistry.Equals("0") )) { 
+			parMinistryValid = "invalid";
+			return; }
+		if (reportSelected.parProgram && (String.IsNullOrWhiteSpace(parProgram) || parProgram.Equals("0"))) { 
+			parProgramValid = "invalid";
+			return; }
+		if (reportSelected.parSubprogram && ( String.IsNullOrWhiteSpace(parSubProg) || parSubProg.Equals("0"))) { 
+			parSubProgValid = "invalid";
+			return; }
+		if (reportSelected.parSOC && (String.IsNullOrWhiteSpace(parSOC) || parSOC.Equals("0"))) { 
+			parSOCValid = "invalid";
+			return; }
+		if (reportSelected.parAccount && (String.IsNullOrWhiteSpace(parAccount) || parAccount.Equals("0"))) {
+			parAccountValid = "invalid";
+			return; }		
+		parMinistryValid = String.Empty;
+		parProgramValid = String.Empty;
+		parSubProgValid = String.Empty;
+		parSOCValid = String.Empty;
+		parAccountValid = String.Empty;
+		errorString = String.Empty;
+		//Build my parameter list
+		Dictionary<string, object> myParameters = new Dictionary<string, object>();
+		myParameters.Add("year", year_selected);
+		if (reportSelected.parUser)
+		{
+			myParameters.Add("user", username);
+		}
+		if (reportSelected.parMinistry)
+		{
+			myParameters.Add("ministry", parMinistry);
+		}
+		if (reportSelected.parProgram) { myParameters.Add("program", parProgram); }
+		if (reportSelected.parSubprogram) { myParameters.Add("subprog", parSubProg); }
+		if (reportSelected.parSOC) { myParameters.Add("soc", parSOC); }
+		if (reportSelected.parAccount) { myParameters.Add("account", parAccount); }
+		//Run stored procedure if needed
+		if (!String.IsNullOrWhiteSpace(reportSelected.storedProcedure))
+		{
+			try
+			{
+				await _db.RunProcedure(reportSelected.storedProcedure, myParameters);
+			}
+			catch (Exception e)
+			{
+				errorString = "An error occured while running the stored procedure: "+e.Message;
+				base.StateHasChanged();
+				return;
+
+			}
+
+		}		
+		runReport = true;
+		base.StateHasChanged();
+	}
+
+	protected override async void OnParametersSet()
+	{
+		if (String.IsNullOrWhiteSpace(reportID))
+		{
+			reportID = "0";
+		}
+		reportID = reportID.ToLower();
+		await onReportChanged();
+		if (!String.IsNullOrWhiteSpace(parRun) && parRun.ToLower().Equals("y"))
+		{ RunReport(); }
+		base.StateHasChanged();
+	}
 
 }

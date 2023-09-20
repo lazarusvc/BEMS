@@ -1,0 +1,51 @@
+﻿@inject AuthenticationStateProvider authStateProvider;
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+
+<div class="card">
+      <div class="card-header">
+    <h5 class="card-title">My Programs</h5>
+  </div>
+    <div class="overflow-auto"  style="height: 250px;">
+    <div class="list-group">
+          
+        @if (accessTo is null || accessTo.Count==0)
+        {
+           <li class="list-group-item">None assigned yet</li>
+        }
+        else {
+             @foreach (var item in accessTo)
+            {
+                 <a href="/recurrent/@year/@item.Id/@item.Name" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                      <h5 class="mb-1"><b>@item.Id @item.Name</b> </h5>
+                    </div>
+                    <p class="mb-1">@item.Description</p>
+                  </a>
+
+                
+            }
+        }
+      </div>
+      </div>
+</div>
+
+@code {
+    [Parameter]
+    public int year { get; set; }
+
+    private List<ListItemModel2>? accessTo;
+    private string username =string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        accessTo =  await _db.GetUserMinPrograms(username);
+    }
+
+
+
+
+}

@@ -7,9 +7,10 @@
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
 
-<h3>Ministry Estimates</h3>
+<h3>Ministry Estimates - @year</h3>
 
 <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#newEntry">Add New Entry</button>
+<button type="button" class="btn btn-secondary" @onclick="() => NavigateTo(year)">View By SOC</button>
 <p />
 <Rec_AddEntry year=@year OnSaveEntry="RefreshList"></Rec_AddEntry>
 
@@ -99,6 +100,11 @@ else {
     {
          NavigationManager.NavigateTo($"recurrent/{year}/{ministry}", forceLoad: true);
   
+    }
+
+    private void NavigateTo(int year)
+    {
+         NavigationManager.NavigateTo($"recurrent/soc/{year}", forceLoad: true);
     }
 
     private async void RefreshList()

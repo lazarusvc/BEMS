@@ -57,6 +57,14 @@ namespace DataAccessLibrary
                 return data;
             }
         }
+        public async Task ExecuteSP(string spName, object parameters)
+        {
+            string connectionString = _config.GetConnectionString(ConnectionStringName);
+            using (IDbConnection connection = new SqlConnection(connectionString))
+            {
+                await connection.ExecuteAsync(spName,parameters,commandType: CommandType.StoredProcedure);                
+            }
+        }
 
 
         public Tuple<IEnumerable<T1>, IEnumerable<T2>> GetMultipleDataSets<T1, T2>(string sql, object parameters,

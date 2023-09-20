@@ -11,11 +11,29 @@ namespace DataAccessLibrary
         {
             _db = db;
         }
+        public Task RunProcedure(string spName, object parameters)
+        {            
+            return _db.ExecuteSP(spName, parameters);
+        }
 
         public Task<List<ProcessingYearModel>> GetYears()
         {
-            string sql = "select year,ready_for_data_entry,year_closed from dbo.Processing_Year ORder by year desc;";
+            string sql = "select year,ready_for_data_entry,year_closed from dbo.Processing_Year Order by year desc;";
             return _db.GetListData<ProcessingYearModel, dynamic>(sql, new { });
+        }
+
+        public Task<bool> IsYearClosed(int year)
+        {
+            string sql = "select year_closed from dbo.Processing_Year where year=@year;";
+            return _db.GetSingleRowData<bool, dynamic>(sql, new { year=year});
+        }
+
+        public Task<ProcessingYearModel> GetCurrentProcessingYear()
+        {
+            string sql = "select year,ready_for_data_entry,year_closed " +
+                "from dbo.Processing_Year  WHERE ready_for_data_entry=1 " +
+                "Order by year desc;";
+            return _db.GetSingleRowData<ProcessingYearModel, dynamic>(sql, new { });
         }
 
 
@@ -141,5 +159,198 @@ namespace DataAccessLibrary
         }
 
 
+        public Task<List<ListItemModel2>> GetUserMinPrograms(string username)
+        {
+
+            string sql = @"SELECT Distinct ministry as Id,
+                               [program] as Name
+                               ,p.[DESCRIPTION] as Description
+                              FROM [BEMS].[dbo].[vw_user_access]
+                              LEFT JOIN vw_ss_program_name p on p.[NAME]=[program]
+                            WHERE userName=@username
+                            group by ministry,program,p.DESCRIPTION";
+
+            return _db.GetListData<ListItemModel2, dynamic>(sql, new { username });
+        }
+
+        public Task<List<ListItemModel2>> GetSubmittedPrograms(int year)
+        {
+
+            string sql = @"SELECT Distinct ministry as Id,
+                               [program] as Name
+                               ,p.[DESCRIPTION] as Description
+                            FROM [BEMS].[dbo].[vw_subprogram_submitted]
+                            LEFT JOIN vw_ss_program_name p on p.[NAME]=[program]
+                            WHERE [processing_year]=@year
+                            group by ministry,program,p.DESCRIPTION
+                            Order by ministry,program";
+
+            return _db.GetListData<ListItemModel2, dynamic>(sql, new { year });
+        }
+
+        public Task<List<ListItemModel2>> GetUnSubmittedPrograms(int year)
+        {
+
+            string sql = @"SELECT Distinct ministry as Id,
+                               [program] as Name
+                               ,p.[DESCRIPTION] as Description
+                            FROM [BEMS].[dbo].[vw_subprogram_unsubmitted]
+                            LEFT JOIN vw_ss_program_name p on p.[NAME]=[program]
+                            WHERE [processing_year]=@year
+                            group by ministry,program,p.DESCRIPTION
+                            Order by ministry,program";
+
+            return _db.GetListData<ListItemModel2, dynamic>(sql, new { year });
+        }
+
+
+        public Task<List<StructureChangeModel>> GetAllStructureChanges()
+        {
+
+            string sql = @"SELECT *
+                            FROM dbo.Structure_Change 
+                            Order by proc_year desc,ministry,program,subprogram,account;                                                   
+                           ";
+
+            return _db.GetListData<StructureChangeModel, dynamic>(sql, new { });
+        }
+
+        public Task<StructureChangeModel> GetStructureChange(int id)
+        {
+
+            string sql = @"SELECT *
+                            FROM dbo.Structure_Change  
+                            WHERE id=@id;
+                           ";
+
+            return _db.GetSingleRowData<StructureChangeModel, dynamic>(sql, new { id });
+        }
+        public Task<int> AddStructureChange(StructureChangeModel structureChange)
+        {
+
+            string sql = @"INSERT INTO Structure_Change([proc_year],
+	                                                    [ministry],
+	                                                    [program],
+	                                                    [subprogram],
+	                                                    [soc],
+	                                                    [account],
+	                                                    [to_ministry],
+	                                                    [to_program],
+	                                                    [to_subprogram],
+	                                                    [to_soc],
+	                                                    [to_account],
+	                                                    [descp])
+                        VALUES(@proc_year,
+	                            @ministry,
+	                            @program,
+	                            @subprogram,
+	                            @soc,
+	                            @account,
+	                            @to_ministry,
+	                            @to_program,
+	                            @to_subprogram,
+	                            @to_soc,
+	                           @to_account,
+	                            @descp);";
+
+            return _db.ExecuteSql<StructureChangeModel>(sql, structureChange);
+        }
+
+        public Task<int> RemoveStructureChange(int id)
+        {
+
+            string sql = @"DELETE FROM Structure_Change
+                           WHERE id=@id;";
+
+            return _db.ExecuteSql(sql, new { id });
+        }
+        public Task<int> UpdateStructureChange(StructureChangeModel structureChange)
+        {
+            string sql = @"UPDATE Structure_Change
+                        SET proc_year=@proc_year,
+	                        ministry= @ministry,
+	                        program= @program,
+	                        subprogram=@subprogram,
+	                        soc= @soc,
+	                        account=@account,
+	                        to_ministry= @to_ministry,
+	                        to_program= @to_program,
+	                        to_subprogram= @to_subprogram,
+	                        to_soc= @to_soc,
+	                        to_account= @to_account,
+	                        descp=  @descp
+                       WHERE id=@id";
+
+            return _db.ExecuteSql<StructureChangeModel>(sql, structureChange);
+        }
+
+        public Task<List<ReportConfigModel>> GetAllReportConfig()
+        {
+            string sql = @"SELECT *
+                            FROM dbo.Report_Config
+                            Order by reportDesc;                                                   
+                           ";
+
+            return _db.GetListData<ReportConfigModel, dynamic>(sql, new { });
+        }
+
+        public Task<ReportConfigModel> GetReportConfig(int id)
+        {
+            string sql = @"SELECT *
+                            FROM dbo.Report_Config
+                            WHERE id=@id;
+                           ";
+
+            return _db.GetSingleRowData<ReportConfigModel, dynamic>(sql, new { id });
+        }
+
+        public Task<int> AddReportConfig(ReportConfigModel reportConfig)
+        {
+            string sql = @"INSERT INTO Report_Config([reportId]
+                                                      ,[reportDesc]
+                                                      ,[storedProcedure]
+                                                      ,[parUser]
+                                                      ,[parMinistry]
+                                                      ,[parProgram]
+                                                      ,[parSubprogram]
+                                                      ,[parSOC]
+                                                      ,[parAccount])
+                            VALUES(@reportId
+                                  ,@reportDesc
+                                  ,@storedProcedure
+                                  ,@parUser
+                                  ,@parMinistry
+                                  ,@parProgram
+                                  ,@parSubprogram
+                                  ,@parSOC
+                                  ,@parAccount);";
+
+            return _db.ExecuteSql<ReportConfigModel>(sql, reportConfig);
+        }
+
+        public Task<int> RemoveReportConfig(int id)
+        {
+            string sql = @"DELETE FROM Report_Config
+                           WHERE id=@id;";
+
+            return _db.ExecuteSql(sql, new { id });
+        }
+
+        public Task<int> UpdateReportConfig(ReportConfigModel reportConfig)
+        {
+            string sql = @"UPDATE Report_Config
+                            set [reportId]=@reportId
+                            ,[reportDesc]=@reportDesc
+                            ,[storedProcedure]=@storedProcedure
+                            ,[parUser]=@parUser
+                            ,[parMinistry]=@parMinistry
+                            ,[parProgram]=@parProgram
+                            ,[parSubprogram]=@parSubprogram
+                            ,[parSOC]=@parSOC
+                            ,[parAccount]=@parAccount
+                        WHERE id=@id;";
+
+            return _db.ExecuteSql<ReportConfigModel>(sql, reportConfig);
+        }
     }
 }

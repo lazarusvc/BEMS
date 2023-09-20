@@ -1,22 +1,66 @@
 ﻿@page "/"
+@using Budget_Estimates_Management_System.Pages.Dashboard
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
 
-<PageTitle>Budget Estimates Management System</PageTitle>
+<PageTitle>Budget Estimates Management System - Dashboard </PageTitle>
 
 <AuthorizeView>
 	<Authorized>
-		<h1>DashBoard</h1>
-		<h2>Hi @context.User.Identity.Name</h2>
-
-		<p> More cool stuff coming soon</p>
+		<h1>Hi @context.User.Identity.Name</h1>
+        @if (year is not null)
+        {
+        <h3>Current Budget Period : @year.displayYear</h3>
+        }
+		<div class="container">
+          <div class="row">
+            <div class="col-6">
+                 @if (year is not null)
+                    {
+                          <MyPrograms year="@year.year"></MyPrograms>
+                    }
+            </div>
+            <div class="col-6">
+             <Notifications></Notifications>
+            </div>
+          </div>
+          <br>
+            @if (@context.User.IsInRole("Administrator")||@context.User.IsInRole("BudgetStaff"))
+            {
+                <div class="row">
+                    <div class="col-6">
+                         @if (year is not null)
+                        {
+                            <SubmittedPrograms year="@year.year"></SubmittedPrograms>
+                        }
+                        
+                    </div>
+                    <div class="col-6">
+                         @if (year is not null)
+                        {
+                            <UnSubmittedPrograms year="@year.year"></UnSubmittedPrograms>
+                        }
+                    </div>                    
+                </div>
+            }
+        </div>
 	</Authorized>
 	<NotAuthorized>
-		<h1> Please log in.  A nice dash board coming soon</h1>
+		<img src="splash.png" alt="splash"/>
 	</NotAuthorized>
 
 </AuthorizeView>
 
 @code {
-	[CascadingParameter]
-	private Task<AuthenticationState> authenticationState { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+
+    private ProcessingYearModel? year;    
+
+    protected override async Task OnInitializedAsync()
+    {        
+        year =  await _db.GetCurrentProcessingYear();
+    }
 
 }

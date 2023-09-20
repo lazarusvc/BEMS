@@ -5,13 +5,13 @@
 @attribute [Authorize(Roles = "Administrator")]
 
     
-    <p />
+    <br />
     <div class="row">
         <div class="col-3">
              <input @bind="searchfilter" @bind:event="oninput" class="form-control" placeholder="Search for user">
         </div>
          <div class="col-2">
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newUser">Add New User</button>
+        <button type="button" class="btn btn-outline-success " data-bs-toggle="modal" data-bs-target="#newUser"><span class="oi oi-plus"></span> Add New User</button>
         </div>
 
     </div>
@@ -32,7 +32,7 @@
 
        @if (users is not null)
         {
-          @foreach (var user in users.Where(x=>x.userName.Contains(searchfilter)||String.IsNullOrWhiteSpace(searchfilter)).Take(10))
+                @foreach (var user in users.Where(x => x.userName.ToLower().Contains(searchfilter.ToLower()) || String.IsNullOrWhiteSpace(searchfilter)))
         {
                   <tr>
           <td>@user.userName</td>
@@ -68,7 +68,8 @@
         <tfoot>
           <tr>
               @if (users is not null)
-                {<td colspan="3" >Search Results:  <b>@users.Where(x=>x.userName.Contains(searchfilter)||String.IsNullOrWhiteSpace(searchfilter)).Count() </b> <div style ="color:blue;">@(users.Where(x=>x.userName.Contains(searchfilter)||String.IsNullOrWhiteSpace(searchfilter)).Count()>10?"Only showing the first 10 results.":"")</div>  </td>
+                {
+                    <td colspan="3">Search Results:  <b>@users.Where(x=>x.userName.ToLower().Contains(searchfilter.ToLower())||String.IsNullOrWhiteSpace(searchfilter)).Count() </b> <div style="color:blue;">@(users.Where(x => x.userName.ToLower().Contains(searchfilter.ToLower()) || String.IsNullOrWhiteSpace(searchfilter)).Count() > 10 ? "Only showing the first 10 results." : "")</div>  </td>
                 } 
                 else
                 {
@@ -85,10 +86,10 @@
 
 @code {
 
-    private List<UserModel> users;
+    private List<UserModel>? users;
 
-    private UserModel selectedUser;
-    private List<ListItemModel> roles;
+    private UserModel? selectedUser;
+    private List<ListItemModel>? roles;
 
     private string searchfilter { get; set; } = String.Empty;
 
@@ -101,6 +102,7 @@
 
     private async void RefreshList()
     {
+        selectedUser = null;
         users = await _db.GetUsers();
         base.StateHasChanged();
     }
@@ -115,14 +117,14 @@
             if (affectedRows!=0)
             {
                 //refresh list
-                users.Remove(usr);
+                users?.Remove(usr);
               //invoke refresh
                 base.StateHasChanged();
             } 
               
 
         }
-        catch (Exception e)
+        catch (Exception)
         {
 
         }

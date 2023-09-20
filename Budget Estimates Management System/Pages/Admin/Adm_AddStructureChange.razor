@@ -1,0 +1,523 @@
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@inject IRecEstimateData _rdb;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator")]
+
+<div class="modal fade" id="newSC" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+   <EditForm EditContext="EditContext"  OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Add Structure Change</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+ 
+     <DataAnnotationsValidator />
+    
+      <div  class="form-floating" style="padding-bottom:5px">
+            <InputSelect id="proc_year" placeholder="Year" class="form-select"
+                       @bind-Value="structureChange.proc_year">
+                        @if (years is null)
+                        {
+                            <option selected>Loading...</option>
+                        }
+                    else 
+                        {
+                            <option value=0 selected>Choose...</option>
+                       @foreach (var year in years)
+                            {
+                                <option value=@year.year>@year.displayYear</option>
+                            }
+        }
+                </InputSelect>
+        <label for="proc_year" >
+            Year
+        </label>
+    </div>
+
+
+      <div class="form-floating" style="padding-bottom:5px">
+        <InputText  @bind-Value="structureChange.descp" class="form-control" placeholder="Description" ></InputText>
+           
+        <label for="descp" >
+           Description
+        </label>
+    </div> 
+    <div  class="row" style="padding:10px">
+    <div class="col-6" style="background-color:lemonchiffon; padding:5px">
+        <h4><b>Transfer from...</b></h4>
+        <div  class="form-floating" style="padding-bottom:5px">
+                <InputSelect id="ministry" placeholder="Ministry" class="form-select" 
+                       @bind-Value="@structureChange.ministry" >
+                        @if (ministries is null)
+                        {
+                            <option selected>Loading...</option>
+                        }
+                    else 
+                        {
+                       <option value="" selected>Choose...</option>
+                       @foreach (var item in ministries)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="ministry">
+            Ministry
+        </label>
+
+    </div>
+        <div class="form-floating" style="padding-bottom:5px">
+                   <InputSelect id="program" placeholder="Program" class="form-select" disabled=@progDisabled
+                       @bind-Value="@structureChange.program" >
+                        @if (programs is null)
+                        {
+                            <option selected>@emptyProg</option>
+                        }
+                    else 
+                        {
+                            <option value="" selected>Choose...</option>
+                       @foreach (var item in programs)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="program">
+            Program
+        </label>
+
+    </div>
+        <div class="form-floating" style="padding-bottom:5px">
+               <InputSelect id="subprogram" placeholder="Sub-Program" class="form-select" disabled=@sprogDisabled
+                       @bind-Value="@structureChange.subprogram">
+                        @if (subprograms is null)
+                        {
+                                        <option selected>@emptySubProg</option>
+                        }
+                    else 
+                        {
+                            <option value="" selected>Choose...</option>
+                       @foreach (var item in subprograms)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="subprog">
+            Sub-Program
+        </label>
+
+    </div> 
+    <div class="form-floating" style="padding-bottom:5px">
+           <InputSelect id="soc"  class="form-select"
+                       @bind-Value="structureChange.soc"  disabled="@accountTypeDisabled">
+                        @if (accountTypes is null)
+                        {
+                                        <option selected>@emptySOC</option>
+                        }
+                    else 
+                        {
+                            <option value="" selected>Choose...</option>
+                       @foreach (var item in accountTypes)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="soc" >
+            SOC
+        </label>
+
+    </div> 
+    <div class="form-floating" style="padding-bottom:5px">
+           <InputSelect id="account" placeholder="Account" class="form-select"
+                       @bind-Value="@structureChange.account" >
+                        @if (accounts is null)
+                        {
+                            <option selected>@emptyAccount</option>
+                        }
+                    else 
+                        {
+                            <option value="" selected>Choose...</option>
+                       @foreach (var item in accounts)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="account" >
+            Account
+        </label>
+
+    </div> 
+    </div>
+
+       <div class="col-6" style="background-color:lightcyan; padding:5px">
+           <h4><b>Transfer to...</b></h4>
+        <div  class="form-floating" style="padding-bottom:5px">
+                <InputSelect id="toMinistry" placeholder="Ministry" class="form-select" 
+                       @bind-Value="@structureChange.to_ministry" >
+                        @if (ministries2 is null)
+                        {
+                            <option selected>Loading...</option>
+                        }
+                    else 
+                        {
+                       <option value="" selected>Choose...</option>
+                       @foreach (var item in ministries2)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="ministry">
+            Ministry
+        </label>
+
+    </div>
+        <div class="form-floating" style="padding-bottom:5px">
+                   <InputSelect id="toProgram" placeholder="Program" class="form-select" disabled=@progDisabled
+                       @bind-Value="@structureChange.to_program" >
+                        @if (programs2 is null)
+                        {
+                            <option selected>@emptyProg</option>
+                        }
+                    else 
+                        {
+                            <option value="" selected>Choose...</option>
+                       @foreach (var item in programs2)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="program">
+            Program
+        </label>
+
+    </div>
+        <div class="form-floating" style="padding-bottom:5px">
+               <InputSelect id="toSubprogram" placeholder="Sub-Program" class="form-select" disabled=@sprogDisabled
+                       @bind-Value="@structureChange.to_subprogram">
+                        @if (subprograms2 is null)
+                        {
+                                        <option selected>@emptySubProg</option>
+                        }
+                    else 
+                        {
+                            <option value="" selected>Choose...</option>
+                       @foreach (var item in subprograms2)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="subprog">
+            Sub-Program
+        </label>
+
+    </div> 
+    <div class="form-floating" style="padding-bottom:5px">
+           <InputSelect id="toSoc"  class="form-select"
+                       @bind-Value="structureChange.to_soc"  disabled="@accountTypeDisabled">
+                        @if (accountTypes2 is null)
+                        {
+                                        <option selected>@emptySOC</option>
+                        }
+                    else 
+                        {
+                            <option value="" selected>Choose...</option>
+                       @foreach (var item in accountTypes2)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="toSoc" >
+            SOC
+        </label>
+
+    </div> 
+    <div class="form-floating" style="padding-bottom:5px">
+           <InputSelect id="toAccount" placeholder="Account" class="form-select"
+                       @bind-Value="@structureChange.to_account" >
+                        @if (accounts2 is null)
+                        {
+                                        <option selected>@emptyAccount</option>
+                        }
+                    else 
+                        {
+                            <option value="" selected>Choose...</option>
+                       @foreach (var item in accounts2)
+                            {
+                                <option value=@item.Name>@item.Name - @item.Description</option>
+                            }
+        }
+                </InputSelect>
+        <label for="account" >
+            Account
+        </label>
+        </div>
+    </div> 
+    </div>
+   <div style="color: red">
+        @saveError
+      </div>
+         <div style="color: green">
+        @saveSuccess
+      </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>         
+         <button type="submit" class="btn btn-success">Save</button>
+      </div>
+    </div>
+    </EditForm>
+  </div>
+  </div>
+
+
+@code {
+    [Parameter]
+    public EventCallback OnSaveSC { get; set; }
+
+    private EditContext EditContext;
+
+    private StructureChangeModel structureChange = new StructureChangeModel();
+
+    private string? saveError;
+    private string? saveSuccess;
+
+    private List<ProcessingYearModel>? years;
+
+    private List<ListItemModel>? ministries;
+    private List<ListItemModel>? programs;
+    private List<ListItemModel>? subprograms;
+    private List<ListItemModel>? accountTypes;
+    private List<ListItemModel>? accounts;
+
+    private bool progDisabled = false;
+    private bool sprogDisabled = false;
+    private bool accountTypeDisabled = false;
+
+    private List<ListItemModel>? ministries2;
+    private List<ListItemModel>? programs2;
+    private List<ListItemModel>? subprograms2;
+    private List<ListItemModel>? accountTypes2;
+    private List<ListItemModel>? accounts2;
+
+    const string emptySubProg = "Select a Program first...";
+    const string emptyProg = "Select a Ministry first...";
+    const string emptySOC = "Select a Sub-Program first...";
+    const string emptyAccount = "Select a Account Type first...";
+
+
+
+    private string username = string.Empty;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Initial Edit Context
+        EditContext = new EditContext(structureChange);   
+        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        years = await _db.GetYears();
+        //Get the list data for ministry
+        ministries = await _rdb.GetDependantMinistries(username);
+        ministries2 = await _rdb.GetDependantMinistries(username);
+
+    }
+
+    private async void  HandleValidSubmit()
+    {     
+        if (structureChange.proc_year==0)
+        {
+            saveError = "Year must be selected";
+            return;
+        }
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
+        try
+        {
+            int affectedRows=  await _db.AddStructureChange(structureChange);      
+            //save successfully.  Reset form
+            if (affectedRows==0)
+            {
+                saveError = "Something happened.  Record was not saved";
+                base.StateHasChanged();
+            } else
+            {
+                structureChange=new StructureChangeModel();
+                EditContext = new EditContext(structureChange);
+                //set default values
+                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+                saveSuccess = "Record Successfully Saved.";
+                //Clear dependant fields
+                programs=null;
+                subprograms=null;
+                accounts=null;
+                accountTypes=null;
+
+                programs2=null;
+                subprograms2=null;
+                accounts2=null;
+                accountTypes2=null;
+                base.StateHasChanged();
+                //run the parent procedure
+                await OnSaveSC.InvokeAsync();
+            }
+
+        }
+        catch(Exception e)
+        {
+            saveError = e.Message; 
+            base.StateHasChanged();
+        }
+
+    }
+
+    private  void  HandleInvalidSubmit()
+    {     
+        saveSuccess = string.Empty;
+        saveError = "Please enter the required fields. Thank you.";
+        base.StateHasChanged();                
+    }
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        //clear any save messages because we entering new stull
+        saveSuccess = string.Empty;
+        saveError = string.Empty;
+
+        if (e.FieldIdentifier.FieldName == "ministry")
+        {
+            MinistryChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "program")
+        {
+            ProgramChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "subprogram")
+        {
+            SubProgramChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "soc")
+        {
+            AccountTypeChanged();
+        }
+
+        if (e.FieldIdentifier.FieldName == "to_ministry")
+        {
+            MinistryChanged2();
+        }
+        if (e.FieldIdentifier.FieldName == "to_program")
+        {
+            ProgramChanged2();
+        }
+        if (e.FieldIdentifier.FieldName == "to_subprogram")
+        {
+            SubProgramChanged2();
+        }
+        if (e.FieldIdentifier.FieldName == "to_soc")
+        {
+            AccountTypeChanged2();
+        }
+    }
+
+
+    private async void MinistryChanged()
+    {
+        //need to clear all dependencies        
+        subprograms=null;
+        accounts=null;
+        accountTypes=null;
+        structureChange.program = emptyProg;
+        structureChange.subprogram = emptySubProg;
+        structureChange.account = emptyAccount;
+        structureChange.soc = emptySOC;
+        programs = await _rdb.GetDependantPrograms(structureChange.ministry,username);
+        base.StateHasChanged();
+    }
+
+    private async void ProgramChanged()
+    {
+        //need to clear all dependencies        
+        accountTypes=null;
+        accounts=null;
+        structureChange.account = emptyAccount;
+        structureChange.subprogram = emptySubProg;
+        structureChange.soc = emptySOC;
+        subprograms = await _rdb.GetDependantSubPrograms(structureChange.ministry,structureChange.program,username);
+        base.StateHasChanged();
+    }
+
+    private async void SubProgramChanged()
+    {
+        //need to clear all dependencies    
+        structureChange.account = emptyAccount;
+        structureChange.soc = emptySOC;
+        accountTypes = await _rdb.GetDependantAccountTypes();
+        base.StateHasChanged();
+    }
+
+    private async void AccountTypeChanged()
+    {
+        //need to clear all dependencies    
+        structureChange.account = emptyAccount;
+        accounts = await _rdb.GetDependantAccounts(structureChange.soc);
+        base.StateHasChanged();
+    }
+
+    private async void MinistryChanged2()
+    {
+        //need to clear all dependencies        
+        subprograms2=null;
+        accounts2=null;
+        accountTypes2=null;
+        structureChange.to_program = emptyProg;
+        structureChange.to_subprogram = emptySubProg;
+        structureChange.to_account = emptyAccount;
+        structureChange.to_soc = emptySOC;
+        programs2 = await _rdb.GetDependantPrograms(structureChange.to_ministry,username);
+        base.StateHasChanged();
+    }
+
+    private async void ProgramChanged2()
+    {
+        //need to clear all dependencies        
+        accountTypes2=null;
+        accounts2=null;
+        structureChange.to_account = emptyAccount;
+        structureChange.to_subprogram = emptySubProg;
+        structureChange.to_soc = emptySOC;
+        subprograms2 = await _rdb.GetDependantSubPrograms(structureChange.to_ministry,structureChange.to_program,username);
+        base.StateHasChanged();
+    }
+
+    private async void SubProgramChanged2()
+    {
+        //need to clear all dependencies    
+        structureChange.to_account = emptyAccount;
+        structureChange.to_soc = emptySOC;
+        accountTypes2 = await _rdb.GetDependantAccountTypes();
+        base.StateHasChanged();
+    }
+
+    private async void AccountTypeChanged2()
+    {
+        //need to clear all dependencies    
+        structureChange.to_account = emptyAccount;
+        accounts2 = await _rdb.GetDependantAccounts(structureChange.to_soc);
+        base.StateHasChanged();
+    }
+
+
+}

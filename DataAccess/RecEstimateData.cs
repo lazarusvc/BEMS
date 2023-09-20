@@ -33,6 +33,7 @@ namespace DataAccessLibrary
 
         public Task<List<GroupingModel>> GetMinDataForYear(int year, string username)
         {
+            if (username is null) { username="!"; }
             username=username.ToLower();
             string sql = @"SELECT be.ministry as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
@@ -49,6 +50,7 @@ namespace DataAccessLibrary
 
         public Task<List<GroupingModel>> GetProgramDataForYear(int year, string ministry, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT be.program as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName
@@ -66,6 +68,10 @@ namespace DataAccessLibrary
 
         public Task<List<GroupingModel>> GetSubProgramDataForYear(int year, string ministry, string program, string username)
         {
+            if (username is null)
+            {
+                username = "!";
+            }
             username = username.ToLower();
             string sql = @"SELECT be.subprog as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName, max([vw_subprogram_sub_apv].status) as status
@@ -87,7 +93,10 @@ namespace DataAccessLibrary
         }
 
         public Task<List<GroupingModel>> GetAccountTypeDataForYear(int year, string ministry, string program, string subprogram, string username)
-        {
+        {if (username is null)
+            {
+                username = "!";
+            }
             username = username.ToLower();
             string sql = @"SELECT SUBSTRING(be.account,1,3) as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
@@ -114,7 +123,10 @@ namespace DataAccessLibrary
         }
 
         public Task<List<GroupingModel>> GetAccountDataForYear(int year, string ministry, string program, string subprogram, string accountType, string username)
-        {
+        {if (username is null)
+            {
+                username = "!";
+            }
             username = username.ToLower();
             string sql = @"SELECT be.account as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
                             mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
@@ -143,6 +155,7 @@ namespace DataAccessLibrary
         }
         public Task<List<ListItemModel>> GetDependantMinistries(string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT distinct Name , Description 
                             FROM [dbo].[vw_ss_ministry_name] a
@@ -155,6 +168,7 @@ namespace DataAccessLibrary
         }
         public Task<List<ListItemModel>> GetDependantPrograms(string ministry, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @" SELECT distinct Name, Description 
                             FROM [dbo].[vw_ss_program_name] a
@@ -168,6 +182,7 @@ namespace DataAccessLibrary
         }
         public Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string program, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT distinct Name, Description 
                             FROM [dbo].[vw_ss_subprog_name] a
@@ -183,6 +198,7 @@ namespace DataAccessLibrary
 
         public Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string username)
         {
+            if (username is null) { username = "!"; }
             username = username.ToLower();
             string sql = @"SELECT distinct Name, Description 
                             FROM [dbo].[vw_ss_subprog_name] a
@@ -195,39 +211,25 @@ namespace DataAccessLibrary
 
             return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, username});
         }
-        public Task<List<ListItemModel>> GetDependantAccountTypes(string ministry, string program, string subprogram, string username)
-        {
-            username = username.ToLower();
+        public Task<List<ListItemModel>> GetDependantAccountTypes()
+        {            
             string sql = @"SELECT distinct Name, Description 
-                            FROM [dbo].[vw_ss_account_name] a
-                            LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=LEFT(b.account,3)
-                            WHERE b.ministry=@ministry
-                            and b.program=@program
-                            and b.subprog=@subprogram
-                            AND (b.subprog in (select subprog from vw_user_access ua where LOWER(userName)=@username)
-                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))                          
-                           
+                            FROM [dbo].[vw_ss_account_name] a                            
+                            WHERE LEN(a.Name)=3
                             ORDER BY Name";
 
-            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram, username });
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { });
         }
 
-        public Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program, string subprogram, string acctype, string username)
+        public Task<List<ListItemModel>> GetDependantAccounts(string acctype)
         {
-            username = username.ToLower();
             string sql = @"SELECT distinct Name, Description 
                             FROM [dbo].[vw_ss_account_name] a
                             LEFT JOIN  vw_ss_ledger_accounts b ON a.Name=b.account
-                            WHERE b.ministry=@ministry
-                            and b.program=@program
-                            and b.subprog=@subprogram
-                            and b.account like @acctype+'%'
-                            AND (b.subprog in (select subprog from vw_user_access ua where LOWER(userName)=@username)
-                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))                          
-                           
+                            WHERE b.account like @acctype+'%'                            
                             ORDER BY Name";
 
-            return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram, acctype, username });
+            return _db.GetListData<ListItemModel, dynamic>(sql, new { acctype});
         }
         public Task<List<ListItemModel>> GetEnteredAccounts(int year, string ministry, string program, string subprogram, string acctype)
         {
@@ -266,6 +268,7 @@ namespace DataAccessLibrary
                             ,[comment]
                             ,[flagged]
                             ,[flagged_comment]
+                            ,[is_adjustment]
                             ,[modified_by]
                             ,[last_modified]
                             ,[entry_status_id]
@@ -288,6 +291,7 @@ namespace DataAccessLibrary
                             ,@comment
                             ,@flagged
                             ,@flagged_comment
+                            ,@is_adjustment
                             ,@modified_by
                             ,@last_modified
                             ,@entry_status_id
@@ -324,6 +328,7 @@ namespace DataAccessLibrary
                             ,last_modified=@last_modified
                             ,entry_status_id=@entry_status_id
                             ,label=@label
+                            ,is_adjustment=@is_adjustment
                          WHERE id=@id";
 
             return _db.ExecuteSql<BudgetEstimatesModel>(sql, bem);
@@ -362,8 +367,118 @@ namespace DataAccessLibrary
 
             return _db.GetListData<ListItemModel, dynamic>(sql,new { });
         }
+        public Task<List<GroupingModel>> GetSOCDataForYear(int year, string username)
+        {
+            username = username.ToLower();
+            string sql = @"SELECT SUBSTRING(be.account,1,3) as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on SUBSTRING(be.account,1,3)=mn.[NAME]
+                            WHERE  processing_year=@year
+                            AND (ministry in (select ministry from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))
+                            GROUP BY SUBSTRING(be.account,1,3), mn.[DESCRIPTION]
+                            ORDER BY SUBSTRING(be.account,1,3)";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, username });
+        }
+
+        public Task<List<GroupingModel>> GetSOCMinDataForYear(int year, string soc, string username)
+        {if (username is null)
+            {
+                username = "!";
+            }
+            username = username.ToLower();
+            string sql = @"SELECT be.ministry as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_ministry_name] mn on be.ministry=mn.[NAME]
+                            WHERE  processing_year=@year
+                            AND (ministry in (select ministry from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))
+                            AND SUBSTRING(be.account,1,3)=@soc
+                            GROUP BY be.ministry, mn.[DESCRIPTION]
+                            ORDER BY be.ministry";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, soc, username });
+        }
+
+        public Task<List<GroupingModel>> GetSOCProgramDataForYear(int year, string soc,string ministry, string username)
+        {if (username is null)
+            {
+                username = "!";
+            }
+            username = username.ToLower();
+            string sql = @"SELECT be.program as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_program_name] mn on be.program=mn.[NAME]
+                            WHERE  processing_year=@year
+                            AND be.ministry=@ministry
+                            AND (ministry in (select ministry from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))
+                            AND SUBSTRING(be.account,1,3)=@soc
+                            GROUP BY be.program, mn.[DESCRIPTION]
+                            ORDER BY be.program";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, soc, ministry, username });
+        }
+
+        public Task<List<GroupingModel>> GetSOCSubProgramDataForYear(int year, string soc, string ministry, string program, string username)
+        {
+            if (username is null) { username = "!"; }
+            username = username.ToLower();
+            string sql = @"SELECT be.subprog as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName, max([vw_subprogram_sub_apv].status) as status
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_subprog_name] mn on be.subprog=mn.[NAME]
+                        	LEFT OUTER JOIN [vw_subprogram_sub_apv] on  [vw_subprogram_sub_apv].processing_year=@year
+                            AND [vw_subprogram_sub_apv].ministry=@ministry
+                            AND [vw_subprogram_sub_apv].program=@program
+                            AND [vw_subprogram_sub_apv].subprog=be.subprog
+                            WHERE  be.processing_year=@year
+                            AND be.ministry=@ministry
+                            AND be.program=@program
+                            AND (be.program in (select program from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))
+                            AND SUBSTRING(be.account,1,3)=@soc
+                            GROUP BY be.subprog, mn.[DESCRIPTION]
+                            ORDER BY be.subprog";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, soc, ministry, program, username });
+        }
 
 
+        public Task<List<GroupingModel>> GetSOCAccountDataForYear(int year, string ministry, string program, string subprogram, string accountType, string username)
+        {
+            if (username is null) { username = "!"; }
+            username = username.ToLower();
+            string sql = @"SELECT be.account as item, sum(year0_amount) as year0, sum(year1_amount) as year1, sum(year2_amount) as year2, sum(year3_amount) as year3 ,
+                            mn.[DESCRIPTION] as itemName,  count(o.cc) as flagged
+							FROM dbo.Budget_Estimates be
+                            LEFT OUTER JOIN [dbo].[vw_ss_account_name] mn on be.account =mn.[NAME]							
+                            LEFT OUTER JOIN (SELECT account,count(*) as cc
+                                                          FROM dbo.Budget_Estimates
+                                                          WHERE  processing_year=@year
+														  AND ministry=@ministry
+														  AND program=@program
+														  AND subprog=@subprogram
+							                              AND flagged=1
+														  group by account) as o on be.account = o.account
+						    WHERE  be.processing_year=@year
+                            AND be.ministry=@ministry
+                            AND be.program=@program
+                            AND be.subprog=@subprogram
+                            AND be.account like @accountType+'%'
+                            AND (be.subprog in (select subprog from vw_user_access ua where LOWER(userName)=@username)
+                                OR 'Administrator' in (select userRole from Users ua where LOWER(userName)=@username))                          
+                            GROUP BY be.account , mn.[DESCRIPTION]
+                            ORDER BY be.account;
+                             ";
+
+            return _db.GetListData<GroupingModel, dynamic>(sql, new { year, ministry, program, subprogram, accountType, username });
+        }
 
     }
+       
 }

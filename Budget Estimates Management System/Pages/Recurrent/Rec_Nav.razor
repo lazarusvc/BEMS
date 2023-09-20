@@ -1,6 +1,7 @@
 ﻿@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
+@inject IDbData _db;
 @inject AuthenticationStateProvider authStateProvider;
 @inject NavigationManager NavigationManager
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
@@ -24,7 +25,7 @@
 
         }
     </ul>
-    @if (program is not null)
+    @if (!string.IsNullOrEmpty(program))
     {
             <button id="btnGroupDrop1" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
       @program
@@ -43,7 +44,7 @@
         }
     </ul>
     }
-    @if (subprogram is not null)
+        @if (!string.IsNullOrEmpty(subprogram))
     {
             <button id="btnGroupDrop1" type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
       @subprogram
@@ -62,7 +63,7 @@
         }
     </ul>
     }
-     @if (account is not null)
+        @if (!string.IsNullOrEmpty(account))
     {
             <button id="btnGroupDrop1" type="button" class="btn btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
       @account
@@ -82,38 +83,52 @@
     </ul>
     }
     </div>
-      <div class="btn-group" role="group" aria-label="Second group">
-     <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#newEntry">Add New Entry</button>
+    @if (!yearClosed)
+    {
+        <div class="btn-group" role="group" aria-label="Second group">
+        <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#newEntry">Add New Entry</button>
   </div>
+  }
     
 </div> 
 <p></p>
 
-<Rec_AddEntry year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@account OnSaveEntry="OnSaveEntry"></Rec_AddEntry>
+@if (!yearClosed)
+{
+    <Rec_AddEntry year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@account OnSaveEntry="OnSaveEntry"></Rec_AddEntry>
+}
 
 @code {
     [Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; } = string.Empty;
     [Parameter]
-    public string program { get; set; }    
+    public string program { get; set; } = string.Empty;
     [Parameter]
-    public string subprogram { get; set; }       
+    public string subprogram { get; set; } = string.Empty;
     [Parameter]
-    public string account { get; set; }   
+    public string account { get; set; } = string.Empty;
     [Parameter]
-	public EventCallback OnSaveEntry { get; set; }
+    public EventCallback OnSaveEntry { get; set; }
 
     private List<GroupingModel>? progGroup;
-    private List<GroupingModel> minGroup;
-    private List<GroupingModel> subprogramGroup;
-    private List<GroupingModel> accountGroup;
+    private List<GroupingModel>? minGroup;
+    private List<GroupingModel>? subprogramGroup;
+    private List<GroupingModel>? accountGroup;
+
+    private bool yearClosed = true;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await authStateProvider.GetAuthenticationStateAsync();
-       
+        //is year closed?
+        try
+        {
+            yearClosed = await _db.IsYearClosed(year);
+        }
+        catch { yearClosed = true; }
+
         minGroup=  await _rdb.GetMinDataForYear(year,authState.User.Identity.Name);
         if (program is not null)
         {

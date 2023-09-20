@@ -63,7 +63,8 @@ else {
         </tr>
                    <tr> 
           <th scope="row"></th>
-          <td colspan="5">
+          <td colspan="6">
+              @if (!yearClosed) {
             <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"  title="Submit Budget"
               disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)">
 				<span class="oi oi-task"></span> Submit Budget
@@ -79,6 +80,10 @@ else {
 			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
 				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Unsubmitted, OperationType.Reject);}">Send Back</a></li>
 			      </ul>
+                   <button class="btn btn-outline-secondary btn-sm " type="button"  aria-expanded="false"  title="Budget Adjustment"
+                            disabled="@(status==(int)EntryStatus.Submitted?false:true)" data-bs-toggle="modal" data-bs-target="#newAdjustment">
+				    <span class="oi oi-pie-chart"></span> Budget Adjustment
+			      </button>                 
                  <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false"  title="Approve Budget"
                  disabled="@(status==(int)EntryStatus.Submitted?false:true)">
 				    <span class="oi oi-check"></span> Approve Budget
@@ -95,7 +100,7 @@ else {
 			      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
 				    <li><a href="javascript:void(0)" class="dropdown-item"  @onclick="()=>{SetSubProgramStatus(EntryStatus.Submitted, OperationType.Unaprove);}">Un-Approve</a></li>
 			      </ul>
-             </AuthorizeView>
+             </AuthorizeView>}
           </td>
           
         </tr>
@@ -103,29 +108,31 @@ else {
        </table>
     }
 }
-
+<Rec_Adjustment year=@year ministry=@ministry program=@program subprogram=@subprogram OnSaveEntry="OnSaveEntry"></Rec_Adjustment>
 @code {
     [Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; } = string.Empty;
     [Parameter]
-    public string program { get; set; }
+    public string program { get; set; } = string.Empty;
     [Parameter]
-    public string subprogram { get; set; }
+    public string subprogram { get; set; } = string.Empty;
 
-    private string ministryName;
-    private string programName;
-    private string subprogramName;
+    private string ministryName = string.Empty;
+    private string programName = string.Empty;
+    private string subprogramName = string.Empty;
     private int status;
-    private string username;
+    private string username = string.Empty;
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
 
-    private List<GroupingModel> accountTypeGroup;
+    private bool yearClosed=true;
+
+    private List<GroupingModel>? accountTypeGroup;
 
     protected override async Task OnInitializedAsync()
     {
@@ -139,7 +146,13 @@ else {
         year0T = accountTypeGroup.Sum(x=>x.year0);
         year1T = accountTypeGroup.Sum(x=>x.year1);
         year2T = accountTypeGroup.Sum(x=>x.year2);
-        year3T = accountTypeGroup.Sum(x=>x.year3);     
+        year3T = accountTypeGroup.Sum(x=>x.year3);  
+        
+        try
+        {
+            yearClosed = await _db.IsYearClosed(year);
+        }
+        catch { yearClosed = true; }
     }
 
     protected override async void OnParametersSet()
@@ -200,5 +213,10 @@ else {
         //RefreshList();
 
     }
-
+    private void OnSaveEntry()
+    {
+        //refresh list
+        RefreshList();
+        base.StateHasChanged();
+    }
 }

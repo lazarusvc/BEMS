@@ -41,7 +41,7 @@ else {
       <tbody>
             @foreach (var item in accountGroup)
             {
-               <Rec_Level6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram OnEntryEdit="RefreshList"></Rec_Level6>
+                    <Rec_Level6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram OnEntryEdit="RefreshList" OnAccountChanged="@(e=>account=e.ToString())"></Rec_Level6>
             }
                    <tr  style="background-color:lightyellow"> 
           <th scope="row"></th>
@@ -56,31 +56,34 @@ else {
     }
 }
 
+<Rec_Adjustment year=@year ministry=@ministry program=@program subprogram=@subprogram accountType=@accountType account=@account  OnSaveEntry="OnSaveEntry"></Rec_Adjustment>
 
 @code {
     [Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; }= string.Empty;
     [Parameter]
-    public string program { get; set; }
+    public string program { get; set; } = string.Empty;
     [Parameter]
-    public string subprogram { get; set; }
+    public string subprogram { get; set; } = string.Empty;
     [Parameter]
-    public string accountType { get; set; }
+    public string accountType { get; set; } = string.Empty;
+    
+    public string account { get; set; } = string.Empty;
 
     public int year0T = 0;
     public int year1T = 0;
     public int year2T = 0;
     public int year3T = 0;
 
-    private string ministryName;
-    private string programName;
-    private string subprogramName;
-    private string accountTypeName;
-    private string username;
+    private string ministryName = string.Empty;
+    private string programName = string.Empty;
+    private string subprogramName = string.Empty;
+    private string accountTypeName= string.Empty;
+    private string username = string.Empty;
 
-    private List<GroupingModel> accountGroup;
+    private List<GroupingModel>? accountGroup;
 
     protected override async Task OnInitializedAsync()
     {
@@ -119,8 +122,16 @@ else {
 
     private async void RefreshList()
     {
-          accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram,accountType,username);
-          base.StateHasChanged();
+        accountGroup= await _rdb.GetAccountDataForYear(year,ministry,program,subprogram,accountType,username);
+        base.StateHasChanged();
     }
+
+    private void OnSaveEntry()
+    {
+        //refresh list
+        RefreshList();
+        base.StateHasChanged();
+    }
+
 
 }

@@ -1,0 +1,484 @@
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@using AutoMapper;
+@inject IDbData _db;
+@inject IRecEstimateData _rdb;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator,BudgetStaff")]
+@inject AuthenticationStateProvider authStateProvider;
+
+<div class="modal fade" id="newAdjustment" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <EditForm EditContext="EditContext" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Budget Adjustment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+
+                    <DataAnnotationsValidator />
+                      <div  class="form-floating" style="padding-bottom:5px">
+            <InputSelect id="processingYear" placeholder="Year" class="form-select"
+                       @bind-Value="@entry.processing_year" disabled=@yearDisabled>
+                        @if (years is null)
+                        {
+                            <option selected>Loading...</option>
+                        }
+                    else 
+                        {
+                            <option value=0 selected>Choose...</option>
+                       @foreach (var year in years.Where(x=>!x.year_closed))
+                            {
+                                <option value=@year.year>@year.displayYear</option>
+                            }
+        }
+                </InputSelect>
+        <label for="processingYear" >
+            Processing Year
+        </label>
+    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="ministry" placeholder="Ministry" class="form-select" disabled=@minDisabled
+                                     @bind-Value="@entry.ministry">
+                            @if (ministries is null)
+                            {
+                                <option selected>Loading...</option>
+                            }
+                            else
+                            {
+                                <option value="" selected>Choose...</option>
+                                @foreach (var item in ministries)
+                                {
+                                    <option value=@item.Name>@item.Name - @item.Description</option>
+                                }
+                            }
+                        </InputSelect>
+                        <label for="ministry">
+                            Ministry
+                        </label>
+
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="program" placeholder="Program" class="form-select" disabled=@progDisabled
+                                     @bind-Value="@entry.program">
+                            @if (programs is null)
+                            {
+                                <option selected>Select a Ministry first...</option>
+                            }
+                            else
+                            {
+                                <option value="" selected>Choose...</option>
+                                @foreach (var item in programs)
+                                {
+                                    <option value=@item.Name>@item.Name - @item.Description</option>
+                                }
+                            }
+                        </InputSelect>
+                        <label for="program">
+                            Program
+                        </label>
+
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="subprogram" placeholder="Sub-Program" class="form-select" disabled=@sprogDisabled
+                                     @bind-Value="@entry.subprog">
+                            @if (subprograms is null)
+                            {
+                                <option selected>Select a Program first...</option>
+                            }
+                            else
+                            {
+                                <option value="" selected>Choose...</option>
+                                @foreach (var item in subprograms)
+                                {
+                                    <option value=@item.Name>@item.Name - @item.Description</option>
+                                }
+                            }
+                        </InputSelect>
+                        <label for="subprog">
+                            Sub-Program
+                        </label>
+
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="accountType" class="form-select"
+                                     @bind-Value="@accountType" disabled="@accountTypeDisabled">
+                            @if (accountTypes is null)
+                            {
+                                <option selected>Select a Sub-Program first...</option>
+                            }
+                            else
+                            {
+                                <option value="" selected>Choose...</option>
+                                @foreach (var item in accountTypes)
+                                {
+                                    <option value=@item.Name>@item.Name - @item.Description</option>
+                                }
+                            }
+                        </InputSelect>
+                        <label for="accountType">
+                            Account Type
+                        </label>
+
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="account" placeholder="Account" class="form-select"
+                                     @bind-Value="@entry.account" disabled="@accountDisabled">
+                            @if (accounts is null)
+                            {
+                                <option selected>Select a Account Type first...</option>
+                            }
+                            else
+                            {
+                                <option value="" selected>Choose...</option>
+                                @foreach (var item in accounts)
+                                {
+                                    <option value=@item.Name>@item.Name - @item.Description</option>
+                                }
+                            }
+                        </InputSelect>
+                        <label for="account">
+                            Account
+                        </label>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="form-floating">
+                                <InputText @bind-Value="entry.label" class="form-control" placeholder="Label">
+                                </InputText>
+                                <label for="label">
+                                    Label
+                                </label>
+                            </div>
+                        </div>                        
+                        <div class="col-md">
+                            <div class="form-floating" style="padding-bottom:5px">
+                                <InputNumber id="year1" class="form-control"
+                                             @bind-Value="@entry.year1_amount">
+                                </InputNumber>
+                                <label for="year1">
+                                    @year1Desc
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="color: red">
+                        @saveError
+                    </div>
+                    <div style="color: green">
+                        @saveSuccess
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+
+@code {
+    //TODO: Account not showing up.  Look into it.  Also look into removing old account types
+    [Parameter]
+    public int year { get; set; }
+    [Parameter]
+    public string ministry { get; set; } = string.Empty;
+    [Parameter]
+    public string program { get; set; }= string.Empty;
+    [Parameter]
+    public string subprogram { get; set; }= string.Empty;
+    [Parameter]
+    public string accountType { get; set; } = string.Empty;
+    [Parameter]
+    public string account { get; set; } = string.Empty;
+    [Parameter]
+    public EventCallback OnSaveEntry { get; set; }
+
+    private EditContext EditContext;
+
+    private BudgetEstimatesModel entry = new BudgetEstimatesModel();
+    private List<ProcessingYearModel>? years;
+    private List<ListItemModel>? ministries;
+    private List<ListItemModel>? programs;
+    private List<ListItemModel>? subprograms;
+    private List<ListItemModel>? accountTypes;
+    private List<ListItemModel>? accounts;
+
+    private bool yearDisabled = false;
+    private bool minDisabled = false;
+    private bool progDisabled = false;
+    private bool sprogDisabled = false;
+    private bool accountTypeDisabled = false;
+    private bool accountDisabled = false;
+    private string username = string.Empty;
+    private bool isAdmin = false;
+
+    private string? year0Desc;
+    private string? year1Desc;
+    private string? year2Desc;
+    private string? year3Desc;
+    private string? saveError;
+    private string? saveSuccess;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Initial Edit Context
+        EditContext = new EditContext(entry);
+        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        if (authState.User.IsInRole("Administrator")) { isAdmin = true; }
+        //set up the drop lists
+        years = await _db.GetYears();
+
+        if (year != 0)
+        {
+            if (years.Where(z => z.year == year && !z.year_closed).Count() != 0)
+            {
+                entry.processing_year = year;
+                year0Desc = String.Format("{0} - {1}", year - 1, year);
+                year1Desc = String.Format("{0} - {1}", year, year + 1);
+                year2Desc = String.Format("{0} - {1}", year + 1, year + 2);
+                year3Desc = String.Format("{0} - {1}", year + 2, year + 3);
+            }
+            yearDisabled = true;
+        }
+        //Get the list data for ministry
+        ministries = await _rdb.GetDependantMinistries(username);
+        if (!String.IsNullOrWhiteSpace(ministry))
+        {
+            entry.ministry = ministry;
+            programs = await _rdb.GetDependantPrograms(entry.ministry, username);
+            minDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(program))
+        {
+            entry.program = program;
+            subprograms = await _rdb.GetDependantSubPrograms(entry.ministry, entry.program, username);
+            progDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(subprogram))
+        {
+            entry.subprog = subprogram;
+            accountTypes = await _rdb.GetDependantAccountTypes();
+            sprogDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(accountType))
+        {
+            accountTypeDisabled = true;
+            accounts = await _rdb.GetDependantAccounts(accountType);
+        }
+        if (!String.IsNullOrWhiteSpace(account))
+        {
+            accountDisabled = true;
+            entry.account = account;
+        }
+        //set required hidden fields
+        entry.modified_by = username;
+        entry.project = string.Empty;
+        entry.sector = string.Empty;
+        entry.sof = string.Empty;
+        entry.lastcode = string.Empty;
+        entry.label = "Adjustment";
+    }
+
+
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        //clear any save messages because we entering new stull
+        saveSuccess = string.Empty;
+        saveError = string.Empty;
+
+        if (e.FieldIdentifier.FieldName == "processing_year")
+        {
+            YearChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "ministry")
+        {
+            MinistryChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "program")
+        {
+            ProgramChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "subprog")
+        {
+            SubProgramChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "accountType")
+        {
+            AccountTypeChanged();
+        }
+    }
+
+
+    private async void MinistryChanged()
+    {
+        //need to clear all dependencies
+        subprograms = null;
+        accounts = null;
+        accountTypes = null;
+        entry.program = string.Empty;
+        entry.subprog = string.Empty;
+        entry.account = string.Empty;
+        accountType = string.Empty;
+        programs = await _rdb.GetDependantPrograms(entry.ministry, username);
+        base.StateHasChanged();
+    }
+
+    private async void ProgramChanged()
+    {
+        //need to clear all dependencies
+        accountTypes = null;
+        accounts = null;
+        entry.account = string.Empty;
+        entry.subprog = string.Empty;
+        accountType = string.Empty;
+        subprograms = await _rdb.GetDependantSubPrograms(entry.ministry, entry.program, username);
+        base.StateHasChanged();
+    }
+
+    private async void SubProgramChanged()
+    {
+        //need to clear all dependencies
+        entry.account = string.Empty;
+        accountType = string.Empty;
+        accountTypes = await _rdb.GetDependantAccountTypes();
+        base.StateHasChanged();
+    }
+
+    private async void AccountTypeChanged()
+    {
+        //need to clear all dependencies
+        entry.account = string.Empty;
+        accounts = await _rdb.GetDependantAccounts( accountType);
+        base.StateHasChanged();
+    }
+
+    private void YearChanged()
+    {
+        year0Desc = String.Format("{0} - {1}", entry.processing_year - 1, entry.processing_year);
+        year1Desc = String.Format("{0} - {1}", entry.processing_year, entry.processing_year + 1);
+        year2Desc = String.Format("{0} - {1}", entry.processing_year + 1, entry.processing_year + 2);
+        year3Desc = String.Format("{0} - {1}", entry.processing_year + 2, entry.processing_year + 3);
+    }
+
+    protected override void OnParametersSet()
+    {
+        SetFields();
+        base.StateHasChanged();
+    }
+
+    private async void SetFields()
+    {
+        entry.label = "Adjustment"
+        ;
+        if (year != 0)
+        {
+            entry.processing_year = 0;
+            if (years is null) { years = await _db.GetYears(); }
+            if (years.Where(z => z.year == year && !z.year_closed).Count() != 0)
+            {
+                entry.processing_year = year;
+                year0Desc = String.Format("{0} - {1}", year - 1, year);
+                year1Desc = String.Format("{0} - {1}", year, year + 1);
+                year2Desc = String.Format("{0} - {1}", year + 1, year + 2);
+                year3Desc = String.Format("{0} - {1}", year + 2, year + 3);
+            }
+            yearDisabled = true;
+        }
+        //Get the list data for ministry
+        if (ministries is null) { ministries = await _rdb.GetDependantMinistries(username); }
+        if (!String.IsNullOrWhiteSpace(ministry))
+        {
+            entry.ministry = ministry;
+            if (programs is null) { programs = await _rdb.GetDependantPrograms(entry.ministry, username); }
+            minDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(program))
+        {
+            entry.program = program;
+            if (subprograms is null) { subprograms = await _rdb.GetDependantSubPrograms(entry.ministry, entry.program, username); }
+            progDisabled = true;
+        }
+
+        if (!String.IsNullOrWhiteSpace(subprogram))
+        {
+            entry.subprog = subprogram;
+            if (accountTypes is null)
+            {
+                accountTypes = await _rdb.GetDependantAccountTypes();
+            }
+            sprogDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(accountType))
+        {
+            accountTypeDisabled = true;
+            if (accounts is null) { accounts = await _rdb.GetDependantAccounts( accountType); }
+        }
+        if (!String.IsNullOrWhiteSpace(account))
+        {
+            entry.account = account;
+            accountDisabled = true;
+        }
+        entry.modified_by = username;
+        entry.project = string.Empty;
+        entry.sector = string.Empty;
+        entry.sof = string.Empty;
+        entry.lastcode = string.Empty;
+    }
+
+    private async void HandleValidSubmit()
+    {
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
+        try
+        {
+            entry.last_modified = DateTime.Now;
+            entry.is_adjustment = true;
+            entry.modified_by = username; 
+            int affectedRows = await _rdb.AddNewRecEntry(entry);
+            //save successfully.  Reset form
+            if (affectedRows == 0)
+            {
+                saveError = "Something happened.  Record was not saved";
+                base.StateHasChanged();
+            }
+            else
+            {
+                entry = new BudgetEstimatesModel();
+                EditContext = new EditContext(entry);
+                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+                SetFields();
+                saveSuccess = "Record Successfully Saved.";
+                base.StateHasChanged();
+                //run the parent procedure
+                await OnSaveEntry.InvokeAsync();
+            }
+
+        }
+        catch (Exception e)
+        {
+            saveError = e.Message;
+
+            base.StateHasChanged();
+        }
+
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        saveSuccess = string.Empty;
+        saveError = "Please complete the form properly. Thank you.";
+        base.StateHasChanged();
+    }
+
+}

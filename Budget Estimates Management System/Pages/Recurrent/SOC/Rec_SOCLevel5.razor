@@ -1,0 +1,133 @@
+﻿@page "/recurrent/soc/{year:int}/{soc}/{ministry}/{program}/{subprogram}"
+
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@inject IRecEstimateData _rdb;
+@inject NavigationManager NavigationManager;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
+
+<h6><a href="/recurrent/soc/@year">Estimates By SOC - @year</a></h6>
+<h5><a href="/recurrent/soc/@year/@soc">@soc - @socName</a></h5>
+<h4><a href="/recurrent/soc/@year/@soc/@ministry">@ministry - @ministryName</a></h4>
+<h4><a href="/recurrent/soc/@year/@soc/@ministry/@program">@program - @programName</a></h4>
+<h2>@subprogram - @subprogramName</h2>
+<button type="button" class="btn btn-secondary" @onclick="() => NavigateTo(year)" >View By Ministry</button>
+<p />
+
+ 
+@if (accountGroup is null )
+{
+   <Loading></Loading>
+}
+else {
+    @if  (accountGroup.Count==0)
+    {
+            <p>No entries found for @year - @(year+1)</p>
+    }
+    else
+    {
+        <table class="table table-hover">
+  
+             <thead style="background-color:lightskyblue">
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">#</th>
+                  <th scope="col">Account</th>
+                  <th scope="col" class="text-end">Estimates <br>@(year-1)/@(year)</th>
+                  <th scope="col" class="text-end">Estimates <br>@year/@(year+1) </th>
+                  <th scope="col" class="text-end">Estimates <br>@(year+1)/@(year+2) </th>
+                  <th scope="col" class="text-end">Estimates <br> @(year+2)/@(year+3)</th>
+                </tr>
+              </thead>
+      <tbody>
+            @foreach (var item in accountGroup)
+            {
+               <Rec_SOCLevel6 item=@item year=@year ministry=@ministry program=@program subprogram=@subprogram OnEntryEdit="RefreshList"></Rec_SOCLevel6>
+            }
+                   <tr  style="background-color:lightyellow"> 
+          <th scope="row"></th>
+          <td colspan="2"><b><i>Total:</i></b></td>
+          <td class="text-end" style="background-color:lightgoldenrodyellow">@year0T.ToString("C")</td>
+          <td class="text-end"><b>@year1T.ToString("C")</b></td>
+          <td class="text-end">@year2T.ToString("C")</td>
+          <td class="text-end">@year3T.ToString("C")</td>
+        </tr>
+            </tbody>
+       </table>
+    }
+}
+
+
+@code {
+	[Parameter]
+    public int year { get; set; }
+    [Parameter]
+    public string ministry { get; set; } = string.Empty;
+    [Parameter]
+    public string soc { get; set; } = string.Empty;
+    [Parameter]
+    public string program { get; set; } = string.Empty;
+    [Parameter]
+    public string subprogram { get; set; } = string.Empty;
+
+    public string subprogramName { get; set; } = string.Empty;
+    public string programName { get; set; } = string.Empty;
+    public string socName { get; set; } = string.Empty;
+    public string ministryName { get; set; } = string.Empty;
+    private string username = string.Empty;
+
+    public int year0T = 0;
+    public int year1T = 0;
+    public int year2T = 0;
+    public int year3T = 0;
+
+    private List<GroupingModel>? accountGroup;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        try { socName= await _db.GetAccountName(soc); } catch{}
+		try { ministryName= await _db.GetMinistryName(ministry); } catch{}
+        try { programName = await _db.GetProgramName(program); } catch{}
+        try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
+
+        accountGroup= await _rdb.GetSOCAccountDataForYear(year,ministry,program,subprogram,soc,username);
+        year0T = accountGroup.Sum(x=>x.year0);
+        year1T = accountGroup.Sum(x=>x.year1);
+        year2T = accountGroup.Sum(x=>x.year2);
+        year3T = accountGroup.Sum(x=>x.year3);    
+        
+    }
+
+      protected override async void OnParametersSet()
+    {
+        try { socName= await _db.GetAccountName(soc); } catch{}
+        try { ministryName= await _db.GetMinistryName(ministry); } catch{}
+        try { programName = await _db.GetProgramName(program); } catch{}
+        try { subprogramName = await _db.GetSubProgramName(subprogram); } catch{}
+
+        
+        accountGroup= await _rdb.GetSOCAccountDataForYear(year,ministry,program,subprogram,soc,username);
+        year0T = accountGroup.Sum(x=>x.year0);
+        year1T = accountGroup.Sum(x=>x.year1);
+        year2T = accountGroup.Sum(x=>x.year2);
+        year3T = accountGroup.Sum(x=>x.year3);   
+
+        base.StateHasChanged();
+    }
+
+    private void NavigateTo(int year)
+    {
+         NavigationManager.NavigateTo($"recurrent/{year}", forceLoad: true);
+    }
+
+    private async void RefreshList()
+    {
+          accountGroup= await _rdb.GetSOCAccountDataForYear(year,ministry,program,subprogram,soc,username);
+          base.StateHasChanged();
+    }
+
+}

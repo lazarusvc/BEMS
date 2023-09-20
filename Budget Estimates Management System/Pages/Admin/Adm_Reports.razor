@@ -1,0 +1,144 @@
+﻿@using Budget_Estimates_Management_System.Models;
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@attribute [Authorize(Roles = "Administrator")]
+ 
+    <br />
+    <div class="row">
+        <div class="col-3">
+             <input @bind="searchfilter" @bind:event="oninput" class="form-control" placeholder="Search for report">
+        </div>
+         <div class="col-3">
+        <button type="button" class="btn btn-outline-success " data-bs-toggle="modal" data-bs-target="#newReport"><span class="oi oi-plus"></span> Add New Report</button>
+        </div>
+
+    </div>
+
+    <p />
+    <Adm_AddUser OnSaveUser="RefreshList"></Adm_AddUser>
+    <p />
+    <table class="table table-hover ">
+  <thead>
+    <tr>
+      <th scope="col">Description</th>
+      <th scope="col">Report Id</th>
+            <th scope="col">Stored Procedure</th>
+            <th style="text-align: center">User</th>
+            <th style="text-align: center">Ministry</th>
+            <th style="text-align: center">Program</th>
+        <th  style="text-align: center">Sub-Program</th>
+            <th style="text-align: center">SOC</th>
+            <th style="text-align: center">Account</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+
+       @if (reports is not null)
+        {
+            @foreach (var item in reports.Where(x => x.reportDesc.ToLower().Contains(searchfilter.ToLower()) || String.IsNullOrWhiteSpace(searchfilter)))
+        {
+                  <tr>
+          <td>@item.reportDesc</td>
+                        <td>
+                            @item.reportId                     
+                        </td>
+                    <td>
+                        @item.storedProcedure
+                    </td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parUser" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parMinistry" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parProgram" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parSubprogram" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parSOC" onclick="return false;"></td>
+                    <td style="text-align: center"><input type="checkbox" id="parUser" checked="@item.parAccount" onclick="return false;"></td>
+                        <td>
+              <div class="btn-group" role="group">
+              <div class="btn-group me-2" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm" @onclick="()=>{selectedReport=item;}" data-bs-toggle="modal" data-bs-target="#editReport" data-toggle="tooltip"  title="Change Role"><span class="oi oi-pencil"></span></button>                
+              </div>              
+              <div class="btn-group me-2" role="group" >
+                 <div class="dropdown">
+			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" data-toggle="tooltip"  title="Delete User">
+				<span class="oi oi-delete"></span>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+				<li><a class="dropdown-item" href="javascript:void(0)" @onclick="()=>{DeleteClicked(item);}">Delete</a></li>
+			  </ul>
+			</div>
+              </div>            
+            </div>
+
+          </td>
+        </tr> 
+        }
+    }
+        
+
+  </tbody>
+        <tfoot>
+          <tr>
+              @if (reports is not null)
+                {
+                    <td colspan="9">Search Results:  <b>@reports.Where(x=>x.reportDesc.ToLower().Contains(searchfilter.ToLower())||String.IsNullOrWhiteSpace(searchfilter)).Count() </b> </td>
+                } 
+                else
+                {
+                  <td colspan="9" >No Reports Found</td>
+                }
+
+        </tr>
+      </tfoot>    
+</table>
+
+
+<Adm_AddReport OnSaveReport="RefreshList"></Adm_AddReport>
+<Adm_EditReport OnSaveReport="RefreshList" parReport="selectedReport"></Adm_EditReport>
+
+@code {
+
+    private List<ReportConfigModel> reports;
+
+    private ReportConfigModel selectedReport;
+
+    private string searchfilter { get; set; } = String.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Initial Edit Context
+        reports = await _db.GetAllReportConfig();
+    }
+
+    private async void RefreshList()
+    {
+        selectedReport = null;
+        reports = await _db.GetAllReportConfig();
+        base.StateHasChanged();
+    }
+
+    private async void DeleteClicked(ReportConfigModel report)
+    {
+        //save new record.
+        try
+        {
+            int affectedRows= await _db.RemoveReportConfig(report.id);          
+            //save successfully.  Reset form
+            if (affectedRows!=0)
+            {
+                //refresh list
+                reports.Remove(report);
+              //invoke refresh
+                base.StateHasChanged();
+            } 
+              
+
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+    
+
+}

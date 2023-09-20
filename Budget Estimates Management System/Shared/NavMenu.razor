@@ -35,11 +35,13 @@
                 <span class="oi oi-graph" aria-hidden="true"></span> Capital Estimates
             </NavLink>
         </div>
+         @if (@context.User.IsInRole("Administrator")||@context.User.IsInRole("BudgetStaff")) {
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="messages">
-                <span class="oi oi-bullhorn" aria-hidden="true"></span> Message Center
+            <NavLink class="nav-link" href="notifications">
+                <span class="oi oi-bullhorn" aria-hidden="true"></span> Notification Center
             </NavLink>
         </div>
+         }
         @if (@context.User.IsInRole("Administrator")) {
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="admin">

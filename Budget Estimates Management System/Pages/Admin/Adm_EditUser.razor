@@ -2,6 +2,7 @@
 @using DataAccessLibrary;
 @inject IDbData _db;
 @attribute [Authorize(Roles = "Administrator")]
+@inject IJSRuntime JS
 
 
 <div class="modal fade" id="editUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -16,9 +17,9 @@
         
  
      <DataAnnotationsValidator />
-    
-  
-    <div class="form-floating">
+
+
+                    <div class="form-floating" style="padding-bottom:5px">
            <InputText  @bind-Value="user.userName" class="form-control" placeholder="GOCD User Name" disabled="true">               
                 </InputText>
         <label for="label" >
@@ -74,10 +75,10 @@
     private EditContext EditContext;
 
     private UserModel user = new UserModel();
-    private List<ListItemModel> roles;
+    private List<ListItemModel>? roles;
 
-    private string saveError;
-    private string saveSuccess;
+    private string saveError = string.Empty;
+    private string saveSuccess = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,21 +88,24 @@
         roles = await _db.GetUserRoles();
     }
 
-    protected override async void OnParametersSet()
+    protected override void OnParametersSet()
     {
         if (parUser is not null)
         {
-            user.userName = parUser.userName;
-            user.userRole = parUser.userRole;
+            Reflection.CopyPropertyValues(parUser, user);
+            //user.userName = parUser.userName;
+            //user.userRole = parUser.userRole;
+             saveSuccess = string.Empty;
+            saveError = string.Empty;
         }
-        
+
         base.StateHasChanged();
     }
 
     private async void  HandleValidSubmit()
     {     
-        saveError = "";
-        saveSuccess = "";
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
         try
         {
             int affectedRows=  await _db.UpdateUser(user);      
@@ -112,14 +116,9 @@
                 base.StateHasChanged();
             } else
             {
-                user=new UserModel();
-                EditContext = new EditContext(user);
-                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
                 saveSuccess = "Record Successfully Saved.";
-                base.StateHasChanged();
                 //run the parent procedure
-                await OnSaveUser.InvokeAsync();
-                
+                await OnSaveUser.InvokeAsync();               
             }
            
         }
@@ -133,15 +132,15 @@
 
     private  void  HandleInvalidSubmit()
     {     
-        saveSuccess = "";
+        saveSuccess = string.Empty;
         saveError = "Unable to save changes.";
         base.StateHasChanged();                
     }
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
         //clear any save messages because we entering new stull
-        saveSuccess = "";
-        saveError = "";
+        saveSuccess = string.Empty;
+        saveError = string.Empty;
     }
 
 }

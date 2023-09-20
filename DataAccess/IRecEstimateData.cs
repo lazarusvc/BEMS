@@ -14,8 +14,8 @@ namespace DataAccessLibrary
         Task<List<ListItemModel>> GetDependantPrograms(string ministry, string username);
         Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string program, string username);
         Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string username);
-        Task<List<ListItemModel>> GetDependantAccountTypes(string ministry, string program, string subprogram, string username);
-        Task<List<ListItemModel>> GetDependantAccounts(string ministry, string program, string subprogram, string acctype, string username);
+        Task<List<ListItemModel>> GetDependantAccountTypes();
+        Task<List<ListItemModel>> GetDependantAccounts(string acctype);
         Task<List<ListItemModel>> GetEnteredAccounts(int year, string ministry, string program, string subprogram, string acctype);
         Task<int> AddNewRecEntry(BudgetEstimatesModel bem);
         Task<int> RemoveRecEntry(int id);
@@ -23,5 +23,10 @@ namespace DataAccessLibrary
         Task<int> SetRecEntryStatus(int pyear, string subprog, int status);
         Task<int> GetSubProgramStatus(int pyear, string subprog);
         Task<List<ListItemModel>> GetAllSubPrograms();
+        Task<List<GroupingModel>> GetSOCDataForYear(int year, string username);
+        Task<List<GroupingModel>> GetSOCMinDataForYear(int year, string soc, string username);
+        Task<List<GroupingModel>> GetSOCProgramDataForYear(int year, string soc, string ministry, string username);
+        Task<List<GroupingModel>> GetSOCSubProgramDataForYear(int year, string soc, string ministry, string program, string username);
+        Task<List<GroupingModel>> GetSOCAccountDataForYear(int year, string ministry, string program, string subprogram, string accountType, string username);
     }
 }

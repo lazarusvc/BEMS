@@ -1,11 +1,11 @@
-﻿@using DataAccessLibrary.Models;
+﻿@using Budget_Estimates_Management_System.Models;
+@using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @using AutoMapper;
 @inject IDbData _db;
 @inject IRecEstimateData _rdb;
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
-@inject AuthenticationStateProvider authStateProvider;
 
 <div class="modal fade" id="newEntry" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
@@ -240,39 +240,40 @@
     [Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; } = string.Empty;
     [Parameter]
-    public string program { get; set; }
+    public string program { get; set; } = string.Empty;
     [Parameter]
-    public string subprogram { get; set; }
+    public string subprogram { get; set; }= string.Empty;
     [Parameter]
-    public string accountType { get; set; }
+    public string accountType { get; set; } = string.Empty;
     [Parameter]
     public EventCallback OnSaveEntry { get; set; }
 
     private EditContext EditContext;
 
     private BudgetEstimatesModel entry = new BudgetEstimatesModel();
-    private List<ProcessingYearModel> years;
-    private List<ListItemModel> ministries;
-    private List<ListItemModel> programs;
-    private List<ListItemModel> subprograms;
-    private List<ListItemModel> accountTypes;
-    private List<ListItemModel> accounts;
+    private List<ProcessingYearModel>? years;
+    private List<ListItemModel>? ministries;
+    private List<ListItemModel>? programs;
+    private List<ListItemModel>? subprograms;
+    private List<ListItemModel>? accountTypes;
+    private List<ListItemModel>? accounts;
 
     private bool yearDisabled = false;
     private bool minDisabled = false;
     private bool progDisabled = false;
     private bool sprogDisabled = false;
     private bool accountTypeDisabled = false;
-    private string username;
+    private string username = string.Empty;
+    private bool isAdmin = false;
 
-    private string year0Desc;
-    private string year1Desc;
-    private string year2Desc;
-    private string year3Desc;
-    private string saveError;
-    private string saveSuccess;
+    private string year0Desc = string.Empty;
+    private string year1Desc = string.Empty;
+    private string year2Desc = string.Empty;
+    private string year3Desc = string.Empty;
+    private string saveError = string.Empty;
+    private string saveSuccess = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -281,6 +282,7 @@
         EditContext.OnFieldChanged += EditContext_OnFieldChanged;
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         username = authState.User.Identity.Name;
+        if (authState.User.IsInRole("Administrator")) { isAdmin = true; }
         //set up the drop lists
         years = await _db.GetYears();
 
@@ -309,28 +311,28 @@
         }
         if (!String.IsNullOrWhiteSpace(subprogram)) { 
             entry.subprog=subprogram; 
-            accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry,entry.program,entry.subprog,username);
+            accountTypes = await _rdb.GetDependantAccountTypes();
             sprogDisabled = true;
         }
         if (!String.IsNullOrWhiteSpace(accountType)) {
             accountTypeDisabled = true;
-            accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType,username);
+            accounts = await _rdb.GetDependantAccounts(accountType);
         }
         //set required hidden fields
-        entry.account = null;         
-		entry.modified_by = username;
-        entry.project="";
-        entry.sector = "";
-        entry.sof = "";
-        entry.lastcode = "";
+        entry.account =  string.Empty;
+        entry.modified_by = username;
+        entry.project= string.Empty;
+        entry.sector = string.Empty;
+        entry.sof = string.Empty;
+        entry.lastcode = string.Empty;
     }
 
 
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
         //clear any save messages because we entering new stull
-        saveSuccess = "";
-        saveError = "";
+        saveSuccess = string.Empty;
+        saveError = string.Empty;
 
         if (e.FieldIdentifier.FieldName == "processing_year")
         {
@@ -354,17 +356,17 @@
         }
     }
 
-    //TODO:  On select list change, update dependencies
+
     private async void MinistryChanged()
     {
         //need to clear all dependencies        
         subprograms=null;
         accounts=null;
         accountTypes=null;
-        entry.program = null;
-        entry.subprog = null;
-        entry.account =null;
-        accountType = null;
+        entry.program = string.Empty;
+        entry.subprog = string.Empty;
+        entry.account = string.Empty;
+        accountType = string.Empty;
         programs = await _rdb.GetDependantPrograms(entry.ministry,username);
         base.StateHasChanged();
     }
@@ -374,9 +376,9 @@
         //need to clear all dependencies        
         accountTypes=null;
         accounts=null;
-        entry.account = null;
-        entry.subprog = null;
-        accountType = null;
+        entry.account = string.Empty;
+        entry.subprog = string.Empty;
+        accountType =  string.Empty;
         subprograms = await _rdb.GetDependantSubPrograms(entry.ministry,entry.program,username);
         base.StateHasChanged();
     }
@@ -384,17 +386,17 @@
     private async void SubProgramChanged()
     {
         //need to clear all dependencies    
-        entry.account =null;
-        accountType = null;
-        accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry, entry.program,entry.subprog,username);
+        entry.account = string.Empty;
+        accountType = string.Empty;
+        accountTypes = await _rdb.GetDependantAccountTypes();
         base.StateHasChanged();
     }
 
     private async void AccountTypeChanged()
     {
         //need to clear all dependencies    
-        entry.account = null;        
-        accounts = await _rdb.GetDependantAccounts(entry.ministry,entry.program,entry.subprog,accountType,username);
+        entry.account = string.Empty;        
+        accounts = await _rdb.GetDependantAccounts(accountType);
         base.StateHasChanged();
     }
 
@@ -406,7 +408,7 @@
         year3Desc = String.Format("{0} - {1}", entry.processing_year+2, entry.processing_year+3);
     }
 
-    protected override async void OnParametersSet()
+    protected override  void OnParametersSet()
     {
         SetFields();
         base.StateHasChanged();
@@ -415,6 +417,7 @@
     private async void SetFields()
     {
         if (year!=0) {
+            entry.processing_year = 0;
             if (years is null) { years = await _db.GetYears(); }
             if (years.Where(z => z.year == year&&!z.year_closed).Count() != 0)
             {
@@ -441,51 +444,71 @@
 
         if (!String.IsNullOrWhiteSpace(subprogram)) { 
             entry.subprog=subprogram;
-            if (accountTypes is null) { accountTypes = await _rdb.GetDependantAccountTypes(entry.ministry, entry.program, entry.subprog,username); }
+            if (accountTypes is null)
+            {
+                accountTypes = await _rdb.GetDependantAccountTypes();
+            }
             sprogDisabled = true;
         }
         if (!String.IsNullOrWhiteSpace(accountType)) {
             accountTypeDisabled = true;
-            if (accounts is null) { accounts = await _rdb.GetDependantAccounts(entry.ministry, entry.program, entry.subprog, accountType,username); }
+            if (accounts is null) { accounts = await _rdb.GetDependantAccounts(accountType); }
         }
-        entry.account =null;
-	    entry.modified_by = username;
-        entry.project="";
-        entry.sector = "";
-        entry.sof = "";
-        entry.lastcode = ""; 
+        entry.account = string.Empty;
+        entry.modified_by = username;
+        entry.project= string.Empty;
+        entry.sector = string.Empty;
+        entry.sof = string.Empty;
+        entry.lastcode = string.Empty; 
     }
 
     private async void  HandleValidSubmit()
     {     
-        saveError = "";
-        saveSuccess = "";
-        try
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
+        int status=0;
+        //Before we do anything, make sure we are allow only entries on unsubmitted items
+        try { status = await _rdb.GetSubProgramStatus(year, subprogram); } catch { }
+        if (status == (int)EntryStatus.Unsubmitted)
         {
-            entry.last_modified =DateTime.Now;
-            int affectedRows=  await _rdb.AddNewRecEntry(entry);      
-            //save successfully.  Reset form
-            if (affectedRows==0)
+            try
             {
-                saveError = "Something happened.  Record was not saved";
-                base.StateHasChanged();
-            } else
-            {
-                entry=new BudgetEstimatesModel();
-                EditContext = new EditContext(entry);
-                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
-                SetFields();
-                saveSuccess = "Record Successfully Saved.";
-                base.StateHasChanged();
-                //run the parent procedure
-                await OnSaveEntry.InvokeAsync();
+                entry.last_modified = DateTime.Now;
+                entry.is_adjustment = false;
+                entry.modified_by = username;
+                int affectedRows = await _rdb.AddNewRecEntry(entry);
+                //save successfully.  Reset form
+                if (affectedRows == 0)
+                {
+                    saveError = "Something happened.  Record was not saved";
+                    base.StateHasChanged();
+                }
+                else
+                {
+                    //set the defaults for another entry
+                    ministry = entry.ministry;
+                    program = entry.program;
+                    subprogram = entry.subprog;
+                    entry = new BudgetEstimatesModel();
+                    EditContext = new EditContext(entry);
+                    EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+                    SetFields();
+                    saveSuccess = "Record Successfully Saved.";
+                    base.StateHasChanged();
+                    //run the parent procedure
+                    await OnSaveEntry.InvokeAsync();
+                }
+
             }
+            catch (Exception e)
+            {
+                saveError = e.Message;
 
-        }
-        catch(Exception e)
+                base.StateHasChanged();
+            }
+        } else
         {
-            saveError = e.Message; 
-
+            saveError = "This account has been submitted already. You cannot submit additional items.";
             base.StateHasChanged();
         }
         
@@ -493,7 +516,7 @@
 
     private  void  HandleInvalidSubmit()
     {     
-        saveSuccess = "";
+        saveSuccess = string.Empty;
         saveError = "Please complete the form properly. Thank you.";
         base.StateHasChanged();                
     }

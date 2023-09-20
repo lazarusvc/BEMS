@@ -2,8 +2,8 @@
 {
     public class BreadcrumbModel
     {
-        public string link { get; set; }
-        public string text { get; set; }
+        public string link { get; set; } =string.Empty;
+        public string text { get; set; } = string.Empty;
         public bool active { get; set; }
     }
 }

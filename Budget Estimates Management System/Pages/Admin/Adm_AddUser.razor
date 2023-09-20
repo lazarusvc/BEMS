@@ -16,9 +16,9 @@
         
  
      <DataAnnotationsValidator />
-    
-  
-    <div class="form-floating">
+
+
+                    <div class="form-floating" style="padding-bottom:5px">
            <InputText  @bind-Value="user.userName" class="form-control" placeholder="GOCD User Name">               
                 </InputText>
         <label for="label" >
@@ -72,10 +72,10 @@
     private EditContext EditContext;
 
     private UserModel user = new UserModel();
-    private List<ListItemModel> roles;
+    private List<ListItemModel>? roles;
 
-    private string saveError;
-    private string saveSuccess;
+    private string saveError = String.Empty;
+    private string saveSuccess = String.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,8 +88,8 @@
 
     private async void  HandleValidSubmit()
     {     
-        saveError = "";
-        saveSuccess = "";
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
         try
         {
             int affectedRows=  await _db.AddNewUser(user);      
@@ -126,15 +126,15 @@
 
     private  void  HandleInvalidSubmit()
     {     
-        saveSuccess = "";
+        saveSuccess = String.Empty;
         saveError = "Enter a Username. Thank you.";
         base.StateHasChanged();                
     }
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
         //clear any save messages because we entering new stull
-        saveSuccess = "";
-        saveError = "";
+        saveSuccess = String.Empty;
+        saveError = String.Empty;
     }
 
 }

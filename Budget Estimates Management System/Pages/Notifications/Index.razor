@@ -1,0 +1,142 @@
+﻿@page "/notifications"
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject INotificationData _ndb;
+@attribute [Authorize(Roles = "Administrator,BudgetStaff")]
+
+<h1>Notifications</h1>
+ 
+    <div class="col-12" >
+
+        <button type="button" class="btn btn-outline-danger" @onclick="()=>{ClearExpired();}"  title="Clear Expired Notifications">Clear Expired Notifications <span class="oi oi-timer"></span></button>                        
+        <button type="button" class="btn btn-outline-success " data-bs-toggle="modal" data-bs-target="#newNotification"  title="Add Notification">New Notification <span class="oi oi-plus"></span></button>                              
+     </div>
+ <table class="table table-hover ">
+  <thead>
+    <tr>
+        <th scope="col">Sub-Program</th>
+      <th scope="col">Expiry Date</th>
+      <th scope="col">Message Header</th>
+      <th scope="col">Message</th>
+      <th scope="col">Featured</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>      
+       @if (notifications is not null)
+        {
+          @foreach (var notification in notifications)
+        {
+                  <tr style="background-color: @(notification.expiryDate<@DateTime.Now ? "lightgrey":"")">
+          <td>@notification.subprogram</td>
+           <td>@notification.expiryDate.ToShortDateString()</td>
+           <td>@notification.header</td>
+            <td>@notification.message</td>
+             <td>@notification.featured</td>
+                        <td>
+              <div class="btn-group" role="group">
+               <div class="btn-group me-2" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm" @onclick="()=>{selectedNotification=notification;}" data-bs-toggle="modal" data-bs-target="#editNotification" data-toggle="tooltip"  title="Change Notification"><span class="oi oi-pencil"></span></button>                
+              </div>
+
+              <div class="btn-group me-2" role="group" >
+                 <div class="dropdown">
+			  <button class="btn btn-outline-danger btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" data-toggle="tooltip"  title="Delete User">
+				<span class="oi oi-delete"></span>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+				<li><a class="dropdown-item" href="javascript:void(0)" @onclick="()=>{DeleteClicked(notification);}">Delete</a></li>
+			  </ul>
+			</div>
+              </div>            
+            </div>
+
+          </td>
+        </tr> 
+        }
+    }
+  </tbody>
+        <tfoot>
+          <tr>
+              @if (notifications is not null)
+                {<td colspan="6" >Notifications:  <b>@notifications.Count() </b> <div style ="color:darkred;">Notifications Expired: @notifications.Where(x=>x.expiryDate<=DateTime.Now).Count()</div>  </td>
+                } 
+                else
+                {
+                  <td colspan="6" >No Notifications Found</td>
+                }
+        </tr>
+      </tfoot>    
+</table>
+
+
+<Not_AddNotification OnSaveNotification="RefreshList"></Not_AddNotification>
+<Not_EditNotification parNotification="selectedNotification" OnSaveNotification="RefreshList"></Not_EditNotification>
+
+@code {
+
+    private List<NotificationModel>? notifications;
+
+    private NotificationModel? selectedNotification;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Initial Edit Context
+        notifications = await _ndb.GetAllNotifications();
+    }
+
+
+    private async void DeleteClicked(NotificationModel notification)
+    {
+        //save new record.
+        try
+        {
+            int affectedRows= await _ndb.RemoveNotification(notification.id);          
+            //save successfully.  Reset form
+            if (affectedRows!=0)
+            {
+                //refresh list
+                notifications?.Remove(notification);
+                //invoke refresh
+                base.StateHasChanged();
+            } 
+
+
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+
+
+    private async void ClearExpired()
+    {
+        //save new record.
+        try
+        {
+            int affectedRows= await _ndb.RemoveExpiredNotifications();          
+            //save successfully.  Reset form
+            if (affectedRows!=0)
+            {
+                //refresh list
+                notifications?.RemoveAll(x=>x.expiryDate<DateTime.Now);
+                //invoke refresh
+                base.StateHasChanged();
+            } 
+
+
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+
+    private async void RefreshList()
+    {
+        selectedNotification = null;
+        notifications = await _ndb.GetAllNotifications();
+        base.StateHasChanged();
+    }
+}

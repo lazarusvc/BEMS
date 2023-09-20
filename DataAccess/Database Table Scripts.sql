@@ -30,6 +30,7 @@ is_by_law bit NOT NULL,
 comment nvarchar(150),
 flagged bit NOT NULL,
 flagged_comment nvarchar(150),
+is_adjustment bit NOT NULL,
 modified_by nvarchar(50),
 last_modified datetime,
 entry_status_id tinyint NOT NULL
@@ -96,3 +97,61 @@ CREATE TYPE [User_Access] AS TABLE(
 	[userName] [nvarchar](50) NOT NULL,
 	[subprogram] [nvarchar](5) NOT NULL
  )
+
+ CREATE TABLE [dbo].[Notifications](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[subprogram] [nvarchar](5) NULL,
+	[message] [nvarchar](30) NULL,
+	[message] [nvarchar](500) NOT NULL,
+	[expiryDate] [date] NULL,
+	[dateEntered] [datetime] NOT NULL,
+	[enteredby] [nvarchar](50) NOT NULL,
+	[featured] [bit] NOT NULL,
+	[dateModified] [datetime] NOT NULL,
+	[modifiedBy] [nvarchar](50) NOT NULL
+ CONSTRAINT [PK_Notifications] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+--Structure Change for when mergers happen
+CREATE TABLE [dbo].[Structure_Change](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[proc_year] [int] NOT NULL,
+	[ministry] [nvarchar](50) NOT NULL,
+	[program] [nvarchar](50) NOT NULL,
+	[subprogram] [nvarchar](50) NOT NULL,
+	[soc] [nvarchar](50) NULL,
+	[account] [nvarchar](50) NULL,
+	[to_ministry] [nvarchar](50) NOT NULL,
+	[to_program] [nvarchar](50) NOT NULL,
+	[to_subprogram] [nvarchar](50) NOT NULL,
+	[to_soc] [nvarchar](50) NULL,
+	[to_account] [nvarchar](50) NULL,
+	[descp] [nvarchar](150) NULL,
+ CONSTRAINT [PK_structure_change] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+--Report Configuration
+CREATE TABLE [dbo].[Report_Config](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[reportId] [varchar](50) NOT NULL,
+	[storedProcedure] [varchar](50),
+	[reportDesc] [varchar](50) NOT NULL,
+	[parUser] [bit] NOT NULL,
+	[parMinistry] [bit] NOT NULL,
+	[parProgram] [bit] NOT NULL,
+	[parSubprogram] [bit] NOT NULL,
+	[parSOC] [bit] NOT NULL,
+	[parAccount] [bit] NOT NULL,
+ CONSTRAINT [PK_Report_Config] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]

@@ -2,6 +2,7 @@
 @using DataAccessLibrary.Models;
 @using DataAccessLibrary;
 @inject IRecEstimateData _rdb;
+@inject IDbData _db;
 @inject AuthenticationStateProvider authStateProvider;
 @attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
 
@@ -45,12 +46,22 @@
                     {
                        <tr>
                            <td colspan="7">
-                                  <Rec_EditEntry account=account  OnEntryDeleted = "DeleteRow" OnEntryEdit="OnEntryEdit"></Rec_EditEntry>  
+                                  <Rec_EditEntry yearClosed=yearClosed account=account  OnEntryDeleted = "DeleteRow" OnEntryEdit="OnEntryEdit"></Rec_EditEntry>  
                                   </td>
                            </tr>  
                     }  
                  <tr >
-                      <td colspan="7"><button type="button" class="btn btn-outline-success" @onclick="AddRow" disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)"><span class="oi oi-plus"></span> Add Row</button>
+                     
+                     <td colspan="7">
+                         @if (!yearClosed)
+                         {
+                        @if (status == (int)EntryStatus.Unsubmitted)
+                        {
+                          <button type="button" class="btn btn-outline-success" @onclick="AddRow" disabled="@(status==(int)EntryStatus.Unsubmitted?false:true)"><span class="oi oi-plus"></span> Add Row</button>
+                        }
+                          <AuthorizeView  Roles="Administrator, BudgetStaff">
+                      <span> </span> <button type="button" class="btn btn-outline-secondary" disabled="@(status==(int)EntryStatus.Unsubmitted?true:false)" data-bs-toggle="modal" data-bs-target="#newAdjustment" @onclick="()=>{SetAccount(item.item.Trim());}"><span class="oi oi-pie-chart"></span> Budget Adjustment</button>
+                          </AuthorizeView>}
                           </td>
                  </tr>
 
@@ -61,23 +72,29 @@
 
 @code {
     [Parameter]
-    public GroupingModel item { get; set; }
+    public GroupingModel? item { get; set; }
     [Parameter]
     public int year { get; set; }
     [Parameter]
-    public string ministry { get; set; }
+    public string ministry { get; set; } = string.Empty;
     [Parameter]
-    public string program { get; set; }
+    public string program { get; set; }= string.Empty;
     [Parameter]
-    public string subprogram { get; set; }
+    public string subprogram { get; set; } = string.Empty;
     [Parameter]
     public EventCallback OnEntryEdit { get; set; }
+    [Parameter]
+    public EventCallback<string> OnAccountChanged { get; set; }
 
     public bool Collapsed = true;
     private int status;
-    private string username;
+    private string username= string.Empty;
 
-    List<BudgetEstimatesModel> accounts;
+    public string accountSelected = string.Empty;
+
+    private bool yearClosed = true;
+
+    List<BudgetEstimatesModel>? accounts;
 
     protected override async Task OnInitializedAsync()
     {        
@@ -85,22 +102,28 @@
         username = authState.User.Identity.Name;
         accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
         try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
+        try
+        {
+            yearClosed = await _db.IsYearClosed(year);
+        }
+        catch { yearClosed = true; }
     }
 
     protected override async void OnParametersSet()
     {
-        accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
-        try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
-        base.StateHasChanged();
+    accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
+    try { status = await _rdb.GetSubProgramStatus(year,subprogram); } catch{}
+    base.StateHasChanged();
     }
 
-
+    private void SetAccount(string newaccount)
+    {
+            OnAccountChanged.InvokeAsync(newaccount);
+    }
 
     private async void AddRow()
     {
         //save new record.
-        //TODO:  Use user names
-        //TODO: FIx flag
         try
         {
             BudgetEstimatesModel mapped = new BudgetEstimatesModel();
@@ -109,20 +132,20 @@
             mapped.program =program;
             mapped.subprog =subprogram;
             mapped.account =item.item;
-            mapped.project ="";
-            mapped.sof ="";
-            mapped.sector ="";
-            mapped.lastcode ="";
-            mapped.label ="";
+            mapped.project = string.Empty;
+            mapped.sof = string.Empty;
+            mapped.sector = string.Empty;
+            mapped.lastcode = string.Empty;
+            mapped.label = string.Empty;
             mapped.quantity =0;
             mapped.year0_amount =0;
             mapped.year1_amount =0;
             mapped.year2_amount =0;
             mapped.year3_amount =0;
             mapped.is_by_law =false;
-            mapped.comment ="";
+            mapped.comment = string.Empty;
             mapped.flagged =false;
-            mapped.flagged_comment ="";
+            mapped.flagged_comment = string.Empty;
              var authState = await authStateProvider.GetAuthenticationStateAsync();
 			mapped.modified_by = authState.User.Identity.Name;
             mapped.last_modified =DateTime.Now;
@@ -156,18 +179,25 @@
             if (affectedRows!=0)
             {
                 //refresh list
-                accounts.Remove(delRec);
+                accounts?.Remove(delRec);
                 //invoke refresh
                 await OnEntryEdit.InvokeAsync();
                  base.StateHasChanged();
             } 
 
         }
-        catch (Exception e)
+        catch (Exception)
         {
            
         }
     }        
 
+
+    private async void OnSaveEntry()
+    {
+            //refresh list
+            accounts= await _rdb.GetDataForYear(year,ministry,program,subprogram,item.item,username);
+            base.StateHasChanged();
+    }
     
 }

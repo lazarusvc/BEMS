@@ -56,7 +56,7 @@
 				);
 				navManager.NavigateTo("/", true);
 		} 
-		catch(Exception e)
+		catch(Exception)
 		{
 			await JS.InvokeVoidAsync("alert","An Error Occurred while trying to log in");
 			return;

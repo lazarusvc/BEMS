@@ -19,7 +19,7 @@
         {
        @foreach (var year in years)
             {
-                <option value=@year.year>@year.displayYear @(year.year_closed? "(Year Closed)":"") @(!year.ready_for_data_entry&&!year.year_closed? "(Not Open)":"")</option>
+                <option value=@year.year selected=@(year.ready_for_data_entry? true:false)>@year.displayYear @(year.year_closed ? "(Year Closed)" : "") @(!year.ready_for_data_entry && !year.year_closed ? "(Not Open)" : "")</option>
             }
         }
   </select>  
@@ -35,17 +35,18 @@
 
 
 @code {
-    private List<ProcessingYearModel> years;
+    private List<ProcessingYearModel>? years;
     private int year_selected=0;
 
 
     protected override async Task OnInitializedAsync()
     {
         years = await _db.GetYears();
+        year_selected = years.Where(y => y.ready_for_data_entry).FirstOrDefault().year;
         //if dataentry then remove years which are not ready
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         if (!authState.User.IsInRole("MinistryStaff")) { return; }
-        years = years.FindAll(e => e.ready_for_data_entry == true);
+        years = years.FindAll(e => e.ready_for_data_entry == true||e.year_closed==true);
         
     }
    

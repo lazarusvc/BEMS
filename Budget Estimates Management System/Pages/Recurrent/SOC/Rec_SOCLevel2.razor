@@ -1,0 +1,120 @@
+﻿@page "/recurrent/soc/{year:int}/{soc}"
+
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@inject IRecEstimateData _rdb;
+@inject NavigationManager NavigationManager;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
+
+<h3><a href="/recurrent/soc/@year">Estimates By SOC - @year</a></h3>
+<h2>@soc - @socName</h2>
+<button type="button" class="btn btn-secondary" @onclick="() => NavigateTo(year)" >View By Ministry</button>
+ <button class="btn btn-outline-prmary" type="button"  aria-expanded="false"  title="Budget Adjustment" >
+				    <span class="oi oi-pie-chart"></span> Budget Adjustment
+			      </button> 
+<p />
+
+
+@if (minGroup is null )
+{
+   <Loading></Loading>
+}
+else {
+    @if  (minGroup.Count==0)
+    {
+            <p>No entries found for @year - @(year+1)</p>
+    }
+
+    else
+    {
+        <table class="table table-hover">
+  
+             <thead style="background-color:lightseagreen">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Ministry</th>
+                  <th scope="col" class="text-end">Estimates<br> @(year-1)/@(year)</th>
+                  <th scope="col" class="text-end">Estimates <br>@year/@(year+1) </th>
+                  <th scope="col" class="text-end">Estimates <br>@(year+1)/@(year+2) </th>
+                  <th scope="col" class="text-end">Estimates<br> @(year+2)/@(year+3)</th>
+                </tr>
+              </thead>
+      <tbody>
+            @foreach (var item in minGroup)
+            {
+                    <tr> 
+          <th scope="row" @onclick="() => NavigateTo(year,soc,item.item)" style="cursor:pointer;">@item.item</th>
+          <td @onclick="() => NavigateTo(year,soc,item.item)" style="cursor:pointer;">@item.itemName</td>
+          <td class="text-end" style="background-color:lightgray">@item.year0.ToString("C")</td>
+          <td class="text-end"><b>@item.year1.ToString("C")</b></td>
+          <td class="text-end">@item.year2.ToString("C")</td>
+          <td class="text-end">@item.year3.ToString("C")</td>
+        </tr>
+
+            }
+            <tr style="background-color:lightyellow"> 
+          <th scope="row" ></th>
+          <td><b><i>Total:</i></b></td>
+          <td class="text-end" style="background-color:lightgoldenrodyellow">@year0T.ToString("C")</td>
+          <td class="text-end"><b>@year1T.ToString("C")</b></td>
+          <td class="text-end">@year2T.ToString("C")</td>
+          <td class="text-end">@year3T.ToString("C")</td>
+        </tr>
+            </tbody>
+       </table>
+    }
+}
+
+
+@code {
+	[Parameter]
+    public int year { get; set; }
+    [Parameter]
+    public string soc { get; set; } = string.Empty;
+
+    public string socName { get; set; } = string.Empty;
+    private string username = string.Empty;
+
+    public int year0T = 0;
+    public int year1T = 0;
+    public int year2T = 0;
+    public int year3T = 0;
+
+    private List<GroupingModel>? minGroup;
+
+
+     protected override async Task OnInitializedAsync()
+    {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        try { socName= await _db.GetAccountName(soc); } catch{}
+        minGroup=  await _rdb.GetSOCMinDataForYear(year,soc,username);
+        year0T = minGroup.Sum(x=>x.year0);
+        year1T = minGroup.Sum(x=>x.year1);
+        year2T = minGroup.Sum(x=>x.year2);
+        year3T = minGroup.Sum(x=>x.year3);
+    }
+
+      protected override async void OnParametersSet()
+    {
+        minGroup=  await _rdb.GetSOCMinDataForYear(year,soc,username);
+        year0T = minGroup.Sum(x=>x.year0);
+        year1T = minGroup.Sum(x=>x.year1);
+        year2T = minGroup.Sum(x=>x.year2);
+        year3T = minGroup.Sum(x=>x.year3);
+        base.StateHasChanged();
+    }
+
+    private void NavigateTo(int year)
+    {
+         NavigationManager.NavigateTo($"recurrent/{year}", forceLoad: true);
+  
+    }
+
+    private void NavigateTo(int year, string soc, string ministry)
+    {
+         NavigationManager.NavigateTo($"recurrent/soc/{year}/{soc}/{ministry}", forceLoad: true);
+    }
+}

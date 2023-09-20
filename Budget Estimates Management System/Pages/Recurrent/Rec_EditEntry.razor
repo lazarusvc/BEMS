@@ -64,7 +64,7 @@
 </div>
         </div>
 		<div class="col-1">			
-
+			@if (!yearClosed) {
 			<div class="btn-toolbar" role="toolbar" >
 			  <div class="btn-group me-2" role="group" aria-label="First group">
 				<button type="button" class="btn @(account.flagged ? "btn-warning":"btn-outline-secondary") btn-sm" @onclick="()=>{ FlaggEntry();}" data-toggle="tooltip"  title="Flag this entry"><span class="oi oi-flag"></span></button>
@@ -78,7 +78,7 @@
 			  </ul>
 			</div>
 			</div>			 
-			
+			}
 		</div>
 	</div>
 	@if (showComments)
@@ -95,8 +95,8 @@
              	<div class="col-6">
           <div class="input-group">
   <span class="input-group-text">Flagged Comment</span>
-  <InputText  @bind-Value="account.flagged_comment" class="form-control">               
-                </InputText>
+						<InputText @bind-Value="account.flagged_comment" class="form-control" disabled="@isDisabled">
+						</InputText>
 
 </div>
            </div>
@@ -112,6 +112,8 @@
 	public EventCallback<BudgetEstimatesModel> OnEntryDeleted { get; set; }
 	[Parameter]
 	public EventCallback OnEntryEdit { get; set; }
+	[Parameter]
+	public bool yearClosed { get; set; }
 
 	private bool showComments=false;
 	private bool isDisabled=false;
@@ -124,6 +126,7 @@
 		EditContext.OnFieldChanged += EditContext_OnFieldChanged;
 		//set the disabled flag for submitted and approved
 		if (account.entry_status_id>0) { isDisabled = true; }
+		if (yearClosed) { isDisabled = true; }
 	}
 
 	private async void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)

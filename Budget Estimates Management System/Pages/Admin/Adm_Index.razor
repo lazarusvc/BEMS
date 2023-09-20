@@ -4,28 +4,42 @@
 <h1>Administration</h1>
 
 <ul class="nav nav-tabs">
-  <li class="nav-item">
-    <a class="nav-link @(whichPage==1?"active":"")" aria-current="page" @onclick="()=>{whichPage=1;}" style="cursor:pointer;" >Users</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link @(whichPage==2?"active":"")" @onclick="()=>{whichPage=2;}" style="cursor:pointer;">Budget Periods</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link @(whichPage==3?"active":"")" @onclick="()=>{whichPage=3;}" style="cursor:pointer;">Messaging Configuration</a>
-  </li>
+	<li class="nav-item">
+		<a class="nav-link @(whichPage==1?"active":"")" aria-current="page" @onclick="()=>{whichPage=1;}" style="cursor:pointer;">Users</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link @(whichPage==2?"active":"")" @onclick="()=>{whichPage=2;}" style="cursor:pointer;">Budget Periods</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link @(whichPage==3?"active":"")" @onclick="()=>{whichPage=3;}" style="cursor:pointer;">Structure Changes</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link @(whichPage==4?"active":"")" @onclick="()=>{whichPage=4;}" style="cursor:pointer;">Report Configuration</a>
+	</li>
 </ul>
-@if (whichPage==1)
-{    
-    <Adm_UsersList></Adm_UsersList>
+@if (whichPage == 1)
+{
+	<Adm_UsersList></Adm_UsersList>
 
-} else if (whichPage==2)
-{} else if (whichPage==3)
-{} else
-{    
-   <img src="config-management.png" width="360" height="360"/>
+}
+else if (whichPage == 2)
+{
+	<Adm_Years></Adm_Years>
+}
+else if (whichPage == 3)
+{
+	<Adm_StructureChange></Adm_StructureChange>
+}
+else if (whichPage == 4)
+{
+	<Adm_Reports></Adm_Reports>
+}
+else
+{
+	<img src="config-management.png" width="360" height="360" />
 }
 @code {
-    
-	public int whichPage =0;
+
+	public int whichPage = 0;
 
 }

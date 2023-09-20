@@ -1,4 +1,5 @@
-﻿## Database:
+## Database:
+
 
 **Microsoft SQL database** 
 Backup file -> Database Backup -> 

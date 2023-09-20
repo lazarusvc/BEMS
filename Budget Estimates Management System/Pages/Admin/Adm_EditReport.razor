@@ -1,0 +1,212 @@
+﻿@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject IDbData _db;
+@attribute [Authorize(Roles = "Administrator")]
+
+
+<div class="modal fade" id="editReport" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered ">
+        <EditForm EditContext="EditContext" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Edit Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+
+                    <DataAnnotationsValidator />
+
+
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputText @bind-Value="report.reportDesc" class="form-control" placeholder="Report Name">
+                        </InputText>
+                        <label for="label">
+                            Report Name
+                        </label>
+                    </div>
+
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputText @bind-Value="report.reportId" class="form-control" placeholder="Report ID">
+                        </InputText>
+                        <label for="label">
+                            Report ID
+                        </label>
+                    </div>
+
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputText @bind-Value="report.storedProcedure" class="form-control" placeholder="Stored Procedure">
+                        </InputText>
+                        <label for="label">
+                            Stored Procedure
+                        </label>
+                    </div>
+
+                    <div class="row" style="padding-bottom:5px">
+                        <div class="col-md">
+                    <div class="form-control">
+                        <InputCheckbox @bind-Value="report.parUser">
+                        </InputCheckbox>
+                        <label for="parUser">
+                             Use <b>User</b> As Parameter
+                        </label>
+                    </div>
+                    </div>
+                    </div>
+
+                    <div class="row" style="padding-bottom:5px">
+                        <div class="col-md">
+                            <div class="form-control">
+                                <InputCheckbox @bind-Value="report.parMinistry">
+                                </InputCheckbox>
+                                <label for="parMinistry">
+                                    Show <b>Ministry</b> Parameter
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="row" style="padding-bottom:5px">
+                        <div class="col-md">
+                    <div class="form-control">
+                        <InputCheckbox @bind-Value="report.parProgram">
+                        </InputCheckbox>
+                        <label for="parProgram">
+                                    Show <b>Program</b> Parameter (Dependant on Ministry)
+                        </label>
+                    </div>
+                    </div>
+                    </div>
+
+                    <div class="row" style="padding-bottom:5px">
+                        <div class="col-md">
+                            <div class="form-control">
+                                <InputCheckbox @bind-Value="report.parSubprogram">
+                                </InputCheckbox>
+                                <label for="parSubprogram">
+                                    Show <b>Sub-Program</b> Parameter (Dependant on Program)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="padding-bottom:5px">
+                        <div class="col-md">
+                            <div class="form-control">
+                                <InputCheckbox @bind-Value="report.parSOC">
+                                </InputCheckbox>
+                                <label for="parSOC">
+                                    Show <b>SOC</b> Parameter
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="padding-bottom:5px">
+                        <div class="col-md">
+                            <div class="form-control">
+                                <InputCheckbox @bind-Value="report.parAccount">
+                                </InputCheckbox>
+                                <label for="parAccount">
+                                    Show <b>Account</b> Parameter (Dependant on SOC)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="color: red">
+                        @saveError
+                    </div>
+                    <div style="color: green">
+                        @saveSuccess
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public ReportConfigModel parReport { get; set; }
+    [Parameter]
+    public EventCallback OnSaveReport { get; set; }
+
+
+    private EditContext EditContext;
+
+    private ReportConfigModel report = new ReportConfigModel();
+
+    private string saveError = string.Empty;
+    private string saveSuccess = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Initial Edit Context
+        EditContext = new EditContext(report);
+
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (parReport is not null)
+        {
+            Reflection.CopyPropertyValues(parReport, report);
+            saveSuccess = string.Empty;
+            saveError = string.Empty;
+        }
+
+        base.StateHasChanged();
+    }
+
+
+    private async void HandleValidSubmit()
+    {
+        saveError = string.Empty;
+        saveSuccess = string.Empty;
+        try
+        {
+            int affectedRows = await _db.UpdateReportConfig(report);
+            //save successfully.  Reset form
+            if (affectedRows == 0)
+            {
+                saveError = "Something happened.  Record was not saved";
+                base.StateHasChanged();
+            }
+            else
+            {
+                saveSuccess = "Record Successfully Saved.";
+                //run the parent procedure
+                await OnSaveReport.InvokeAsync();
+
+            }
+
+        }
+        catch (Exception e)
+        {
+            saveError = e.Message; 
+            base.StateHasChanged();
+        }
+
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        saveSuccess = string.Empty;
+        saveError = "Enter Required Fields. Thank you.";
+        base.StateHasChanged();
+    }
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        //clear any save messages because we entering new stull
+        saveSuccess = string.Empty;
+        saveError = string.Empty;
+    }
+
+}
