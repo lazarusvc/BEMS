@@ -16,6 +16,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddTransient<ISqlDataAccess, SqlDataAccess>();
 builder.Services.AddTransient<IDbData, DbData>();
 builder.Services.AddTransient<IRecEstimateData, RecEstimateData>();
+builder.Services.AddTransient<ICAPBudgetData, CAPBudgetData>();
 builder.Services.AddTransient<INotificationData, NotificationData>();
 //Authentication
 builder.Services.AddScoped<ProtectedSessionStorage>();

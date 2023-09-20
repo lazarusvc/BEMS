@@ -367,7 +367,6 @@ namespace DataAccessLibrary
 
             return _db.GetListData<ListItemModel, dynamic>(sql,new { });
         }
-
         public Task<List<GroupingModel>> GetSOCDataForYear(int year, string username)
         {
             username = username.ToLower();

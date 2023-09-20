@@ -1,0 +1,299 @@
+﻿@page "/capital/{year:int}"
+
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@inject ICAPBudgetData _cdb;
+@inject NavigationManager NavigationManager;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")];
+
+<h3>Ministry Estimates</h3>
+
+<button type="button" class="btn btn-info" @onclick='() => NavigateTo("capital", "add", null)'>Bulk Upload</button>
+<br />
+<br />
+
+<!-- TABLE -->
+<!-- ---------------------------------------------------------------------------------- -->
+@if (data is null)
+{
+    <Loading></Loading>
+}
+else
+{
+    @if (data.Count == 0)
+    {
+        <p>No entries found for @year - @(year+1)</p>
+    }
+    else
+    {
+        <table class="table table-hover">
+
+            <thead style="background-color:lightseagreen">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Ministry</th>
+                    <th scope="col" class="text-end">Estimates</th>
+                    <th scope="col" class="text-end">Program</th>
+                    <th scope="col" class="text-end">Sub Program</th>
+                    <th scope="col" class="text-end">Project</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in data)
+                {
+                    <tr>
+                        <th scope="row" style="cursor:pointer;">@item.id</th>
+                        <td style="cursor:pointer;">@item.ldr_entity_id@item.ministry</td>
+                        <td class="text-end" style="background-color:lightgray">@Convert.ToInt32(item.ldr_amt_1).ToString("C")</td>
+                        <td class="text-end"><b>@item.program</b></td>
+                        <td class="text-end"><b>@item.subprog</b></td>
+                        <td class="text-end"><b>@item.project</b></td>
+                    </tr>
+                }
+                <tr style="background-color:lightyellow">
+                    <th scope="row"></th>
+                    <td><b><i>Total:</i></b></td>
+                    <td class="text-end" style="background-color:lightgoldenrodyellow">@tot.ToString("C")</td>
+                    <td class="text-end"><b></b></td>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                </tr>
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    [Parameter]
+
+    // READ
+    public int year { get; set; }
+    private string username;
+    private List<CAPBudgetModel> data;
+    public int tot = 0;
+
+    // ADD
+    private string saveError;
+    private string saveSuccess;
+    public string ministry { get; set; }
+    public string program { get; set; }
+    public string subprogram { get; set; }
+    private bool minDisabled = false;
+    private bool progDisabled = false;
+    private bool sprogDisabled = false;
+    private EditContext EditContext;
+    private List<ListItemModel> ministries;
+    private List<ListItemModel> programs;
+    private List<ListItemModel> subprograms;
+    CAPBudgetModel cmodel = new CAPBudgetModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // READ
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+        data = await _cdb.GetData(year);
+        tot = data.Sum(x => Convert.ToInt32(x.ldr_amt_1));
+
+        // ADD               
+        EditContext = new EditContext(cmodel); //Initial Edit Context
+        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+
+        ministries = await _cdb.GetDependantMinistries(username); // Get the list data for ministry
+        if (!String.IsNullOrWhiteSpace(ministry))
+        {
+            cmodel.ministry = ministry;
+            programs = await _cdb.GetDependantPrograms(cmodel.ministry, username); // Get the list data for program
+            minDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(program))
+        {
+            cmodel.program = program;
+            subprograms = await _cdb.GetDependantSubPrograms(cmodel.ministry, cmodel.program, username); // Get the list data for sub_program
+            progDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(subprogram))
+        {
+            cmodel.subprog = subprogram;
+            sprogDisabled = true;
+        }
+        //set required hidden fields
+        cmodel.account = null;
+        cmodel.project = "";
+        cmodel.sector = "";
+        cmodel.sof = "";
+        cmodel.lastcode = "";
+        cmodel.curr_code = "";
+        cmodel.Expr1000 = "";
+        cmodel.Expr1001 = "";
+        cmodel.Expr1002 = "";
+        cmodel.Expr1003 = "";
+        cmodel.Expr1004 = "";
+        cmodel.Expr1005 = "";
+        cmodel.Expr1006 = "";
+        cmodel.Expr1007 = "";
+        cmodel.Expr1008 = "";
+        cmodel.Expr1009 = "";
+        cmodel.Expr1010 = "";
+        cmodel.Expr1011 = "";
+        cmodel.Expr1012 = "";
+        cmodel.Expr1013 = "";
+        cmodel.ldr_amt_0 = "";
+        cmodel.Name = "";
+    }
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        //clear any save messages because we entering new stull
+        saveSuccess = "";
+        saveError = "";
+
+        if (e.FieldIdentifier.FieldName == "ministry")
+        {
+            MinistryChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "program")
+        {
+            ProgramChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "subprog")
+        {
+            SubProgramChanged();
+        }
+    }
+
+    private async void MinistryChanged()
+    {
+        //need to clear all dependencies
+        subprograms = null;
+        cmodel.program = null;
+        cmodel.subprog = null;
+        programs = await _cdb.GetDependantPrograms(cmodel.ministry, username);
+        base.StateHasChanged();
+    }
+
+    private async void ProgramChanged()
+    {
+        //need to clear all dependencies
+        cmodel.subprog = null;
+        subprograms = await _cdb.GetDependantSubPrograms(cmodel.ministry, cmodel.program, username);
+        base.StateHasChanged();
+    }
+
+    private async void SubProgramChanged()
+    {
+        //need to clear all dependencies
+        base.StateHasChanged();
+    }
+
+    protected override async void OnParametersSet()
+    {
+        data = await _cdb.GetData(year);
+        base.StateHasChanged();
+    }
+
+    private async void SetFields()
+    {
+        // Get the list data for ministry
+        if (ministries is null) { ministries = await _cdb.GetDependantMinistries(username); }
+        if (!String.IsNullOrWhiteSpace(ministry))
+        {
+            cmodel.ministry = ministry;
+            if (programs is null) { programs = await _cdb.GetDependantPrograms(cmodel.ministry, username); }
+            minDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(program))
+        {
+            cmodel.program = program;
+            if (subprograms is null) { subprograms = await _cdb.GetDependantSubPrograms(cmodel.ministry, cmodel.program, username); }
+            progDisabled = true;
+        }
+
+        if (!String.IsNullOrWhiteSpace(subprogram))
+        {
+            cmodel.subprog = subprogram;
+            sprogDisabled = true;
+        }
+        cmodel.account = null;
+        cmodel.project = "";
+        cmodel.sector = "";
+        cmodel.sof = "";
+        cmodel.lastcode = "";
+        cmodel.curr_code = "";
+        cmodel.Expr1000 = "";
+        cmodel.Expr1001 = "";
+        cmodel.Expr1002 = "";
+        cmodel.Expr1003 = "";
+        cmodel.Expr1004 = "";
+        cmodel.Expr1005 = "";
+        cmodel.Expr1006 = "";
+        cmodel.Expr1007 = "";
+        cmodel.Expr1008 = "";
+        cmodel.Expr1009 = "";
+        cmodel.Expr1010 = "";
+        cmodel.Expr1011 = "";
+        cmodel.Expr1012 = "";
+        cmodel.Expr1013 = "";
+        cmodel.ldr_amt_0 = "";
+        cmodel.Name = "";
+    }
+
+    private async void HandleValidSubmit()
+    {
+        saveError = "";
+        saveSuccess = "";
+        try
+        {
+            // entry.last_modified = DateTime.Now;
+            int affectedRows = await _cdb.INSERT_CaptialEntry(cmodel);
+            //save successfully.  Reset form
+            if (affectedRows == 0)
+            {
+                saveError = "Something happened.  Record was not saved";
+                base.StateHasChanged();
+            }
+            else
+            {
+                EditContext = new EditContext(cmodel);
+                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+                SetFields();
+                saveSuccess = "Record Successfully Saved.";
+                base.StateHasChanged();
+                // run the parent procedure
+                // await OnSaveEntry.InvokeAsync();
+            }
+
+        }
+        catch (Exception e)
+        {
+            saveError = e.Message;
+
+            base.StateHasChanged();
+        }
+
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        saveSuccess = "";
+        saveError = "Please complete the form properly. Thank you.";
+        base.StateHasChanged();
+    }
+
+    // NAVIGATION LOGIC
+    // *********************************************************
+    private void NavigateTo(string site, string route, int? id)
+    {
+        if (site.Equals("capital") && route.Equals("add"))
+        {
+            NavigationManager.NavigateTo($"{site}/{route}/{id}");
+        }       
+    }
+
+    private async void RefreshList()
+    {
+        data = await _cdb.GetData(year);
+        base.StateHasChanged();
+    }
+
+}
