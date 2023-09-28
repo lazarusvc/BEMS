@@ -1,0 +1,398 @@
+﻿@using Budget_Estimates_Management_System.Models;
+@using DataAccessLibrary.Models;
+@using DataAccessLibrary;
+@using AutoMapper;
+@inject IDbData _db;
+@inject ICAPBudgetData _cdb;
+@inject AuthenticationStateProvider authStateProvider;
+@attribute [Authorize(Roles = "Administrator,MinistryStaff,BudgetStaff")]
+
+<div class="modal fade" id="newEntry" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <EditForm EditContext="EditContext" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Add Budget Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <DataAnnotationsValidator />
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="processingYear" placeholder="Year" class="form-select"
+                                     @bind-Value="@cmodel.processing_year" disabled=@yearDisabled>
+                            @if (years is null)
+                            {
+                                <option selected>Loading...</option>
+                            }
+                            else
+                            {
+                                <option value=0 selected>Choose...</option>
+                                @foreach (var year in years.Where(x => !x.year_closed))
+                                {
+                                    <option value=@year.year>@year.displayYear</option>
+                                }
+                            }
+                        </InputSelect>
+                        <label for="processingYear">
+                            Processing Year
+                        </label>
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="ministry" placeholder="Ministry" class="form-select" disabled=@minDisabled
+                        @bind-Value="@cmodel.ministry">
+                            @if (ministries is null)
+                            {
+                                <option selected>Select Processing Year first...</option>
+                            }
+                            else
+                            {
+                                <option value="" selected>Choose...</option>
+                                @foreach (var item in ministries)
+                                {
+                                    <option value=@item.Name>@item.Name - @item.Description</option>
+                                }
+                            }
+                        </InputSelect>
+                        <label for="ministry">
+                            Ministry
+                        </label>
+
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="program" placeholder="Program" class="form-select" disabled=@progDisabled
+                        @bind-Value="@cmodel.program">
+                            @if (programs is null)
+                            {
+                                <option selected>Select a Ministry first...</option>
+                            }
+                            else
+                            {
+                                <option value="" selected>Choose...</option>
+                                @foreach (var item in programs)
+                                {
+                                    <option value=@item.Name>@item.Name - @item.Description</option>
+                                }
+                            }
+                        </InputSelect>
+                        <label for="program">
+                            Program
+                        </label>
+
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="subprogram" placeholder="Sub-Program" class="form-select" disabled=@sprogDisabled
+                        @bind-Value="@cmodel.subprog">
+                            @if (subprograms is null)
+                            {
+                                <option selected>Select a Program first...</option>
+                            }
+                            else
+                            {
+                                <option value="" selected>Choose...</option>
+                                @foreach (var item in subprograms)
+                                {
+                                    <option value=@item.Name>@item.Name - @item.Description</option>
+                                }
+                            }
+                        </InputSelect>
+                        <label for="subprog">
+                            Sub-Program
+                        </label>
+
+                    </div>
+                    <div style="color: red">
+                        @saveError
+                    </div>
+                    <div style="color: green">
+                        @saveSuccess
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public int year { get; set; }
+
+    private string username;
+
+    [Parameter]
+    public EventCallback OnSaveEntry { get; set; }
+
+    public string accountType { get; set; } = string.Empty;
+
+    CAPBudgetModel cmodel = new CAPBudgetModel();
+
+
+    // ADD
+    private string year0Desc = string.Empty;
+    private string year1Desc = string.Empty;
+    private string year2Desc = string.Empty;
+    private string year3Desc = string.Empty;
+    private string saveError;
+    private string saveSuccess;
+    public string ministry { get; set; }
+    public string program { get; set; }
+    public string subprogram { get; set; }
+    
+    private bool minDisabled = false;
+    private bool progDisabled = false;
+    private bool sprogDisabled = false;
+    private bool yearDisabled = false;
+    private bool accountTypeDisabled = false;
+    private bool isAdmin = false;
+
+    private EditContext EditContext;
+    private List<ListItemModel> ministries;
+    private List<ListItemModel> programs;
+    private List<ListItemModel> subprograms;
+    private List<ProcessingYearModel>? years;
+    private List<ListItemModel>? accountTypes;
+    private List<ListItemModel>? accounts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // ADD
+        EditContext = new EditContext(cmodel); //Initial Edit Context
+        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        username = authState.User.Identity.Name;
+
+        //set up the drop lists
+        years = await _db.GetYears();
+
+        if (year != 0)
+        {
+            if (years.Where(z => z.year == year && !z.year_closed).Count() != 0)
+            {
+                cmodel.processing_year = year;
+                year0Desc = String.Format("{0} - {1}", year - 1, year);
+                year1Desc = String.Format("{0} - {1}", year, year + 1);
+                year2Desc = String.Format("{0} - {1}", year + 1, year + 2);
+                year3Desc = String.Format("{0} - {1}", year + 2, year + 3);
+            }
+            yearDisabled = true;
+        }
+
+        ministries = await _cdb.GetDependantMinistries(username); // Get the list data for ministry
+        if (!String.IsNullOrWhiteSpace(ministry))
+        {
+            cmodel.ministry = ministry;
+            programs = await _cdb.GetDependantPrograms(cmodel.ministry, username); // Get the list data for program
+            minDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(program))
+        {
+            cmodel.program = program;
+            subprograms = await _cdb.GetDependantSubPrograms(cmodel.ministry, cmodel.program, username); // Get the list data for sub_program
+            progDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(subprogram))
+        {
+            cmodel.subprog = subprogram;
+            sprogDisabled = true;
+        }
+        //set required hidden fields
+        cmodel.account = null;
+        cmodel.project = "";
+        cmodel.sector = "";
+        cmodel.sof = "";
+        cmodel.lastcode = "";
+        cmodel.curr_code = "";
+        cmodel.Expr1000 = "";
+        cmodel.Expr1001 = "";
+        cmodel.Expr1002 = "";
+        cmodel.Expr1003 = "";
+        cmodel.Expr1004 = "";
+        cmodel.Expr1005 = "";
+        cmodel.Expr1006 = "";
+        cmodel.Expr1007 = "";
+        cmodel.Expr1008 = "";
+        cmodel.Expr1009 = "";
+        cmodel.Expr1010 = "";
+        cmodel.Expr1011 = "";
+        cmodel.Expr1012 = "";
+        cmodel.Expr1013 = "";
+        cmodel.ldr_amt_0 = "";
+        cmodel.Name = "";
+    }
+    
+    protected override void OnParametersSet()
+    {
+        SetFields();
+        base.StateHasChanged();
+    }
+
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        //clear any save messages because we entering new stull
+        saveSuccess = "";
+        saveError = "";
+
+        if (e.FieldIdentifier.FieldName == "processing_year")
+        {
+            YearChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "ministry")
+        {
+            MinistryChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "program")
+        {
+            ProgramChanged();
+        }
+        if (e.FieldIdentifier.FieldName == "subprog")
+        {
+            SubProgramChanged();
+        }
+    }
+
+    private async void MinistryChanged()
+    {
+        //need to clear all dependencies
+        subprograms = null;
+        cmodel.program = null;
+        cmodel.subprog = null;
+        programs = await _cdb.GetDependantPrograms(cmodel.ministry, username);
+        base.StateHasChanged();
+    }
+
+    private async void ProgramChanged()
+    {
+        //need to clear all dependencies
+        cmodel.subprog = null;
+        subprograms = await _cdb.GetDependantSubPrograms(cmodel.ministry, cmodel.program, username);
+        base.StateHasChanged();
+    }
+
+    private async void SubProgramChanged()
+    {
+        //need to clear all dependencies
+        base.StateHasChanged();
+    }
+
+    private void YearChanged()
+    {
+        year0Desc = String.Format("{0} - {1}", cmodel.processing_year - 1, cmodel.processing_year);
+        year1Desc = String.Format("{0} - {1}", cmodel.processing_year, cmodel.processing_year + 1);
+        year2Desc = String.Format("{0} - {1}", cmodel.processing_year + 1, cmodel.processing_year + 2);
+        year3Desc = String.Format("{0} - {1}", cmodel.processing_year + 2, cmodel.processing_year + 3);
+    }
+
+
+    private async void SetFields()
+    {
+        if (year != 0)
+        {
+            cmodel.processing_year = 0;
+            if (years is null) { years = await _db.GetYears(); }
+            if (years.Where(z => z.year == year && !z.year_closed).Count() != 0)
+            {
+                cmodel.processing_year = year;
+                year0Desc = String.Format("{0} - {1}", year - 1, year);
+                year1Desc = String.Format("{0} - {1}", year, year + 1);
+                year2Desc = String.Format("{0} - {1}", year + 1, year + 2);
+                year3Desc = String.Format("{0} - {1}", year + 2, year + 3);
+            }
+            yearDisabled = true;
+        }
+
+        // Get the list data for ministry
+        if (ministries is null) { ministries = await _cdb.GetDependantMinistries(username); }
+        if (!String.IsNullOrWhiteSpace(ministry))
+        {
+            cmodel.ministry = ministry;
+            if (programs is null) { programs = await _cdb.GetDependantPrograms(cmodel.ministry, username); }
+            minDisabled = true;
+        }
+        if (!String.IsNullOrWhiteSpace(program))
+        {
+            cmodel.program = program;
+            if (subprograms is null) { subprograms = await _cdb.GetDependantSubPrograms(cmodel.ministry, cmodel.program, username); }
+            progDisabled = true;
+        }
+
+        if (!String.IsNullOrWhiteSpace(subprogram))
+        {
+            cmodel.subprog = subprogram;
+            sprogDisabled = true;
+        }
+        cmodel.account = "";
+        cmodel.project = "";
+        cmodel.sector = "";
+        cmodel.sof = "";
+        cmodel.lastcode = "";
+        cmodel.curr_code = "";
+        cmodel.Expr1000 = "";
+        cmodel.Expr1001 = "";
+        cmodel.Expr1002 = "";
+        cmodel.Expr1003 = "";
+        cmodel.Expr1004 = "";
+        cmodel.Expr1005 = "";
+        cmodel.Expr1006 = "";
+        cmodel.Expr1007 = "";
+        cmodel.Expr1008 = "";
+        cmodel.Expr1009 = "";
+        cmodel.Expr1010 = "";
+        cmodel.Expr1011 = "";
+        cmodel.Expr1012 = "";
+        cmodel.Expr1013 = "";
+        cmodel.ldr_amt_0 = "";
+        cmodel.Name = "";
+    }
+
+    private async void HandleValidSubmit()
+    {
+    
+    // ,[Name2]
+    // ,[ldr_amt_1]
+      
+    saveError = "";
+        saveSuccess = "";
+        try
+        {
+            // entry.last_modified = DateTime.Now;
+            int affectedRows = await _cdb.INSERT_CaptialEntry(cmodel);
+            //save successfully.  Reset form
+            if (affectedRows == 0)
+            {
+                saveError = "Something happened.  Record was not saved";
+                base.StateHasChanged();
+            }
+            else
+            {
+                EditContext = new EditContext(cmodel);
+                EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+                SetFields();
+                saveSuccess = "Record Successfully Saved.";
+                base.StateHasChanged();
+                // run the parent procedure
+                await OnSaveEntry.InvokeAsync();
+            }
+
+        }
+        catch (Exception e)
+        {
+            saveError = e.Message;
+
+            base.StateHasChanged();
+        }
+
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        saveSuccess = "";
+        saveError = "Please complete the form properly. Thank you.";
+        base.StateHasChanged();
+    }
+}

@@ -1,62 +1,110 @@
 ﻿@page "/capital/add"
+@using CsvHelper;
+@using System.Globalization;
+@using DataAccessLibrary.Models;
 
-<div class="py-20 h-screen bg-gray-300 px-2">
-    <div class="max-w-md mx-auto bg-white rounded-lg overflow-hidden md:max-w-lg">
-        <div class="md:flex">
-            <div class="w-full">
+@using System.Text;
+@using System.Collections.Generic;
+@using System.IO;
+@using System.Net.Http.Headers;
+@using CsvHelper.Configuration;
+@using DataAccessLibrary;
 
-       
-                <div class="p-4 border-b-2">
-
-                <span class="text-lg font-bold text-gray-600">Add documents</span>
-                        
+@inject ICAPBudgetData _cdb;
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Environment
+@inject IConfiguration config
+@if (isLoading)
+{
+    <Loading></Loading>
+}
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="font-weight-bold">Bulk Upload</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <small class="form-text text-muted">Accepted file type: .csv</small>
                 </div>
-
-                <div class="p-3">
-
-                <div class="mb-2"> 
-                    <span class="text-sm">Title</span> 
+                <div class="text-center pb-3">
+                    <InputFile OnChange="@LoadFiles" class="form-control" accept=".csv" />
                 </div>
-
-                <div class="mb-2"> 
-                    <span>Attachments</span>
-                    <div class="relative h-40 rounded-lg border-dashed border-2 border-gray-200 bg-white flex justify-center items-center hover:cursor-pointer">
-                        <div class="absolute">
-                            <div class="flex flex-col items-center "> 
-                                <i class="fa fa-cloud-upload fa-3x text-gray-200"></i> 
-                                <span class="block text-gray-400 font-normal">Attach you files here</span> 
-                                <span class="block text-gray-400 font-normal">or</span>
-                                    
-                                <span class="block text-blue-400 font-normal">Browse files</span>
-                                    
-                            </div>
-                        </div> <input type="file" class="h-full w-full opacity-0" name="">
-                    </div>
-                    <div class="flex justify-between items-center text-gray-400">
-                        <span>Accepted file type:.doc, .docx, .csv</span>
-                        <span class="flex items-center "><i class="fa fa-lock mr-1"></i> secure</span>
-                    </div>
+                <div style="color: red">
+                    @saveError
                 </div>
-
-                <div class="mt-3 text-center pb-3">
-
-                    <button class="w-full h-12 text-lg w-32 bg-blue-600 rounded text-white hover:bg-blue-700">Create</button>
-                          
+                <div style="color: green">
+                    @saveSuccess
                 </div>
-
-                        
-                </div>
-                       
-
-
             </div>
         </div>
     </div>
 </div>
 
-
+<a href="/CsvTemplate.csv" class="btn btn-warning btn-sm mt-3">Download Template CSV</a>
 
 @code {
- 
+    private long maxFileSize = 1024 * 1024 * 1; // represents 3MB
+    private int maxAllowedFiles = 1;
 
+    private string saveError;
+    private string saveSuccess;
+
+    bool isLoading = false;
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        var records = new List<CAPBudgetModel>();
+        int successCount = 0;
+        saveError = "";
+        saveSuccess = "";
+
+        if (e.FileCount > maxAllowedFiles)
+        {
+            saveError = $"Error: Attempting to upload {e.FileCount} files, but only {maxAllowedFiles} files are allowed";
+            return;
+        }
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+            try
+            {
+                string newFileName = Path.ChangeExtension(
+                    Path.GetRandomFileName(),
+                    Path.GetExtension(file.Name));
+
+                string path = Path.Combine(Environment.WebRootPath + @"\Temp", newFileName);
+
+                Directory.CreateDirectory(Environment.WebRootPath + @"\Temp");
+
+                await using (FileStream fs = new(path, FileMode.Create))
+                {
+                    await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+                }
+
+                using (var reader = new StreamReader(path))
+
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    records = csv.GetRecords<CAPBudgetModel>().ToList();
+                }
+                File.Delete(path);
+
+                foreach (var item in records)
+                {
+                    var inserted = await _cdb.INSERT_CaptialEntry(item);
+                    if (inserted > 0) successCount++;
+                }
+
+                saveSuccess = $"{successCount} Records Successfully Saved.";
+            }
+            catch (Exception ex)
+            {
+                saveError = $"File: {file.Name} Error: {ex.Message}";
+            }
+        }
+
+        isLoading = false;
+    }
 }
