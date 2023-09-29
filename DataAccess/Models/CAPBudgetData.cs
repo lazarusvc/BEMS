@@ -68,7 +68,7 @@ namespace DataAccessLibrary
                      VALUES
                            ('D'
                            ,@ministry
-                           ,@program,
+                           ,@program
                            ,@subprog
                            ,@account
                            ,@project
@@ -94,7 +94,7 @@ namespace DataAccessLibrary
                            ,0
                            ,0
                            ,0
-                           ,@processing_yr";
+                           ,@processing_year)";
             return _db.ExecuteSql<CAPBudgetModel>(sql, model);
         }
         public Task<List<ListItemModel>> GetDependantMinistries(string username)
