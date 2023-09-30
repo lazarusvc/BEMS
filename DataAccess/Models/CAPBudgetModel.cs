@@ -45,7 +45,7 @@ namespace DataAccessLibrary.Models
         public string Name { get; set; } = "";
         public string Name2 { get; set; } = "";
 
-        public string ldr_amt_0 { get; set; } = "";
+        public decimal ldr_amt_0 { get; set; }
 
         public string ldr_amt_1 { get; set; } = "";
 

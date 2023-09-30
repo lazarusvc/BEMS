@@ -12,5 +12,7 @@ namespace DataAccessLibrary
         Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string username);
         Task<List<ListItemModel>> GetDependantSubPrograms(string ministry, string program, string username);
         Task<int> INSERT_CaptialEntry(CAPBudgetModel model);
+        public Task<int> Delete(int id);
+        public Task<int> Update(CAPBudgetModel model);
     }
 }

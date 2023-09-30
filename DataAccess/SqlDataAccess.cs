@@ -21,11 +21,18 @@ namespace DataAccessLibrary
             string connectionString = _config.GetConnectionString(ConnectionStringName);
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
+                try
+                {
                 var data = await connection.QueryAsync<T>(sql, parameters);
                 return data.ToList();
+
+                }
+                catch (Exception e)
+                {
+                }
             }
 
-
+            return default;
         }
 
         public async Task<T> GetSingleValueData<T, U>(string sql, U parameters)
@@ -43,9 +50,18 @@ namespace DataAccessLibrary
             string connectionString = _config.GetConnectionString(ConnectionStringName);
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
-                var data = await connection.QuerySingleAsync<T>(sql, parameters);
-                return data;
+                try
+                {
+                    var data = await connection.QuerySingleAsync<T>(sql, parameters);
+                    return data;
+                }
+                catch (Exception e)
+                {
+
+                }
             }
+
+            return default;
         }
 
         public async Task<int> ExecuteSql<T>(string sql, T parameters)

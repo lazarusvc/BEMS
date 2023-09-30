@@ -29,5 +29,30 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
+    <script>
+        function MCloseModal(modalId) {
+            document.querySelector(modalId).style.display = 'none';
+
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.style.display = 'none';
+            });
+
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => {
+                backdrop.parentNode.removeChild(backdrop);
+            });
+        }
+
+        function DownloadCSV(bytesBase64) {
+            var link = document.createElement('a');
+            link.download = "data.csv";
+            link.href = "data:application/octet-stream;base64," + bytesBase64;
+            document.body.appendChild(link); // Needed for Firefox
+            link.click();
+            document.body.removeChild(link);
+        }
+
+    </script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 ﻿using DataAccessLibrary.Models;
+using System.Reflection;
 
 namespace DataAccessLibrary
 {
@@ -97,6 +98,30 @@ namespace DataAccessLibrary
                            ,@processing_year)";
             return _db.ExecuteSql<CAPBudgetModel>(sql, model);
         }
+        public Task<int> Update(CAPBudgetModel model)
+        {
+            string sql = @"
+                UPDATE Capital_Budget
+                SET
+                    [ministry] = @ministry,
+                    [program] = @program,
+                    [subprog] = @subprog,
+                    [account] = @account,
+                    [project] = @project,
+                    [sof] = @sof,
+                    [sector] = @sector,
+                    [lastcode] = @lastcode,
+                    [curr_code] = @curr_code,
+                    [Name] = @Name,
+                    [Name2] = @Name2,
+                    [ldr_amt_0] = @ldr_amt_0,
+                    [ldr_amt_1] = @ldr_amt_1,
+                    [processing_year] = @processing_year
+                WHERE
+                    [id] = @id;
+            ";
+            return _db.ExecuteSql<CAPBudgetModel>(sql, model);
+        }
         public Task<List<ListItemModel>> GetDependantMinistries(string username)
         {
             username = username.ToLower();
@@ -165,6 +190,12 @@ namespace DataAccessLibrary
                             ORDER BY Name";
 
             return _db.GetListData<ListItemModel, dynamic>(sql, new { ministry, program, subprogram, username });
+        }
+
+        public Task<int> Delete(int id)
+        {
+            string sql = @"DELETE FROM  Capital_Budget WHERE Id = @id";
+            return _db.ExecuteSql<dynamic>(sql, new { id });
         }
     }
 }

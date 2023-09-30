@@ -100,12 +100,67 @@
                         </label>
 
                     </div>
-                    <div style="color: red">
-                        @saveError
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputText @bind-Value="cmodel.Name" class="form-control" placeholder="Label">
+                        </InputText>
+                        <label for="label">
+                            Name
+                        </label>
                     </div>
-                    <div style="color: green">
-                        @saveSuccess
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputText @bind-Value="cmodel.account" class="form-control" placeholder="Label" maxlength="5">
+                        </InputText>
+                        <label for="label">
+                            Account
+                        </label>
                     </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputText @bind-Value="cmodel.project" class="form-control" placeholder="Label" maxlength="5">
+                        </InputText>
+                        <label for="label">
+                            Project
+                        </label>
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="sof" class="form-select" @bind-Value="@cmodel.sof">
+                            <option value="" selected>Choose...</option>
+                            <option value="1">Option 1</option>
+                            <option value="2">Option 2</option>
+                            <option value="3">Option 3</option>
+                        </InputSelect>
+                        <label for="sof">
+                            Sof
+                        </label>
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputSelect id="sector" class="form-select" @bind-Value="@cmodel.sector">
+                            <option value="" selected>Choose...</option>
+                            <option value="1">Option 1</option>
+                            <option value="2">Option 2</option>
+                            <option value="3">Option 3</option>
+                        </InputSelect>
+                        <label for="sector">
+                            Sector
+                        </label>
+                    </div>
+                    <div class="form-floating" style="padding-bottom:5px">
+                        <InputNumber id="ldr_amt_0" class="form-control" @bind-Value="@cmodel.ldr_amt_0"> </InputNumber>
+                        <label for="ldr_amt_0">
+                            Amount
+                        </label>
+                    </div>
+                    @if (saveError != null)
+                    {
+                        <div style="color: red">
+                            @saveError
+                        </div>
+                    }
+                    @if (saveSuccess != null)
+                    {
+                        <div style="color: green">
+                            @saveSuccess
+                        </div>
+                    }
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -122,10 +177,16 @@
     [Parameter]
     public int year { get; set; }
 
+    [Parameter]
+    public int? Id { get; set; }
+
     private string username;
 
     [Parameter]
     public EventCallback OnSaveEntry { get; set; }
+
+    [Parameter]
+    public CAPBudgetModel? EditModel { get; set; }
 
     public string accountType { get; set; } = string.Empty;
 
@@ -137,12 +198,12 @@
     private string year1Desc = string.Empty;
     private string year2Desc = string.Empty;
     private string year3Desc = string.Empty;
-    private string saveError;
-    private string saveSuccess;
-    public string ministry { get; set; }
-    public string program { get; set; }
-    public string subprogram { get; set; }
-    
+    private string saveError = string.Empty;
+    private string saveSuccess = string.Empty;
+    public string ministry { get; set; } = string.Empty;
+    public string program { get; set; } = string.Empty;
+    public string subprogram { get; set; } = string.Empty;
+
     private bool minDisabled = false;
     private bool progDisabled = false;
     private bool sprogDisabled = false;
@@ -183,7 +244,7 @@
             yearDisabled = true;
         }
 
-        ministries = await _cdb.GetDependantMinistries(username); // Get the list data for ministry
+        ministries = await _cdb.GetDependantMinistries(username ?? ""); // Get the list data for ministry
         if (!String.IsNullOrWhiteSpace(ministry))
         {
             cmodel.ministry = ministry;
@@ -201,11 +262,7 @@
             cmodel.subprog = subprogram;
             sprogDisabled = true;
         }
-        //set required hidden fields
-        cmodel.account = null;
-        cmodel.project = "";
-        cmodel.sector = "";
-        cmodel.sof = "";
+        //set required hidden fields 
         cmodel.lastcode = "";
         cmodel.curr_code = "";
         cmodel.Expr1000 = "";
@@ -222,13 +279,31 @@
         cmodel.Expr1011 = "";
         cmodel.Expr1012 = "";
         cmodel.Expr1013 = "";
-        cmodel.ldr_amt_0 = "";
-        cmodel.Name = "";
     }
-    
+
     protected override void OnParametersSet()
     {
         SetFields();
+
+        if (Id.HasValue && Id.Value > 0 && EditModel != null)
+        {
+            cmodel.processing_year = EditModel.processing_year;
+            YearChanged();
+            cmodel.ministry = EditModel.ministry;
+            MinistryChanged();
+            cmodel.program = EditModel.program;
+            ProgramChanged();
+            cmodel.subprog = EditModel.subprog;
+            SubProgramChanged();
+            cmodel.account = EditModel.account;
+            cmodel.project = EditModel.project;
+            cmodel.sof = EditModel.sof;
+            cmodel.sector = EditModel.sector;
+            cmodel.id = EditModel.id;
+            cmodel.ldr_amt_0 = EditModel.ldr_amt_0;
+            cmodel.Name = EditModel.Name;
+        }
+
         base.StateHasChanged();
     }
 
@@ -307,7 +382,7 @@
         }
 
         // Get the list data for ministry
-        if (ministries is null) { ministries = await _cdb.GetDependantMinistries(username); }
+        if (ministries is null) { ministries = await _cdb.GetDependantMinistries(username ?? ""); }
         if (!String.IsNullOrWhiteSpace(ministry))
         {
             cmodel.ministry = ministry;
@@ -326,10 +401,6 @@
             cmodel.subprog = subprogram;
             sprogDisabled = true;
         }
-        cmodel.account = "";
-        cmodel.project = "";
-        cmodel.sector = "";
-        cmodel.sof = "";
         cmodel.lastcode = "";
         cmodel.curr_code = "";
         cmodel.Expr1000 = "";
@@ -345,24 +416,30 @@
         cmodel.Expr1010 = "";
         cmodel.Expr1011 = "";
         cmodel.Expr1012 = "";
-        cmodel.Expr1013 = "";
-        cmodel.ldr_amt_0 = "";
-        cmodel.Name = "";
+        cmodel.Expr1013 = "";        
     }
 
     private async void HandleValidSubmit()
     {
-    
-    // ,[Name2]
-    // ,[ldr_amt_1]
-      
-    saveError = "";
+
+        // ,[Name2]
+        // ,[ldr_amt_1]
+
+        saveError = "";
         saveSuccess = "";
         try
         {
-            // entry.last_modified = DateTime.Now;
-            int affectedRows = await _cdb.INSERT_CaptialEntry(cmodel);
-            //save successfully.  Reset form
+            int affectedRows = 0;
+            if (Id.HasValue && Id.Value > 0 && EditModel != null)
+            {
+                affectedRows = await _cdb.Update(cmodel);
+            }
+            else
+            {
+                // entry.last_modified = DateTime.Now;
+                affectedRows = await _cdb.INSERT_CaptialEntry(cmodel);
+                //save successfully.  Reset form
+            }
             if (affectedRows == 0)
             {
                 saveError = "Something happened.  Record was not saved";
@@ -370,6 +447,9 @@
             }
             else
             {
+                Id = null;
+                EditModel = new CAPBudgetModel();
+                cmodel = new CAPBudgetModel();
                 EditContext = new EditContext(cmodel);
                 EditContext.OnFieldChanged += EditContext_OnFieldChanged;
                 SetFields();
